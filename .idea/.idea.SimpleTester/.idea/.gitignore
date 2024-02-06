@@ -1,0 +1,6 @@
+# Default ignored folders
+bin/
+obj/
+.idea/
+packages/
+
