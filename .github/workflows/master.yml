@@ -10,9 +10,8 @@ env:
   NuGetSource: https://nuget.pkg.github.com/abatar1/index.json
     
 jobs:       
-  run_test:
+  unit_tests:
     runs-on: ubuntu-latest
-    needs: [ build ]
     steps:
       - uses: actions/checkout@v3
         
@@ -24,7 +23,7 @@ jobs:
         
   create_nuget:
     runs-on: ubuntu-latest
-    needs: [ run_test ]
+    needs: [ unit_tests ]
     steps:
       - uses: actions/download-artifact@v3
         with:
