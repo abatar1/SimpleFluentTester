@@ -44,7 +44,7 @@ jobs:
         uses: actions/setup-dotnet@v4
         
       - name: Run unit tests
-        run: dotnet test ${{ env.BinDirectory }}/{{ env.NuGetPackageName }}.UnitTests.dll --no-build
+        run: dotnet test ${{ env.BinDirectory }}/${{ env.NuGetPackageName }}.UnitTests.dll --no-build
         
   create_nuget:
     runs-on: ubuntu-latest
