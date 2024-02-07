@@ -3,7 +3,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 
-namespace SimpleTester.Core.Entities;
+namespace SimpleFluentTester.Core.Entities;
 
 public sealed record TestCase<TOutput>(object[] Inputs, TOutput Expected, Lazy<CalculatedTestResult<TOutput>> LazyResult, bool ShouldBeCalculated, int Iteration)
 {

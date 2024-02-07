@@ -1,4 +1,4 @@
-﻿namespace SimpleTester.UnitTests;
+﻿namespace SimpleFluentTester.UnitTests;
 
 public class TestRunBuilderTests
 {

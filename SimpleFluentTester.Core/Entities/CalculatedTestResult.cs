@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace SimpleTester.Core.Entities;
+namespace SimpleFluentTester.Core.Entities;
 
 public sealed record CalculatedTestResult<TOutput>(bool Passed, ValueWrapper<TOutput>? Output, Exception? Exception, TimeSpan ElapsedTime)
 {

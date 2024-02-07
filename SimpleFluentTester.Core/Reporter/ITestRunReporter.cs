@@ -1,4 +1,4 @@
-namespace SimpleTester.Core.Reporter;
+namespace SimpleFluentTester.Core.Reporter;
 
 public interface ITestRunReporter
 {

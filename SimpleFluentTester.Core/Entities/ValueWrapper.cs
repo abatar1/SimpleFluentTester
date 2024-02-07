@@ -1,4 +1,4 @@
-namespace SimpleTester.Core.Entities;
+namespace SimpleFluentTester.Core.Entities;
 
 public sealed record ValueWrapper<TOutput>(TOutput Value)
 {

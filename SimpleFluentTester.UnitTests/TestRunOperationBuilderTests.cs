@@ -1,8 +1,8 @@
-using SimpleTester.Core.Reporter;
-using SimpleTester.Core.TestRun;
-using SimpleTester.Core.TestSuite;
+using SimpleFluentTester.Core.Reporter;
+using SimpleFluentTester.Core.TestRun;
+using SimpleFluentTester.Core.TestSuite;
 
-namespace SimpleTester.UnitTests;
+namespace SimpleFluentTester.UnitTests;
 
 public class TestRunOperationBuilderTests
 {

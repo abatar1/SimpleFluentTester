@@ -1,8 +1,8 @@
 using System.Collections;
 using System.Reflection;
-using SimpleTester.Core.Reporter;
+using SimpleFluentTester.Core.Reporter;
 
-namespace SimpleTester.Examples;
+namespace SimpleFluentTester.Examples;
 
 internal sealed class CustomReporter(IList innerTestResults, MethodInfo methodInfo) : BaseTestRunReporter<int>(innerTestResults, methodInfo)
 {

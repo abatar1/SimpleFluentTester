@@ -1,6 +1,6 @@
-﻿namespace SimpleTester.UnitTests;
+﻿namespace SimpleFluentTester.Examples;
 
-internal static class StaticMethods
+internal static class CustomMethods
 {
     internal static int Adder(int number1, int number2)
     {

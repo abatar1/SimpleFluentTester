@@ -1,5 +1,5 @@
-﻿using SimpleTester.Core.TestSuite;
-using SimpleTester.Examples;
+﻿using SimpleFluentTester.Core.TestSuite;
+using SimpleFluentTester.Examples;
 
 // Setup test suite with default reporter (default output format).
 // Then add few test cases, run them and print report.

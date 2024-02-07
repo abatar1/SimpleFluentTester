@@ -1,10 +1,10 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleTester.Core", "SimpleTester.Core\SimpleTester.Core.csproj", "{C0F31A77-7EAD-47F3-AFDE-4B8B91E85E14}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleFluentTester.Core", "SimpleFluentTester.Core\SimpleFluentTester.Core.csproj", "{C0F31A77-7EAD-47F3-AFDE-4B8B91E85E14}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleTester.Examples", "SimpleTester.Examples\SimpleTester.Examples.csproj", "{7889FEE9-296F-40AE-A9F1-0C616F187E66}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleFluentTester.Examples", "SimpleFluentTester.Examples\SimpleFluentTester.Examples.csproj", "{7889FEE9-296F-40AE-A9F1-0C616F187E66}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleTester.UnitTests", "SimpleTester.UnitTests\SimpleTester.UnitTests.csproj", "{FF0115F7-F109-43A7-AB0C-BAC4DE94ADFB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleFluentTester.UnitTests", "SimpleFluentTester.UnitTests\SimpleFluentTester.UnitTests.csproj", "{FF0115F7-F109-43A7-AB0C-BAC4DE94ADFB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
