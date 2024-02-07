@@ -7,13 +7,14 @@ env:
   DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
   DOTNET_NOLOGO: true
   NuGetDirectory: ${{ github.workspace }}/nuget
-  NuGetSource: https://nuget.pkg.github.com/abatar1/index.json
+  GithubNuGetSource: https://nuget.pkg.github.com/abatar1/index.json
+  NuGetSource: https://api.nuget.org/v3/index.json
     
 jobs:       
   unit_tests:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
@@ -25,7 +26,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [ unit_tests ]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
@@ -46,7 +47,7 @@ jobs:
       packages: write
     needs: [ create_nuget ]
     steps:
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: nuget
           path: ${{ env.NuGetDirectory }}
@@ -54,6 +55,10 @@ jobs:
       - name: Setup .NET Core
         uses: actions/setup-dotnet@v4
 
-      - name: Publish NuGet package
+      - name: Publish NuGet package to GitHub Packages
         run: |
-          dotnet nuget push ${{ env.NuGetDirectory }}/SimpleFluentTester.*.nupkg -k "${{ secrets.GITHUB_TOKEN }}" -s ${{ env.NuGetSource }} --skip-duplicate
+          dotnet nuget push ${{ env.NuGetDirectory }}/SimpleFluentTester.*.nupkg -k "${{ secrets.GITHUB_TOKEN }}" -s ${{ env.GithubNuGetSource }} --skip-duplicate
+          
+      - name: Publish NuGet package to NuGet Packages
+        run: |
+          dotnet nuget push ${{ env.NuGetDirectory }}/SimpleFluentTester.*.nupkg -k "${{ secrets.NUGET_TOKEN }}" -s ${{ env.NuGetSource }} --skip-duplicate
