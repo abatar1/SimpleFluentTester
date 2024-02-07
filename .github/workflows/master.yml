@@ -33,6 +33,7 @@ jobs:
         
   run_test:
     runs-on: ubuntu-latest
+    needs: [ build ]
     steps:
       - uses: actions/download-artifact@v3
         with:
@@ -71,7 +72,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       packages: write
-    needs: [ create_nuget, run_test ]
+    needs: [ create_nuget ]
     steps:
       - uses: actions/download-artifact@v3
         with:
