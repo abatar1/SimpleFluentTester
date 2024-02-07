@@ -1,6 +1,5 @@
-using SimpleFluentTester.Core.Reporter;
-using SimpleFluentTester.Core.TestRun;
-using SimpleFluentTester.Core.TestSuite;
+using SimpleFluentTester.Reporter;
+using SimpleFluentTester.TestRun;
 
 namespace SimpleFluentTester.UnitTests;
 

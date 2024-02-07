@@ -1,7 +1,7 @@
 ﻿using System;
-using SimpleFluentTester.Core.Reporter;
+using SimpleFluentTester.Reporter;
 
-namespace SimpleFluentTester.Core.TestRun;
+namespace SimpleFluentTester.TestRun;
 
 public sealed class TestRunOperationBuilder
 {

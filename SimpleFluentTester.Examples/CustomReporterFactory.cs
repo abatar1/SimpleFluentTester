@@ -1,6 +1,6 @@
 using System.Collections;
 using System.Reflection;
-using SimpleFluentTester.Core.Reporter;
+using SimpleFluentTester.Reporter;
 
 namespace SimpleFluentTester.Examples;
 

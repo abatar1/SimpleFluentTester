@@ -1,7 +1,7 @@
-﻿using SimpleFluentTester.Core.Reporter;
-using SimpleFluentTester.Core.TestRun;
+﻿using SimpleFluentTester.Reporter;
+using SimpleFluentTester.TestRun;
 
-namespace SimpleFluentTester.Core.TestSuite;
+namespace SimpleFluentTester;
 
 public static class TestSuite
 {

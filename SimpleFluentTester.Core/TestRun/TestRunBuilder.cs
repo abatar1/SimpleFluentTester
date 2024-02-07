@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
-using SimpleFluentTester.Core.Entities;
-using SimpleFluentTester.Core.Reporter;
+using SimpleFluentTester.Entities;
+using SimpleFluentTester.Reporter;
 
-namespace SimpleFluentTester.Core.TestRun;
+namespace SimpleFluentTester.TestRun;
 
 public sealed class TestRunBuilder<TOutput>
 {

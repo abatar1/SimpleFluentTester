@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Reflection;
 
-namespace SimpleFluentTester.Core.Reporter;
+namespace SimpleFluentTester.Reporter;
 
 public abstract class BaseTestRunReporterFactory
 {

@@ -2,9 +2,9 @@
 using System.Linq;
 using System.Reflection;
 using Microsoft.Extensions.Logging;
-using SimpleFluentTester.Core.Entities;
+using SimpleFluentTester.Entities;
 
-namespace SimpleFluentTester.Core.Reporter;
+namespace SimpleFluentTester.Reporter;
 
 public sealed class DefaultTestRunReporter<TOutput>(IList innerTestResult, MethodInfo methodInfo)
     : BaseTestRunReporter<TOutput>(innerTestResult, methodInfo)
