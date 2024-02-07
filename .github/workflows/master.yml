@@ -10,10 +10,6 @@ env:
   BinDirectory: ${{ github.workspace}}/bin
   NuGetPackageName: SimpleFluentTester
   NuGetSource: https://nuget.pkg.github.com/abatar1/index.json
-
-defaults:
-  run:
-    shell: pwsh
     
 jobs:
   build:
