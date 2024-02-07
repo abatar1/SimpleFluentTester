@@ -57,7 +57,7 @@ jobs:
         uses: actions/setup-dotnet@v4
         
       - name: Run unit tests
-        run: dotnet test ${{ env.BinDirectory }} --no-build
+        run: dotnet test ${{ env.BinDirectory }}/SimpleFluentTester.UnitTests.dll --no-build
         
   create_nuget:
     runs-on: ubuntu-latest
