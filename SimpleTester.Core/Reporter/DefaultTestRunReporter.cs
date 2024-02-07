@@ -38,13 +38,13 @@ public sealed class DefaultTestRunReporter<TOutput>(IList innerTestResult, Metho
         logger.LogInformation("Tests to execute: {count}", testsToExecute.Count);
 
         var failedTestResults = testsToExecute
-            .Where(x => !x.CalculatedResult.Value.Passed)
+            .Where(x => !x.LazyResult.Value.Passed)
             .ToList();
 
         foreach (var testResult in failedTestResults)
             PrintResult(logger, testResult);
 
-        var totalElapsedMs = testsToExecute.Sum(x => x.CalculatedResult.Value.ElapsedTime.TotalMilliseconds);
+        var totalElapsedMs = testsToExecute.Sum(x => x.LazyResult.Value.ElapsedTime.TotalMilliseconds);
         logger.LogInformation(
             $"Elapsed total: {totalElapsedMs:F5}ms; Avg: {totalElapsedMs / testsToExecute.Count:F5}ms");
 
@@ -59,7 +59,7 @@ public sealed class DefaultTestRunReporter<TOutput>(IList innerTestResult, Metho
 
     private static void PrintResult(ILogger logger, TestCase<TOutput> testResult)
     {
-        var noError = testResult is { CalculatedResult.Value: { Passed: true, Exception: null } };
+        var noError = testResult is { LazyResult.Value: { Passed: true, Exception: null } };
         if (noError)
             logger.LogInformation(testResult.ToString());
         else

@@ -3,3 +3,4 @@ obj/
 .idea/
 packages/
 *.DotSettings.user
+*.nupkg
