@@ -6,8 +6,9 @@
         <LangVersion>latest</LangVersion>
         <Nullable>enable</Nullable>
         <PackageId>SimpleFluentTester</PackageId>
-        <Version>0.0.1</Version>
+        <Version>0.0.2</Version>
         <Authors>Evgeny Halzov</Authors>
+        <Description>Simple fluent library for C# to run test cases.</Description>
     </PropertyGroup>
 
     <ItemGroup>
