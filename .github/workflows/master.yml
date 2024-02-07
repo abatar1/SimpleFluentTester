@@ -20,7 +20,7 @@ jobs:
         uses: actions/setup-dotnet@v4
         
       - name: Build Core
-        run: dotnet build SimpleFluentTester/SimpleFluentTester.Core --configuration Release --output ${{ env.BinDirectory }}/Core
+        run: dotnet build SimpleFluentTester/SimpleFluentTester.Core/ --configuration Release --output ${{ env.BinDirectory }}/Core
 
       - name: Copy Core project file
         run: cp SimpleFluentTester/SimpleFluentTester.Core/SimpleFluentTester.Core.csproj ${{ env.BinDirectory }}/Core
@@ -34,7 +34,7 @@ jobs:
           path: ${{ env.BinDirectory }}/Core
           
       - name: Build Tests
-        run: dotnet build SimpleFluentTester/SimpleFluentTester.UnitTests --configuration Release --output ${{ env.BinDirectory }}/UnitTests
+        run: dotnet build SimpleFluentTester/SimpleFluentTester.UnitTests/ --configuration Release --output ${{ env.BinDirectory }}/UnitTests
         
       - name: Upload Tests build artifact
         uses: actions/upload-artifact@v3
