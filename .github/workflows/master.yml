@@ -7,6 +7,7 @@ env:
   DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
   DOTNET_NOLOGO: true
   NuGetDirectory: ${{ github.workspace}}/nuget
+  BinDirectory: ${{ github.workspace}}/bin
   NuGetPackageName: SimpleFluentTester
   NuGetSource: https://nuget.pkg.github.com/abatar1/index.json
 
@@ -15,32 +16,55 @@ defaults:
     shell: pwsh
     
 jobs:
-  run_test:
+  build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+        
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
+        
+      - name: Build
+        run: dotnet build --configuration Release --output ${{ env.BinDirectory }}
+          
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: bin
+          if-no-files-found: error
+          retention-days: 7
+          path: ${{ env.BinDirectory }}
+        
+  run_test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v3
+        with:
+          name: bin
+          path: ${{ env.BinDirectory }}
+        
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        
       - name: Run tests
-        run: dotnet test --configuration Release
+        run: dotnet test ${{ env.BinDirectory }} --no-build
         
   create_nuget:
     runs-on: ubuntu-latest
     needs: [ run_test ]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/download-artifact@v3
         with:
-          fetch-depth: 0 # Get all history to allow automatic versioning using MinVer
+          name: bin
+          path: ${{ env.BinDirectory }}
       
-      # Install the .NET SDK indicated in the global.json file
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
       
-      # Create the NuGet package in the folder from the environment variable NuGetDirectory
-      - run: dotnet pack ${{ env.NuGetPackageName }}.Core --configuration Release --output ${{ env.NuGetDirectory }}
-      
-      # Publish the NuGet package as an artifact, so they can be used in the following jobs
-      - uses: actions/upload-artifact@v3
+      - run: dotnet pack ${{ env.BinDirectory }}/${{ env.NuGetPackageName }}.Core --configuration Release --output ${{ env.NuGetDirectory }} --no-build
+
+      - name: Upload nuget artifact
+        uses: actions/upload-artifact@v3
         with:
           name: nuget
           if-no-files-found: error
@@ -49,6 +73,8 @@ jobs:
 
   deploy_nuget:
     runs-on: ubuntu-latest
+    permissions:
+      packages: write
     needs: [ create_nuget, run_test ]
     steps:
       - uses: actions/download-artifact@v3
