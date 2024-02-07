@@ -6,8 +6,8 @@ on:
 env:
   DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
   DOTNET_NOLOGO: true
-  NuGetDirectory: ${{ github.workspace}}/nuget
-  BinDirectory: ${{ github.workspace}}/bin
+  NuGetDirectory: ${{ github.workspace }}/nuget
+  BinDirectory: ${{ github.workspace }}/bin
   NuGetPackageName: SimpleFluentTester
   NuGetSource: https://nuget.pkg.github.com/abatar1/index.json
     
@@ -43,8 +43,8 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         
-      - name: Run tests
-        run: dotnet test ${{ env.BinDirectory }} --no-build
+      - name: Run unit tests
+        run: dotnet test ${{ env.BinDirectory }}/{{ env.NuGetPackageName }}.UnitTests.dll --no-build
         
   create_nuget:
     runs-on: ubuntu-latest
@@ -58,7 +58,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
       
-      - run: dotnet pack ${{ env.BinDirectory }}/${{ env.NuGetPackageName }}.Core --configuration Release --output ${{ env.NuGetDirectory }} --no-build
+      - run: dotnet pack ${{ env.BinDirectory }}/${{ env.NuGetPackageName }}.Core.dll --output ${{ env.NuGetDirectory }} --no-build
 
       - name: Upload nuget artifact
         uses: actions/upload-artifact@v3
