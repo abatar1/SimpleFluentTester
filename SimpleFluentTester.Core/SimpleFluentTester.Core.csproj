@@ -2,6 +2,7 @@
 
     <PropertyGroup>
         <TargetFramework>netstandard2.1</TargetFramework>
+        <OutputType>Library</OutputType>
         <LangVersion>latest</LangVersion>
         <Nullable>enable</Nullable>
         <PackageId>SimpleFluentTester</PackageId>
