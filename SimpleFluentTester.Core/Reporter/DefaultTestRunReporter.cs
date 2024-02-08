@@ -14,17 +14,18 @@ public sealed class DefaultTestRunReporter<TOutput>(IList innerTestResult, Metho
     {
         var logger = BuildLoggerFactory().CreateLogger<DefaultTestRunReporter<TOutput>>();
 
-        var formattedParameters = string.Join(", ", MethodInfo.GetParameters().Select(x => x.ParameterType.Name));
-        logger.LogInformation("Executing tests for target method [{returnType} {className}.{methodName}({parameters})]",
-            MethodInfo.ReturnType.Name, MethodInfo.DeclaringType, MethodInfo.Name, formattedParameters);
+        var headerStringBuilder = new StringBuilder();
+        
+        headerStringBuilder.AppendLine($"Executing tests for target method [{MethodInfo}]");
 
         if (InnerTestResults.Count == 0)
         {
-            logger.LogError("No tests added");
+            headerStringBuilder.AppendLine("The test cases have not been added");
+            logger.LogError(headerStringBuilder.ToString());
             return;
         }
 
-        logger.LogInformation("Total tests: {count}", InnerTestResults.Count);
+        headerStringBuilder.AppendLine($"Total tests: {InnerTestResults.Count}");
 
         var testsToExecute = InnerTestResults
             .Where(x => x.ShouldBeCalculated)
@@ -32,11 +33,13 @@ public sealed class DefaultTestRunReporter<TOutput>(IList innerTestResult, Metho
 
         if (testsToExecute.Count == 0)
         {
-            logger.LogError("No tests to execute");
+            headerStringBuilder.AppendLine("Not a single test was found to be executed");
+            logger.LogError(headerStringBuilder.ToString());
             return;
         }
 
-        logger.LogInformation("Tests to execute: {count}", testsToExecute.Count);
+        headerStringBuilder.Append($"Tests to execute: {testsToExecute.Count}");
+        logger.LogInformation(headerStringBuilder.ToString());
 
         var failedTestResults = testsToExecute
             .Where(x => !x.LazyResult.Value.Passed)
@@ -44,26 +47,34 @@ public sealed class DefaultTestRunReporter<TOutput>(IList innerTestResult, Metho
 
         foreach (var testResult in failedTestResults)
             PrintResult(logger, testResult);
-
+        
+        var outerStringBuilder = new StringBuilder();
+        var logLevel = LogLevel.None;
+        
+        if (failedTestResults.Count == 0)
+        {
+            outerStringBuilder.AppendLine($"All {testsToExecute.Count} tests passed!");
+            logLevel = LogLevel.Information;
+        }
+        else
+        {
+            outerStringBuilder.Append(failedTestResults.Count);
+            outerStringBuilder.Append('/');
+            outerStringBuilder.Append(testsToExecute.Count);
+            outerStringBuilder.AppendLine(" tests haven't passed!");
+            outerStringBuilder.Append("Failed test iterations: ");
+            outerStringBuilder.AppendLine(string.Join(", ", failedTestResults.Select(x => x.Iteration)));
+            logLevel = LogLevel.Error;
+        }
+        
         var totalElapsedMs = testsToExecute.Sum(x => x.LazyResult.Value.ElapsedTime.TotalMilliseconds);
         var avgElapsedMs = totalElapsedMs / testsToExecute.Count;
         var maxElapsedTest = testsToExecute.OrderByDescending(x => x.LazyResult.Value.ElapsedTime).First();
-        logger.LogInformation($"Elapsed total: {totalElapsedMs:F5}ms; Avg: {avgElapsedMs:F5}ms; Max: {maxElapsedTest.LazyResult.Value.ElapsedTime.TotalMilliseconds:F5}ms [Iteration {maxElapsedTest.Iteration}]");
-
-        if (failedTestResults.Count == 0)
-        {
-            logger.LogInformation($"All {testsToExecute.Count} tests passed!");
-            return;
-        }
+        var statistics =
+            $"Elapsed total: {totalElapsedMs:F5}ms; Avg: {avgElapsedMs:F5}ms; Max: {maxElapsedTest.LazyResult.Value.ElapsedTime.TotalMilliseconds:F5}ms [Iteration {maxElapsedTest.Iteration}]";
+        outerStringBuilder.Append(statistics);
         
-        var failedMessageBuilder = new StringBuilder();
-        failedMessageBuilder.Append(failedTestResults.Count);
-        failedMessageBuilder.Append('/');
-        failedMessageBuilder.Append(testsToExecute.Count);
-        failedMessageBuilder.AppendLine(" tests haven't passed!");
-        failedMessageBuilder.Append("Failed test iterations: ");
-        failedMessageBuilder.Append(string.Join(", ", failedTestResults.Select(x => x.Iteration)));
-        logger.LogError(failedMessageBuilder.ToString());
+        logger.Log(logLevel, null, outerStringBuilder.ToString());
     }
 
     private static void PrintResult(ILogger logger, TestCase<TOutput> testResult)

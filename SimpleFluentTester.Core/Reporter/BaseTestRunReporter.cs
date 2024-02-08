@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Reflection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Console;
 using SimpleFluentTester.Entities;
 
 namespace SimpleFluentTester.Reporter;
@@ -16,6 +17,15 @@ public abstract class BaseTestRunReporter<TOutput>(IList innerTestResults, Metho
 
     protected virtual ILoggerFactory BuildLoggerFactory()
     {
-        return LoggerFactory.Create(loggerBuilder => loggerBuilder.AddConsole());
+        return LoggerFactory.Create(loggerBuilder =>
+        {
+            loggerBuilder.ClearProviders();
+            loggerBuilder.AddSimpleConsole(x =>
+            {
+                x.TimestampFormat = "HH:mm:ss.fff ";
+                x.IncludeScopes = true;
+                x.ColorBehavior = LoggerColorBehavior.Enabled;
+            });
+        });
     }
 }
