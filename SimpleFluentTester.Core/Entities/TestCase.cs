@@ -41,14 +41,15 @@ public sealed record TestCase<TOutput>(object[] Inputs, TOutput Expected, Lazy<C
         if (calculatedResult.Output != null)
             stringBuilder.AppendLine($"Output: '{calculatedResult.Output.Value}'");
       
-        stringBuilder.AppendLine($"Elapsed: {calculatedResult.ElapsedTime.TotalMilliseconds:F5}ms");
+        stringBuilder.Append($"Elapsed: {calculatedResult.ElapsedTime.TotalMilliseconds:F5}ms");
 
         if (calculatedResult.Exception != null)
         {
             var exception = calculatedResult.Exception;
             if (exception is TargetInvocationException targetInvocationException)
                 exception = targetInvocationException.InnerException;
-            stringBuilder.AppendLine($"Exception: {exception}");
+            stringBuilder.AppendLine();
+            stringBuilder.Append($"Exception: {exception}");
         }
 
         return stringBuilder.ToString();

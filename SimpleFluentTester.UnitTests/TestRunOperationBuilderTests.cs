@@ -9,7 +9,10 @@ public class TestRunOperationBuilderTests
     public void UseOperation_InvalidReturnType_ShouldThrow()
     {
         // Arrange
-        var useOperationFunc = () => TestSuite.Setup().UseOperation<string>(StaticMethods.Adder);
+        var setup = TestSuite.Setup();
+        
+        // Act
+        var useOperationFunc = () => setup.UseOperation<string>(StaticMethods.Adder);
 
         // Assert
         Assert.Throws<InvalidCastException>(useOperationFunc);

@@ -8,10 +8,11 @@ internal sealed class CustomReporter(IList innerTestResults, MethodInfo methodIn
 {
     public override void Report()
     {
-        Console.WriteLine("\nCustom console test reporter!\n");
+        Console.WriteLine($"\nCustom console test reporter for method [{MethodInfo}]\n");
         foreach (var innerTestResult in InnerTestResults)
         {
             Console.WriteLine(innerTestResult);
+            Console.WriteLine();
         }
     }
 }

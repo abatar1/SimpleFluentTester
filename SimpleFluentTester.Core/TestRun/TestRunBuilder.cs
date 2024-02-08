@@ -26,13 +26,13 @@ public sealed class TestRunBuilder<TOutput>
     public TestRunBuilder<TOutput> AddTestCase(TOutput expected, params object[] inputs)
     {
         if (inputs.Length != _operationParameters.Length)
-            throw new InvalidOperationException($"Invalid inputs number, should be {_operationParameters.Length}, but was {inputs.Length}, inputs {string.Join(", ", inputs)}");
+            throw new TargetParameterCountException($"Invalid inputs number, should be {_operationParameters.Length}, but was {inputs.Length}, inputs {string.Join(", ", inputs)}");
 
         var parametersTypesAreValid = inputs
             .Zip(_operationParameters, (input, parameter) => (input, parameter))
             .All(x => x.input.GetType() == x.parameter.ParameterType);
         if (!parametersTypesAreValid)
-            throw new InvalidOperationException("Passed parameters and method parameters are not equal");
+            throw new InvalidCastException("Passed parameters and method parameters are not equal");
         
         var calculatedResult = new Lazy<CalculatedTestResult<TOutput>>(() => ExecuteTestIteration(inputs, expected));
         _testIteration += 1;
@@ -73,9 +73,13 @@ public sealed class TestRunBuilder<TOutput>
             invokeResult = _operation.Method.Invoke(_operation.Target, input);
             stopwatch.Stop();
         }
+        catch (TargetInvocationException e)
+        {
+            return new CalculatedTestResult<TOutput>(false, null, e.InnerException, stopwatch.Elapsed);
+        }
         catch (Exception e)
         {
-            return new CalculatedTestResult<TOutput>(false, null, e, stopwatch.Elapsed);
+            throw new InvalidOperationException("Invocation throw a general Exception, something possibly went wrong and it looks like a bug", e);
         }
 
         if (invokeResult is not TOutput output)

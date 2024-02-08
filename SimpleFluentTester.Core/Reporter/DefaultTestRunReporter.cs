@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using Microsoft.Extensions.Logging;
 using SimpleFluentTester.Entities;
 
@@ -45,16 +46,24 @@ public sealed class DefaultTestRunReporter<TOutput>(IList innerTestResult, Metho
             PrintResult(logger, testResult);
 
         var totalElapsedMs = testsToExecute.Sum(x => x.LazyResult.Value.ElapsedTime.TotalMilliseconds);
-        logger.LogInformation(
-            $"Elapsed total: {totalElapsedMs:F5}ms; Avg: {totalElapsedMs / testsToExecute.Count:F5}ms");
+        var avgElapsedMs = totalElapsedMs / testsToExecute.Count;
+        var maxElapsedTest = testsToExecute.OrderByDescending(x => x.LazyResult.Value.ElapsedTime).First();
+        logger.LogInformation($"Elapsed total: {totalElapsedMs:F5}ms; Avg: {avgElapsedMs:F5}ms; Max: {maxElapsedTest.LazyResult.Value.ElapsedTime.TotalMilliseconds:F5}ms [Iteration {maxElapsedTest.Iteration}]");
 
         if (failedTestResults.Count == 0)
         {
             logger.LogInformation($"All {testsToExecute.Count} tests passed!");
             return;
         }
-
-        logger.LogError($"{failedTestResults.Count}/{testsToExecute.Count} tests haven't passed!\n Failed tests: [{string.Join(", ", failedTestResults.Select(x => x.Iteration))}]");
+        
+        var failedMessageBuilder = new StringBuilder();
+        failedMessageBuilder.Append(failedTestResults.Count);
+        failedMessageBuilder.Append('/');
+        failedMessageBuilder.Append(testsToExecute.Count);
+        failedMessageBuilder.AppendLine(" tests haven't passed!");
+        failedMessageBuilder.Append("Failed test iterations: ");
+        failedMessageBuilder.Append(string.Join(", ", failedTestResults.Select(x => x.Iteration)));
+        logger.LogError(failedMessageBuilder.ToString());
     }
 
     private static void PrintResult(ILogger logger, TestCase<TOutput> testResult)
