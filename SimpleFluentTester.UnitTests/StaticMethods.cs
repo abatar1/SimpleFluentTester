@@ -7,6 +7,10 @@ internal static class StaticMethods
         return number1 + number2;
     }
     
+    internal static void Empty(int number1, int number2)
+    {
+    }
+    
     internal static int AdderThrowsCustomException(int number1, int number2)
     {
         throw new CustomException();

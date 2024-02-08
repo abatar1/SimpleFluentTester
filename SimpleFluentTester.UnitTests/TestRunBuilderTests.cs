@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using Moq;
 using SimpleFluentTester.Entities;
 using SimpleFluentTester.Reporter;
 using SimpleFluentTester.TestRun;
@@ -139,10 +140,17 @@ public class TestRunBuilderTests
         // Act
         var func1 = () => new TestRunBuilder<int>(null, new DefaultTestRunReporterFactory());
         var func2 = () => new TestRunBuilder<int>(StaticMethods.Adder, null);
+        var parameterInfoMock = new Mock<ParameterInfo>();
+        var func3 = () => new TestRunBuilder<int>(StaticMethods.Adder, [parameterInfoMock.Object], new DefaultTestRunReporterFactory(), null);
+        var func4 = () => new TestRunBuilder<int>(StaticMethods.Adder, [parameterInfoMock.Object], null, new List<TestCase<int>>());
+        var func5 = () => new TestRunBuilder<int>(StaticMethods.Adder, null, new DefaultTestRunReporterFactory(), new List<TestCase<int>>());
         
         // Assert
         Assert.Throws<ArgumentNullException>(func1);
         Assert.Throws<ArgumentNullException>(func2);
+        Assert.Throws<ArgumentNullException>(func3);
+        Assert.Throws<ArgumentNullException>(func4);
+        Assert.Throws<ArgumentNullException>(func5);
     }
     
     [Fact]
