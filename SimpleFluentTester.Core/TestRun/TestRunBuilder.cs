@@ -44,10 +44,10 @@ public sealed class TestRunBuilder<TOutput>
     
     public BaseTestRunReporter<TOutput> Run(params int[] testIterations)
     {
-        if (_operation == null)
-            throw new InvalidOperationException("Setup operation with SetupOperation() first");
-
         var testIterationsHash = new HashSet<int>(testIterations);
+        
+        if (testIterationsHash.Count != 0 && (testIterationsHash.Count > _testCases.Count || testIterationsHash.Max() > _testCases.Count))
+            throw new InvalidOperationException("Invalid test case iteration was given as input");
 
         var executedTestCases = _testCases
             .Select((testResult, it) => (testResult, it + 1))
@@ -77,13 +77,9 @@ public sealed class TestRunBuilder<TOutput>
         {
             return new CalculatedTestResult<TOutput>(false, null, e.InnerException, stopwatch.Elapsed);
         }
-        catch (Exception e)
-        {
-            throw new InvalidOperationException("Invocation throw a general Exception, something possibly went wrong and it looks like a bug", e);
-        }
 
         if (invokeResult is not TOutput output)
-            throw new InvalidOperationException($"Couldn't convert invoked test result to {typeof(TOutput)} type");
+            throw new InvalidCastException($"Couldn't convert invoked test result to {typeof(TOutput)} type");
 
         return new CalculatedTestResult<TOutput>(Equals(output, expected), new ValueWrapper<TOutput>(output), null, stopwatch.Elapsed);
     }

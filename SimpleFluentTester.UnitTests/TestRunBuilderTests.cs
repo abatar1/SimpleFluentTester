@@ -114,6 +114,49 @@ public class TestRunBuilderTests
         Assert.NotNull(firstIteration.LazyResult.Value.Exception);
         Assert.IsType<CustomException>(firstIteration.LazyResult.Value.Exception);
     }
+    
+    [Fact]
+    public void Run_InvalidIterationNumber_ThrowsException()
+    {
+        // Arrange
+        var builder1 = SetupBuilder();
+        var builder2 = SetupBuilder();
+        
+        // Act
+        var func1 = () => builder1.AddTestCase(2, 1, 1).Run(2);
+        var func2 = () => builder2.AddTestCase(2, 1, 1).Run(1, 2);
+        
+        // Assert
+        Assert.Throws<InvalidOperationException>(func1);
+        Assert.Throws<InvalidOperationException>(func2);
+    }
+    
+    [Fact]
+    public void TestRunBuilder_PassNullArgumentsToCtor_ThrowsException()
+    {
+        // Arrange
+        
+        // Act
+        var func1 = () => new TestRunBuilder<int>(null, new DefaultTestRunReporterFactory());
+        var func2 = () => new TestRunBuilder<int>(StaticMethods.Adder, null);
+        
+        // Assert
+        Assert.Throws<ArgumentNullException>(func1);
+        Assert.Throws<ArgumentNullException>(func2);
+    }
+    
+    [Fact]
+    public void TestRunBuilder_InvalidDelegateReturnType_ThrowsException()
+    {
+        // Arrange
+        var builder = new TestRunBuilder<int>((int _, int _) => "test", new DefaultTestRunReporterFactory());
+        
+        // Act
+        var func = () => builder.AddTestCase(2, 1, 1).Run();
+        
+        // Assert
+        Assert.Throws<InvalidCastException>(func);
+    }
 
     private static IList<TestCase<TOutput>> GetTesCasesFromReporter<TOutput>(BaseTestRunReporter<TOutput> reporter)
     {
