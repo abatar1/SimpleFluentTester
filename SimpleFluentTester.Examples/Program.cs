@@ -5,9 +5,9 @@ using SimpleFluentTester.Examples;
 // Then add few test cases, run them and print report.
 TestSuite.Setup()
     .UseOperation<int>(CustomMethods.Adder) // UseOperation generic type should be the same as used delegate's return type.  
-    .AddTestCase(2, 1, 1) // Number and type of input parameters should be the same as delegate's parameters, otherwise exception will be thrown.
-    .AddTestCase(-2, -1, -1)
-    .AddTestCase(-3, -1, -1)
+    .Expect(2).WithInput(1, 1) // Number and type of input parameters should be the same as delegate's parameters, otherwise exception will be thrown.
+    .Expect(-2).WithInput(-1, -1)
+    .Expect(-3).WithInput(-1, -1)
     .Run() // Could be used as .Run(1, 2) to run some specific test cases.
     .Report(); // Prints the test execution result using default reporter.
 
@@ -17,8 +17,8 @@ TestSuite.Custom
     .WithCustomReporterFactory<CustomReporterFactory>() 
     .Setup()
     .UseOperation<int>(CustomMethods.Adder) // UseOperation generic type should be the same as used delegate's return type. 
-    .AddTestCase(2, 1, 1)  // Number and type of input parameters should be the same as delegate's parameters, otherwise exception will be thrown.
-    .AddTestCase(-2, -1, -1)
-    .AddTestCase(-3, -1, -1)
+    .Expect(2).WithInput(1, 1) // Number and type of input parameters should be the same as delegate's parameters, otherwise exception will be thrown.
+    .Expect(-2).WithInput(-1, -1)
+    .Expect(-3).WithInput(-1, -1)
     .Run() // Could be used as .Run(1, 2) to run some specific test cases.
     .Report();  // Prints the test execution result using custom CustomReporterFactory reporter.

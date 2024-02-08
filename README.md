@@ -39,10 +39,9 @@ Let's start writing tests for it!
      // Here we specify the method we want to test.
     .UseOperation<int>(Adder) 
      // Then we add 2 valid tests and one invalid test.
-     // The first parameter is for the expected value, while all subsequent ones are inputs.
-    .AddTestCase(2, 1, 1) 
-    .AddTestCase(-2, -1, -1)
-    .AddTestCase(-3, -1, -1)
+    .Expect(2).WithInput(1, 1) 
+    .Expect(-2).WithInput(-1, -1)
+    .Expect(-3).WithInput(-1, -1)
     .Run() 
     .Report();
  ```
@@ -71,9 +70,9 @@ Furthermore, for debugging purposes, it would be most convenient to select only 
 ```csharp
  TestSuite.Setup()
     .UseOperation<int>(Adder) 
-    .AddTestCase(2, 1, 1) 
-    .AddTestCase(-2, -1, -1)
-    .AddTestCase(-3, -1, -1)
+    .Expect(2).WithInput(1, 1) 
+    .Expect(-2).WithInput(-1, -1)
+    .Expect(-3).WithInput(-1, -1)
      // You should not comment on your test cases; just specify the iteration you want to test, every other iteration will be ignored.
     .Run(3) 
     .Report();
@@ -84,7 +83,7 @@ TestSuite.Custom
     .WithCustomReporterFactory<CustomReporterFactory>() 
     .Setup()
     .UseOperation<int>(CustomMethods.Adder) 
-    .AddTestCase(2, 1, 1)
+    .Expect(2).WithInput(1, 1) 
     .Run()
     .Report();
 ```

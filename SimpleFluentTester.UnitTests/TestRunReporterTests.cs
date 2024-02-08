@@ -28,7 +28,7 @@ public class TestRunReporterTests
         // Act
         TestSuite.Setup()
             .UseOperation<int>(StaticMethods.Adder)
-            .AddTestCase(2, 1, 1)
+            .Expect(2).WithInput(1, 1)
             .Run()
             .Report();
             
@@ -43,7 +43,7 @@ public class TestRunReporterTests
         // Act
         TestSuite.Setup()
             .UseOperation<int>(StaticMethods.Adder)
-            .AddTestCase(3, 1, 1)
+            .Expect(3).WithInput(1, 1)
             .Run()
             .Report();
             
@@ -60,7 +60,7 @@ public class TestRunReporterTests
             .WithCustomReporterFactory<CustomReporterFactory>()
             .Setup()
             .UseOperation<int>(StaticMethods.Adder)
-            .AddTestCase(3, 1, 1)
+            .Expect(3).WithInput(1, 1)
             .Run()
             .Report();
             

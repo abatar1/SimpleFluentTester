@@ -14,7 +14,7 @@ public class TestRunBuilderTests
         var builder = SetupBuilder();
             
         // Act    
-        var func = () => builder.AddTestCase(2, 1, 1, 1);
+        var func = () => builder.Expect(2).WithInput(1, 1, 1);
         
         // Assert
         Assert.Throws<TargetParameterCountException>(func);
@@ -27,7 +27,7 @@ public class TestRunBuilderTests
         var builder = SetupBuilder();
             
         // Act    
-        var func = () => builder.AddTestCase(2, 1);
+        var func = () => builder.Expect(2).WithInput(1);
         
         // Assert
         Assert.Throws<TargetParameterCountException>(func);
@@ -40,7 +40,7 @@ public class TestRunBuilderTests
         var builder = SetupBuilder();
             
         // Act    
-        var func = () => builder.AddTestCase(2, 1, "test");
+        var func = () => builder.Expect(2).WithInput(1, "test");
         
         // Assert
         Assert.Throws<InvalidCastException>(func);
@@ -54,9 +54,9 @@ public class TestRunBuilderTests
             
         // Act    
         var reporter = builder
-            .AddTestCase(2, 1, 1)
-            .AddTestCase(2, 2, 1)
-            .AddTestCase(3, 2, 1)
+            .Expect(2).WithInput(1, 1)
+            .Expect(2).WithInput(2, 1)
+            .Expect(3).WithInput(2, 1)
             .Run(1, 2);
 
         // Assert
@@ -103,7 +103,7 @@ public class TestRunBuilderTests
         
         // Act
         var reporter = builder
-            .AddTestCase(2, 1, 1)
+            .Expect(2).WithInput(1, 1)
             .Run();
         
         // Assert
@@ -123,8 +123,8 @@ public class TestRunBuilderTests
         var builder2 = SetupBuilder();
         
         // Act
-        var func1 = () => builder1.AddTestCase(2, 1, 1).Run(2);
-        var func2 = () => builder2.AddTestCase(2, 1, 1).Run(1, 2);
+        var func1 = () => builder1.Expect(2).WithInput(1, 1).Run(2);
+        var func2 = () => builder2.Expect(2).WithInput(1, 1).Run(1, 2);
         
         // Assert
         Assert.Throws<InvalidOperationException>(func1);
@@ -152,7 +152,7 @@ public class TestRunBuilderTests
         var builder = new TestRunBuilder<int>((int _, int _) => "test", new DefaultTestRunReporterFactory());
         
         // Act
-        var func = () => builder.AddTestCase(2, 1, 1).Run();
+        var func = () => builder.Expect(2).WithInput(1, 1).Run();
         
         // Assert
         Assert.Throws<InvalidCastException>(func);

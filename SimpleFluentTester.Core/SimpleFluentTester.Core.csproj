@@ -7,7 +7,7 @@
         <Nullable>enable</Nullable>
         <RootNamespace>SimpleFluentTester</RootNamespace>
         <PackageId>SimpleFluentTester</PackageId>
-        <Version>0.0.3</Version>
+        <Version>0.0.4</Version>
         <Authors>Evgeny Halzov</Authors>
         <PackageLicenseFile>LICENSE</PackageLicenseFile>
         <PackageReadmeFile>README.md</PackageReadmeFile>
