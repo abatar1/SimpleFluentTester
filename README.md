@@ -21,69 +21,76 @@ Based on my personal experience, I have created a library that allows you to set
 
 ## Instruction
 
-1. Use your preferred IDE to install the NuGet package `SimpleFluentTester`. You can also find it at this [link](https://www.nuget.org/packages/SimpleFluentTester).
+Use your preferred IDE or CLI to install the NuGet package `SimpleFluentTester`. You can also find the NuGet package at this [link](https://www.nuget.org/packages/SimpleFluentTester).
 
+I assume that you have a very complex function to cover with test cases, but let's say we have a very simple function of some sort:
+    
+```csharp
+ int Adder(int number1, int number2)
+ {
+     return number1 + number2;
+ }
+ ```
 
-2. I assume that you have a very simple function that can add two numbers and return the sum, and you want to test all possible test cases for it.
-    ```csharp
-    int Adder(int number1, int number2)
-    {
-        return number1 + number2;
-    }
-    ```
-   Let's start writing tests for it!
-   ```csharp
-    TestSuite.Setup()
-        // Here we specify the method we want to test.
-       .UseOperation<int>(Adder) 
-        // Then we add 2 valid tests and one invalid test.
-       .AddTestCase(2, 1, 1) 
-       .AddTestCase(-2, -1, -1)
-       .AddTestCase(-3, -1, -1)
-       .Run() 
-       .Report();
-    ```
-   And the output of this code will indicate that one out of the three tests has not passed: 
-   ```
-   18:36:46.431 info: SimpleFluentTester.Reporter.DefaultTestRunReporter[0]
-      Executing tests for target method [Int32 Adder(Int32, Int32)]
-      Total tests: 3
-      Tests to execute: 3
-   18:36:46.445 fail: SimpleFluentTester.Reporter.DefaultTestRunReporter[0]
-      Test iteration [3] not passed
-      Inputs: '-1', '-1'
-      Expected: '-3'
-      Output: '-2'
-      Elapsed: 0,00040ms
-   18:36:46.448 fail: SimpleFluentTester.Reporter.DefaultTestRunReporter[0]
-      1/3 tests haven't passed!
-      Failed test iterations: 3
-      Elapsed total: 0,17370ms; Avg: 0,05790ms; Max: 0,12480ms [Iteration 2]
-   ```
-   Furthermore, for debugging purposes, it would be most convenient to select only the unsuccessful iteration:
-   ```csharp
-    TestSuite.Setup()
-       .UseOperation<int>(Adder) 
-       .AddTestCase(2, 1, 1) 
-       .AddTestCase(-2, -1, -1)
-       .AddTestCase(-3, -1, -1)
-        // You should not comment on your test cases; just specify the iteration you want to test, every other iteration will be ignored.
-       .Run(3) 
-       .Report();
-    ```
-   Also, you can write your custom reporter that will generate a report in the format you need:
-   ```csharp
-   TestSuite.Custom
-       .WithCustomReporterFactory<CustomReporterFactory>() 
-       .Setup()
-       .UseOperation<int>(CustomMethods.Adder) 
-       .AddTestCase(2, 1, 1)
-       .Run()
-       .Report();
-   ```
+Let's start writing tests for it!
 
-   If you have any questions, you can find all these examples in [this project](/SimpleFluentTester.Examples) 
-   or ask me directly via [email](mailto:evgenyhalzov@gmail.com?Subject=SimpleFluentTester)!
+```csharp
+ TestSuite.Setup()
+     // Here we specify the method we want to test.
+    .UseOperation<int>(Adder) 
+     // Then we add 2 valid tests and one invalid test.
+     // The first parameter is for the expected value, while all subsequent ones are inputs.
+    .AddTestCase(2, 1, 1) 
+    .AddTestCase(-2, -1, -1)
+    .AddTestCase(-3, -1, -1)
+    .Run() 
+    .Report();
+ ```
+    
+And the output of this code will indicate that one out of the three tests has not passed: 
+   
+```
+18:36:46.431 info: SimpleFluentTester.Reporter.DefaultTestRunReporter[0]
+   Executing tests for target method [Int32 Adder(Int32, Int32)]
+   Total tests: 3
+   Tests to execute: 3
+18:36:46.445 fail: SimpleFluentTester.Reporter.DefaultTestRunReporter[0]
+   Test iteration [3] not passed
+   Inputs: '-1', '-1'
+   Expected: '-3'
+   Output: '-2'
+   Elapsed: 0,00040ms
+18:36:46.448 fail: SimpleFluentTester.Reporter.DefaultTestRunReporter[0]
+   1/3 tests haven't passed!
+   Failed test iterations: 3
+   Elapsed total: 0,17370ms; Avg: 0,05790ms; Max: 0,12480ms [Iteration 2]
+```
+
+Furthermore, for debugging purposes, it would be most convenient to select only the unsuccessful iteration:
+   
+```csharp
+ TestSuite.Setup()
+    .UseOperation<int>(Adder) 
+    .AddTestCase(2, 1, 1) 
+    .AddTestCase(-2, -1, -1)
+    .AddTestCase(-3, -1, -1)
+     // You should not comment on your test cases; just specify the iteration you want to test, every other iteration will be ignored.
+    .Run(3) 
+    .Report();
+ ```
+Also, you can write your custom reporter that will generate a report in the format you need:
+```csharp
+TestSuite.Custom
+    .WithCustomReporterFactory<CustomReporterFactory>() 
+    .Setup()
+    .UseOperation<int>(CustomMethods.Adder) 
+    .AddTestCase(2, 1, 1)
+    .Run()
+    .Report();
+```
+
+If you have any questions, you can find all these examples in [this project](/SimpleFluentTester.Examples) 
+or ask me directly via [email](mailto:evgenyhalzov@gmail.com?Subject=SimpleFluentTester)!
 
 ## License
 
