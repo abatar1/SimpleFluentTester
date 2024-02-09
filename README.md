@@ -23,7 +23,7 @@ Based on my personal experience, I have created a library that allows you to set
 
 Use your preferred IDE or CLI to install the NuGet package `SimpleFluentTester`. You can also find the NuGet package at this [link](https://www.nuget.org/packages/SimpleFluentTester).
 
-I assume that you have a very complex function to cover with test cases, but let's say we have a very simple function of some sort:
+I assume that you have a very complex function to cover with test cases, but let's say we have a very simple one of some sort:
     
 ```csharp
  int Adder(int number1, int number2)
@@ -32,7 +32,7 @@ I assume that you have a very complex function to cover with test cases, but let
  }
  ```
 
-Let's start writing tests for it!
+Let's start writing test cases for it!
 
 ```csharp
  TestSuite.Setup()
@@ -46,7 +46,7 @@ Let's start writing tests for it!
     .Report();
  ```
     
-And the output of this code will indicate that one out of the three tests has not passed: 
+And the output of this code will indicate that one out of the three test cases has not passed: 
    
 ```
 18:36:46.431 info: SimpleFluentTester.Reporter.DefaultTestRunReporter[0]
@@ -54,7 +54,7 @@ And the output of this code will indicate that one out of the three tests has no
    Total tests: 3
    Tests to execute: 3
 18:36:46.445 fail: SimpleFluentTester.Reporter.DefaultTestRunReporter[0]
-   Test iteration [3] not passed
+   Test case [3] not passed
    Inputs: '-1', '-1'
    Expected: '-3'
    Output: '-2'
@@ -65,7 +65,7 @@ And the output of this code will indicate that one out of the three tests has no
    Elapsed total: 0,17370ms; Avg: 0,05790ms; Max: 0,12480ms [Iteration 2]
 ```
 
-Furthermore, for debugging purposes, it would be most convenient to select only the unsuccessful iteration:
+Furthermore, for debugging purposes, for the next run it would be most convenient to select only the unsuccessful test cases:
    
 ```csharp
  TestSuite.Setup()

@@ -25,7 +25,7 @@ public class TestRunOperationBuilderTests
         var setup = TestSuite.Setup();
         
         // Act
-        var useOperationFunc = () => setup.UseOperation<int>(null);
+        var useOperationFunc = () => setup.UseOperation<int>(null!);
 
         // Assert
         Assert.Throws<ArgumentNullException>(useOperationFunc);

@@ -62,8 +62,8 @@ public sealed class DefaultTestRunReporter<TOutput>(IList innerTestResult, Metho
             outerStringBuilder.Append('/');
             outerStringBuilder.Append(testsToExecute.Count);
             outerStringBuilder.AppendLine(" tests haven't passed!");
-            outerStringBuilder.Append("Failed test iterations: ");
-            outerStringBuilder.AppendLine(string.Join(", ", failedTestResults.Select(x => x.Iteration)));
+            outerStringBuilder.Append("Failed test cases: ");
+            outerStringBuilder.AppendLine(string.Join(", ", failedTestResults.Select(x => x.Number)));
             logLevel = LogLevel.Error;
         }
         
@@ -71,7 +71,7 @@ public sealed class DefaultTestRunReporter<TOutput>(IList innerTestResult, Metho
         var avgElapsedMs = totalElapsedMs / testsToExecute.Count;
         var maxElapsedTest = testsToExecute.OrderByDescending(x => x.LazyResult.Value.ElapsedTime).First();
         var statistics =
-            $"Elapsed total: {totalElapsedMs:F5}ms; Avg: {avgElapsedMs:F5}ms; Max: {maxElapsedTest.LazyResult.Value.ElapsedTime.TotalMilliseconds:F5}ms [Iteration {maxElapsedTest.Iteration}]";
+            $"Elapsed total: {totalElapsedMs:F5}ms; Avg: {avgElapsedMs:F5}ms; Max: {maxElapsedTest.LazyResult.Value.ElapsedTime.TotalMilliseconds:F5}ms [Number {maxElapsedTest.Number}]";
         outerStringBuilder.Append(statistics);
         
         logger.Log(logLevel, null, outerStringBuilder.ToString());

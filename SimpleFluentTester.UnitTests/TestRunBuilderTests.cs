@@ -63,36 +63,36 @@ public class TestRunBuilderTests
         // Assert
         var testCases = GetTesCasesFromReporter(reporter);
         
-        var firstIteration = testCases.FirstOrDefault(x => x.Iteration == 1);
-        Assert.NotNull(firstIteration);
-        Assert.True(firstIteration.ShouldBeCalculated);
-        Assert.Equal(2, firstIteration.Expected);
-        Assert.Equal([1, 1], firstIteration.Inputs);
-        Assert.True(firstIteration.LazyResult.IsValueCreated);
-        Assert.True(firstIteration.LazyResult.Value.Passed);
-        Assert.Null(firstIteration.LazyResult.Value.Exception);
-        Assert.NotNull(firstIteration.LazyResult.Value.Output);
-        Assert.Equal(firstIteration.Expected, firstIteration.LazyResult.Value.Output.Value);
-        Assert.True(firstIteration.LazyResult.Value.ElapsedTime.TotalMilliseconds > 0);
+        var firstTestCase = testCases.FirstOrDefault(x => x.Number == 1);
+        Assert.NotNull(firstTestCase);
+        Assert.True(firstTestCase.ShouldBeCalculated);
+        Assert.Equal(2, firstTestCase.Expected);
+        Assert.Equal([1, 1], firstTestCase.Inputs);
+        Assert.True(firstTestCase.LazyResult.IsValueCreated);
+        Assert.True(firstTestCase.LazyResult.Value.Passed);
+        Assert.Null(firstTestCase.LazyResult.Value.Exception);
+        Assert.NotNull(firstTestCase.LazyResult.Value.Output);
+        Assert.Equal(firstTestCase.Expected, firstTestCase.LazyResult.Value.Output.Value);
+        Assert.True(firstTestCase.LazyResult.Value.ElapsedTime.TotalMilliseconds > 0);
         
-        var secondIteration = testCases.FirstOrDefault(x => x.Iteration == 2);
-        Assert.NotNull(secondIteration);
-        Assert.True(secondIteration.ShouldBeCalculated);
-        Assert.Equal(2, secondIteration.Expected);
-        Assert.Equal([2, 1], secondIteration.Inputs);
-        Assert.True(secondIteration.LazyResult.IsValueCreated);
-        Assert.False(secondIteration.LazyResult.Value.Passed);
-        Assert.Null(secondIteration.LazyResult.Value.Exception);
-        Assert.NotNull(secondIteration.LazyResult.Value.Output);
-        Assert.NotEqual(secondIteration.Expected, secondIteration.LazyResult.Value.Output.Value);
-        Assert.True(secondIteration.LazyResult.Value.ElapsedTime.TotalMilliseconds > 0);
+        var secondTestCase = testCases.FirstOrDefault(x => x.Number == 2);
+        Assert.NotNull(secondTestCase);
+        Assert.True(secondTestCase.ShouldBeCalculated);
+        Assert.Equal(2, secondTestCase.Expected);
+        Assert.Equal([2, 1], secondTestCase.Inputs);
+        Assert.True(secondTestCase.LazyResult.IsValueCreated);
+        Assert.False(secondTestCase.LazyResult.Value.Passed);
+        Assert.Null(secondTestCase.LazyResult.Value.Exception);
+        Assert.NotNull(secondTestCase.LazyResult.Value.Output);
+        Assert.NotEqual(secondTestCase.Expected, secondTestCase.LazyResult.Value.Output.Value);
+        Assert.True(secondTestCase.LazyResult.Value.ElapsedTime.TotalMilliseconds > 0);
         
-        var thirdIteration = testCases.FirstOrDefault(x => x.Iteration == 3);
-        Assert.NotNull(thirdIteration);
-        Assert.False(thirdIteration.ShouldBeCalculated);
-        Assert.Equal(3, thirdIteration.Expected);
-        Assert.Equal([2, 1], thirdIteration.Inputs);
-        Assert.False(thirdIteration.LazyResult.IsValueCreated);
+        var thirdTestCase = testCases.FirstOrDefault(x => x.Number == 3);
+        Assert.NotNull(thirdTestCase);
+        Assert.False(thirdTestCase.ShouldBeCalculated);
+        Assert.Equal(3, thirdTestCase.Expected);
+        Assert.Equal([2, 1], thirdTestCase.Inputs);
+        Assert.False(thirdTestCase.LazyResult.IsValueCreated);
     }
 
     [Fact]
@@ -110,10 +110,10 @@ public class TestRunBuilderTests
         // Assert
         var testCases = GetTesCasesFromReporter(reporter);
         
-        var firstIteration = testCases.FirstOrDefault(x => x.Iteration == 1);
-        Assert.NotNull(firstIteration);
-        Assert.NotNull(firstIteration.LazyResult.Value.Exception);
-        Assert.IsType<CustomException>(firstIteration.LazyResult.Value.Exception);
+        var firstTestCase = testCases.FirstOrDefault(x => x.Number == 1);
+        Assert.NotNull(firstTestCase);
+        Assert.NotNull(firstTestCase.LazyResult.Value.Exception);
+        Assert.IsType<CustomException>(firstTestCase.LazyResult.Value.Exception);
     }
     
     [Fact]
@@ -138,12 +138,12 @@ public class TestRunBuilderTests
         // Arrange
         
         // Act
-        var func1 = () => new TestRunBuilder<int>(null, new DefaultTestRunReporterFactory());
-        var func2 = () => new TestRunBuilder<int>(StaticMethods.Adder, null);
+        var func1 = () => new TestRunBuilder<int>(null!, new DefaultTestRunReporterFactory());
+        var func2 = () => new TestRunBuilder<int>(StaticMethods.Adder, null!);
         var parameterInfoMock = new Mock<ParameterInfo>();
-        var func3 = () => new TestRunBuilder<int>(StaticMethods.Adder, [parameterInfoMock.Object], new DefaultTestRunReporterFactory(), null);
-        var func4 = () => new TestRunBuilder<int>(StaticMethods.Adder, [parameterInfoMock.Object], null, new List<TestCase<int>>());
-        var func5 = () => new TestRunBuilder<int>(StaticMethods.Adder, null, new DefaultTestRunReporterFactory(), new List<TestCase<int>>());
+        var func3 = () => new TestRunBuilder<int>(StaticMethods.Adder, [parameterInfoMock.Object], new DefaultTestRunReporterFactory(), null!);
+        var func4 = () => new TestRunBuilder<int>(StaticMethods.Adder, [parameterInfoMock.Object], null!, new List<TestCase<int>>());
+        var func5 = () => new TestRunBuilder<int>(StaticMethods.Adder, null!, new DefaultTestRunReporterFactory(), new List<TestCase<int>>());
         
         // Assert
         Assert.Throws<ArgumentNullException>(func1);

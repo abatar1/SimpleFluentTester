@@ -38,18 +38,18 @@ public sealed class TestRunBuilder<TOutput>
         return new TestCaseInputBuilder<TOutput>(expected, _testCases, _reporterFactory, _operation, _operationParameters);
     }
     
-    public BaseTestRunReporter<TOutput> Run(params int[] testIterations)
+    public BaseTestRunReporter<TOutput> Run(params int[] testNumbers)
     {
-        var testIterationsHash = new HashSet<int>(testIterations);
+        var testNumbersHash = new HashSet<int>(testNumbers);
         
-        if (testIterationsHash.Count != 0 && (testIterationsHash.Count > _testCases.Count || testIterationsHash.Max() > _testCases.Count))
-            throw new InvalidOperationException("Invalid test case iteration was given as input");
+        if (testNumbersHash.Count != 0 && (testNumbersHash.Count > _testCases.Count || testNumbersHash.Max() > _testCases.Count))
+            throw new InvalidOperationException("Invalid test case numbers were given as input");
 
         var executedTestCases = _testCases
             .Select((testResult, it) => (testResult, it + 1))
             .Select(x =>
             {
-                var shouldBeCalculated = testIterationsHash.Count == 0 || (testIterationsHash.Count != 0 && testIterationsHash.Contains(x.Item2));
+                var shouldBeCalculated = testNumbersHash.Count == 0 || (testNumbersHash.Count != 0 && testNumbersHash.Contains(x.Item2));
                 if (shouldBeCalculated)
                     _ = x.testResult.LazyResult.Value;
                 return x.testResult with { ShouldBeCalculated = shouldBeCalculated };

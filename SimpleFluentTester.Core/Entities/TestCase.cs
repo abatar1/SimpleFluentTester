@@ -5,7 +5,7 @@ using System.Text;
 
 namespace SimpleFluentTester.Entities;
 
-public sealed record TestCase<TOutput>(object[] Inputs, TOutput Expected, Lazy<CalculatedTestResult<TOutput>> LazyResult, bool ShouldBeCalculated, int Iteration)
+public sealed record TestCase<TOutput>(object[] Inputs, TOutput Expected, Lazy<CalculatedTestResult<TOutput>> LazyResult, bool ShouldBeCalculated, int Number)
 {
     public Lazy<CalculatedTestResult<TOutput>> LazyResult { get; } = LazyResult;
     
@@ -15,7 +15,7 @@ public sealed record TestCase<TOutput>(object[] Inputs, TOutput Expected, Lazy<C
     
     public bool ShouldBeCalculated { get; set; } = ShouldBeCalculated;
     
-    public int Iteration { get; } = Iteration;
+    public int Number { get; } = Number;
     
     public override string ToString()
     {
@@ -23,7 +23,7 @@ public sealed record TestCase<TOutput>(object[] Inputs, TOutput Expected, Lazy<C
 
         if (!LazyResult.IsValueCreated)
         {
-            stringBuilder.AppendLine($"Test iteration [{Iteration}] not calculated");
+            stringBuilder.AppendLine($"Test case [{Number}] not calculated");
             AddInputString(stringBuilder);
             AddExpectedString(stringBuilder);
             return stringBuilder.ToString();
@@ -33,7 +33,7 @@ public sealed record TestCase<TOutput>(object[] Inputs, TOutput Expected, Lazy<C
 
         var noError = calculatedResult.Passed && calculatedResult.Exception == null;
 
-        stringBuilder.AppendLine($"Test iteration [{Iteration}] {(!noError ? "not " : "")}passed");
+        stringBuilder.AppendLine($"Test case [{Number}] {(!noError ? "not " : "")}passed");
 
         AddInputString(stringBuilder);
         AddExpectedString(stringBuilder);
