@@ -10,7 +10,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\SimpleFluentTester.Core\SimpleFluentTester.Core.csproj" />
+      <PackageReference Include="SimpleFluentTester" Version="0.0.4"/>
     </ItemGroup>
 
 </Project>

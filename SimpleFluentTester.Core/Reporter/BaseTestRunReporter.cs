@@ -7,6 +7,9 @@ using SimpleFluentTester.Entities;
 
 namespace SimpleFluentTester.Reporter;
 
+/// <summary>
+/// Base class that should be used for defining your own custom reporter.
+/// </summary>
 public abstract class BaseTestRunReporter<TOutput>(IList innerTestResults, MethodInfo methodInfo) : ITestRunReporter
 {
     protected readonly IList<TestCase<TOutput>> InnerTestResults = (IList<TestCase<TOutput>>) innerTestResults;

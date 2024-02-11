@@ -12,10 +12,10 @@ public class TestRunBuilderTests
     public void AddTestCase_ParametersNumberMoreThanExpected_ThrowsException()
     {
         // Arrange
-        var builder = SetupBuilder();
+        var builder = SetupAdderBuilder();
             
         // Act    
-        var func = () => builder.Expect(2).WithInput(1, 1, 1);
+        var func = () => builder.Expect(2).WithInput(1, 1, 1).Run();
         
         // Assert
         Assert.Throws<TargetParameterCountException>(func);
@@ -25,10 +25,10 @@ public class TestRunBuilderTests
     public void AddTestCase_ParametersNumberLessThanExpected_ThrowsException()
     {
         // Arrange
-        var builder = SetupBuilder();
+        var builder = SetupAdderBuilder();
             
         // Act    
-        var func = () => builder.Expect(2).WithInput(1);
+        var func = () => builder.Expect(2).WithInput(1).Run();
         
         // Assert
         Assert.Throws<TargetParameterCountException>(func);
@@ -38,10 +38,10 @@ public class TestRunBuilderTests
     public void AddTestCase_ParametersWrongType_ThrowsException()
     {
         // Arrange
-        var builder = SetupBuilder();
+        var builder = SetupAdderBuilder();
             
         // Act    
-        var func = () => builder.Expect(2).WithInput(1, "test");
+        var func = () => builder.Expect(2).WithInput(1, "test").Run();
         
         // Assert
         Assert.Throws<InvalidCastException>(func);
@@ -51,7 +51,7 @@ public class TestRunBuilderTests
     public void AddTestCase_ParametersValidTypesAndCount_ValidReturn()
     {
         // Arrange
-        var builder = SetupBuilder();
+        var builder = SetupAdderBuilder();
             
         // Act    
         var reporter = builder
@@ -61,19 +61,10 @@ public class TestRunBuilderTests
             .Run(1, 2);
 
         // Assert
-        var testCases = GetTesCasesFromReporter(reporter);
+        var testCases = GetTestCasesFromReporter(reporter);
         
         var firstTestCase = testCases.FirstOrDefault(x => x.Number == 1);
-        Assert.NotNull(firstTestCase);
-        Assert.True(firstTestCase.ShouldBeCalculated);
-        Assert.Equal(2, firstTestCase.Expected);
-        Assert.Equal([1, 1], firstTestCase.Inputs);
-        Assert.True(firstTestCase.LazyResult.IsValueCreated);
-        Assert.True(firstTestCase.LazyResult.Value.Passed);
-        Assert.Null(firstTestCase.LazyResult.Value.Exception);
-        Assert.NotNull(firstTestCase.LazyResult.Value.Output);
-        Assert.Equal(firstTestCase.Expected, firstTestCase.LazyResult.Value.Output.Value);
-        Assert.True(firstTestCase.LazyResult.Value.ElapsedTime.TotalMilliseconds > 0);
+        AssertValidTestCase(firstTestCase, 2, [1, 1]);
         
         var secondTestCase = testCases.FirstOrDefault(x => x.Number == 2);
         Assert.NotNull(secondTestCase);
@@ -99,8 +90,8 @@ public class TestRunBuilderTests
     public void AddTestCase_TestingOperationIsBroken_TestCaseHasException()
     {
         // Arrange
-        var builder = TestSuite.Setup()
-            .UseOperation<int>(StaticMethods.AdderThrowsCustomException);
+        var builder = TestSuite.WithExpectedReturnType<int>()
+            .UseOperation(StaticMethods.AdderThrowsCustomException);
         
         // Act
         var reporter = builder
@@ -108,7 +99,7 @@ public class TestRunBuilderTests
             .Run();
         
         // Assert
-        var testCases = GetTesCasesFromReporter(reporter);
+        var testCases = GetTestCasesFromReporter(reporter);
         
         var firstTestCase = testCases.FirstOrDefault(x => x.Number == 1);
         Assert.NotNull(firstTestCase);
@@ -120,8 +111,8 @@ public class TestRunBuilderTests
     public void Run_InvalidIterationNumber_ThrowsException()
     {
         // Arrange
-        var builder1 = SetupBuilder();
-        var builder2 = SetupBuilder();
+        var builder1 = SetupAdderBuilder();
+        var builder2 = SetupAdderBuilder();
         
         // Act
         var func1 = () => builder1.Expect(2).WithInput(1, 1).Run(2);
@@ -133,40 +124,55 @@ public class TestRunBuilderTests
     }
     
     [Fact]
-    public void TestRunBuilder_PassNullArgumentsToCtor_ThrowsException()
-    {
-        // Arrange
-        
-        // Act
-        var func1 = () => new TestRunBuilder<int>(null!, new DefaultTestRunReporterFactory());
-        var func2 = () => new TestRunBuilder<int>(StaticMethods.Adder, null!);
-        var parameterInfoMock = new Mock<ParameterInfo>();
-        var func3 = () => new TestRunBuilder<int>(StaticMethods.Adder, [parameterInfoMock.Object], new DefaultTestRunReporterFactory(), null!);
-        var func4 = () => new TestRunBuilder<int>(StaticMethods.Adder, [parameterInfoMock.Object], null!, new List<TestCase<int>>());
-        var func5 = () => new TestRunBuilder<int>(StaticMethods.Adder, null!, new DefaultTestRunReporterFactory(), new List<TestCase<int>>());
-        
-        // Assert
-        Assert.Throws<ArgumentNullException>(func1);
-        Assert.Throws<ArgumentNullException>(func2);
-        Assert.Throws<ArgumentNullException>(func3);
-        Assert.Throws<ArgumentNullException>(func4);
-        Assert.Throws<ArgumentNullException>(func5);
-    }
-    
-    [Fact]
     public void TestRunBuilder_InvalidDelegateReturnType_ThrowsException()
     {
         // Arrange
-        var builder = new TestRunBuilder<int>((int _, int _) => "test", new DefaultTestRunReporterFactory());
+        var builder = new TestRunBuilder<int>(new DefaultTestRunReporterFactory(), new EntryAssemblyProvider());
         
         // Act
-        var func = () => builder.Expect(2).WithInput(1, 1).Run();
+        var func = () => builder.UseOperation((int _, int _) => "test").Expect(2).WithInput(1, 1).Run();
         
         // Assert
         Assert.Throws<InvalidCastException>(func);
     }
+    
+    [Fact]
+    public void AddTestCase_TestingOperationNotSet_AdderWithAttributeShouldBeSelected()
+    {
+        // Arrange
+        var entryAssemblyProviderMock = new Mock<IEntryAssemblyProvider>();
+        entryAssemblyProviderMock
+            .Setup(x => x.Get())
+            .Returns(Assembly.GetAssembly(typeof(TestRunBuilderTests)));
+        var builder = new TestRunBuilder<int>(new DefaultTestRunReporterFactory(), entryAssemblyProviderMock.Object);
+        
+        // Act
+        var reporter = builder
+            .Expect(2).WithInput(1, 1)
+            .Run();
+        
+        // Assert
+        var testCases = GetTestCasesFromReporter(reporter);
+        
+        var firstTestCase = testCases.FirstOrDefault(x => x.Number == 1);
+        AssertValidTestCase(firstTestCase, 2, [1, 1]);
+    }
 
-    private static IList<TestCase<TOutput>> GetTesCasesFromReporter<TOutput>(BaseTestRunReporter<TOutput> reporter)
+    private static void AssertValidTestCase<TOutput>(TestCase<TOutput>? testCase, TOutput expected, object[] inputs)
+    {
+        Assert.NotNull(testCase);
+        Assert.True(testCase.ShouldBeCalculated);
+        Assert.Equal(expected, testCase.Expected);
+        Assert.Equal(inputs, testCase.Inputs);
+        Assert.True(testCase.LazyResult.IsValueCreated);
+        Assert.True(testCase.LazyResult.Value.Passed);
+        Assert.Null(testCase.LazyResult.Value.Exception);
+        Assert.NotNull(testCase.LazyResult.Value.Output);
+        Assert.Equal(testCase.Expected, testCase.LazyResult.Value.Output.Value);
+        Assert.True(testCase.LazyResult.Value.ElapsedTime.TotalMilliseconds > 0);
+    }
+
+    private static IList<TestCase<TOutput>> GetTestCasesFromReporter<TOutput>(BaseTestRunReporter<TOutput> reporter)
     {
         var baseReporterType = reporter.GetType().BaseType;
         Assert.NotNull(baseReporterType);
@@ -181,9 +187,15 @@ public class TestRunBuilderTests
         return testCases;
     }
 
-    private static TestRunBuilder<int> SetupBuilder()
+    private static TestRunBuilder<int> SetupAdderBuilder()
     {
-        return TestSuite.Setup()
-            .UseOperation<int>(StaticMethods.Adder);
+        return TestSuite.WithExpectedReturnType<int>()
+            .UseOperation(StaticMethods.Adder);
+    }
+    
+    [TestSuiteDelegate]
+    private static int AdderWithAttribute(int number1, int number2)
+    {
+        return number1 + number2;
     }
 }

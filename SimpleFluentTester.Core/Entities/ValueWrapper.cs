@@ -1,8 +1,17 @@
 namespace SimpleFluentTester.Entities;
 
-public sealed record ValueWrapper<TOutput>(TOutput Value)
+public sealed record ValueWrapper<TOutput>
 {
-    public TOutput Value { get; } = Value;
+    public ValueWrapper()
+    {
+    }
+
+    public ValueWrapper(TOutput value)
+    {
+        Value = value;
+    }
+    
+    public TOutput? Value { get; set; }
 
     public override string ToString()
     {

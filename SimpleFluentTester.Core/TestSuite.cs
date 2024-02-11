@@ -3,9 +3,16 @@ using SimpleFluentTester.TestRun;
 
 namespace SimpleFluentTester;
 
+/// <summary>
+/// Starting point used to initialize tests.
+/// </summary>
 public static class TestSuite
 {
-    public static TestRunOperationBuilder Setup() => new(new DefaultTestRunReporterFactory());
-
-    public static TestSuiteCustomBuilder Custom => new();
+    /// <summary>
+    /// Defines the return type of the function that we plan to test.
+    /// </summary>
+    public static TestRunBuilder<TOutput> WithExpectedReturnType<TOutput>()
+    {
+        return new TestRunBuilder<TOutput>(new DefaultTestRunReporterFactory(), new EntryAssemblyProvider());
+    }
 }

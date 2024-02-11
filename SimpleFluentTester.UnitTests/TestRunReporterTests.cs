@@ -12,8 +12,8 @@ public class TestRunReporterTests
         // Assign
         
         // Act
-        TestSuite.Setup()
-            .UseOperation<int>(StaticMethods.Adder)
+        TestSuite.WithExpectedReturnType<int>()
+            .UseOperation(StaticMethods.Adder)
             .Run()
             .Report();
             
@@ -26,8 +26,8 @@ public class TestRunReporterTests
         // Assign
         
         // Act
-        TestSuite.Setup()
-            .UseOperation<int>(StaticMethods.Adder)
+        TestSuite.WithExpectedReturnType<int>()
+            .UseOperation(StaticMethods.Adder)
             .Expect(2).WithInput(1, 1)
             .Run()
             .Report();
@@ -41,8 +41,8 @@ public class TestRunReporterTests
         // Assign
         
         // Act
-        TestSuite.Setup()
-            .UseOperation<int>(StaticMethods.Adder)
+        TestSuite.WithExpectedReturnType<int>()
+            .UseOperation(StaticMethods.Adder)
             .Expect(3).WithInput(1, 1)
             .Run()
             .Report();
@@ -56,10 +56,9 @@ public class TestRunReporterTests
         // Assign
         
         // Act
-        TestSuite.Custom
+        TestSuite.WithExpectedReturnType<int>()
             .WithCustomReporterFactory<CustomReporterFactory>()
-            .Setup()
-            .UseOperation<int>(StaticMethods.Adder)
+            .UseOperation(StaticMethods.Adder)
             .Expect(3).WithInput(1, 1)
             .Run()
             .Report();

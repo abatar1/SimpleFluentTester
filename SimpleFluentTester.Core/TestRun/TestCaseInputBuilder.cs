@@ -4,41 +4,29 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using SimpleFluentTester.Entities;
-using SimpleFluentTester.Reporter;
 
 namespace SimpleFluentTester.TestRun;
 
-public sealed class TestCaseInputBuilder<TOutput>
+public sealed class TestCaseInputBuilder<TOutput>(TOutput expected, TestRunBuilderContext<TOutput> context)
 {
-    private readonly TOutput _expected;
-    private readonly IList<TestCase<TOutput>> _testCases;
-    private readonly BaseTestRunReporterFactory _reporterFactory;
-    private readonly Delegate _operation;
-    private readonly ParameterInfo[] _operationParameters;
-
-    public TestCaseInputBuilder(TOutput expected, 
-        IList<TestCase<TOutput>> testCases, 
-        BaseTestRunReporterFactory reporterFactory, 
-        Delegate operation, 
-        ParameterInfo[] operationParameters)
-    {
-        _expected = expected;
-        _testCases = testCases;
-        _reporterFactory = reporterFactory;
-        _operation = operation;
-        _operationParameters = operationParameters;
-    }
-
+    /// <summary>
+    /// Defines input parameters; their types should match the types of the tested method's input parameters and should be in the same order.
+    /// </summary>
     public TestRunBuilder<TOutput> WithInput(params object[] inputs)
     {
-        ValidateInputs(_operationParameters, inputs);
+        var calculatedResult = new Lazy<CalculatedTestResult<TOutput>>(() =>
+        {
+            if (context.Operation.Value == null)
+                throw new InvalidOperationException("Value of operation has been tried to be calculated before operation has been set, this is most likely a bug.");
+            
+            ValidateInputs(context.OperationParameters, inputs);
+            return ExecuteTestIteration(context.Operation.Value, inputs, expected);
+        });
         
-        var calculatedResult = new Lazy<CalculatedTestResult<TOutput>>(() => ExecuteTestIteration(_operation, inputs, _expected));
-        
-        var innerResult = new TestCase<TOutput>(inputs, _expected, calculatedResult, true, _testCases.Count + 1);
-        _testCases.Add(innerResult);
+        var innerResult = new TestCase<TOutput>(inputs, expected, calculatedResult, true, context.TestCases.Count + 1);
+        context.TestCases.Add(innerResult);
 
-        return new TestRunBuilder<TOutput>(_operation, _operationParameters, _reporterFactory, _testCases);
+        return new TestRunBuilder<TOutput>(context);
     }
     
     private static void ValidateInputs(IReadOnlyCollection<ParameterInfo> operationParameterInfos, object[] inputs)
