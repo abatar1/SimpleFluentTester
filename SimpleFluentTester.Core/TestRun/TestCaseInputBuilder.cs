@@ -20,7 +20,7 @@ public sealed class TestCaseInputBuilder<TOutput>(TOutput expected, TestRunBuild
                 throw new InvalidOperationException("Value of operation has been tried to be calculated before operation has been set, this is most likely a bug.");
             
             ValidateInputs(context.OperationParameters, inputs);
-            return ExecuteTestIteration(context.Operation.Value, inputs, expected);
+            return ExecuteTestIteration(context.Operation.Value, context.Comparer, inputs, expected);
         });
         
         var innerResult = new TestCase<TOutput>(inputs, expected, calculatedResult, true, context.TestCases.Count + 1);
@@ -41,7 +41,10 @@ public sealed class TestCaseInputBuilder<TOutput>(TOutput expected, TestRunBuild
             throw new InvalidCastException("Passed parameters and method parameters are not equal");
     }
     
-    private static CalculatedTestResult<TOutput> ExecuteTestIteration(Delegate operation, object[] input, TOutput expectedOutput)
+    private static CalculatedTestResult<TOutput> ExecuteTestIteration(Delegate operation, 
+        Func<TOutput, TOutput, bool>? comparer,
+        object[] input, 
+        TOutput expectedOutput)
     {
         var stopwatch = new Stopwatch();
         object? invokeResult;
@@ -59,6 +62,8 @@ public sealed class TestCaseInputBuilder<TOutput>(TOutput expected, TestRunBuild
         if (invokeResult is not TOutput output)
             throw new InvalidCastException($"Couldn't convert invoked test result to {typeof(TOutput)} type");
 
-        return new CalculatedTestResult<TOutput>(Equals(output, expectedOutput), new ValueWrapper<TOutput>(output), null, stopwatch.Elapsed);
+        var passed = comparer?.Invoke(output, expectedOutput) ?? output.Equals(expectedOutput);
+        
+        return new CalculatedTestResult<TOutput>(passed, new ValueWrapper<TOutput>(output), null, stopwatch.Elapsed);
     }
 }

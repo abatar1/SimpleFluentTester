@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using System.Reflection;
 using SimpleFluentTester.Entities;
 using SimpleFluentTester.Reporter;
@@ -10,7 +11,8 @@ public sealed class TestRunBuilderContext<TOutput>(
     IEntryAssemblyProvider entryAssemblyProvider,
     IList<TestCase<TOutput>> testCases,
     BaseTestRunReporterFactory reporterFactory,
-    ValueWrapper<Delegate> operation)
+    ValueWrapper<Delegate> operation,
+    Func<TOutput, TOutput, bool>? comparer)
 {
     public IEntryAssemblyProvider EntryAssemblyProvider { get; } = entryAssemblyProvider;
 
@@ -19,6 +21,8 @@ public sealed class TestRunBuilderContext<TOutput>(
     public BaseTestRunReporterFactory ReporterFactory { get; set; } = reporterFactory;
 
     public ValueWrapper<Delegate> Operation { get; } = operation;
+    
+    public Func<TOutput, TOutput, bool>? Comparer { get; } = comparer;
 
     private ParameterInfo[]? _operationParameters;
     public ParameterInfo[] OperationParameters

@@ -12,12 +12,15 @@ public sealed class TestRunBuilder<TOutput>
 {
     private readonly TestRunBuilderContext<TOutput> _context;
 
-    internal TestRunBuilder(BaseTestRunReporterFactory reporterFactory, IEntryAssemblyProvider entryAssemblyProvider)
+    internal TestRunBuilder(BaseTestRunReporterFactory reporterFactory, 
+        IEntryAssemblyProvider entryAssemblyProvider,
+        Func<TOutput, TOutput, bool>? comparer)
     {
         _context = new TestRunBuilderContext<TOutput>(entryAssemblyProvider, 
             new List<TestCase<TOutput>>(),
             reporterFactory, 
-            new ValueWrapper<Delegate>());
+            new ValueWrapper<Delegate>(),
+            comparer);
     }
     
     internal TestRunBuilder(TestRunBuilderContext<TOutput> context)

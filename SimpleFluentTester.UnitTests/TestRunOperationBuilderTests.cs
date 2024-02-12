@@ -36,7 +36,7 @@ public class TestRunOperationBuilderTests
     {
         // Arrange
         Delegate @delegate = StaticMethods.Adder;
-        var expectedTestRunBuilder = new TestRunBuilder<int>(new DefaultTestRunReporterFactory(), new EntryAssemblyProvider());
+        var expectedTestRunBuilder = new TestRunBuilder<int>(new DefaultTestRunReporterFactory(), new EntryAssemblyProvider(), null);
         
         // Act
         var testRunBuilder = TestSuite.WithExpectedReturnType<int>().UseOperation(@delegate);

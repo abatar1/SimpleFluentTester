@@ -127,7 +127,7 @@ public class TestRunBuilderTests
     public void TestRunBuilder_InvalidDelegateReturnType_ThrowsException()
     {
         // Arrange
-        var builder = new TestRunBuilder<int>(new DefaultTestRunReporterFactory(), new EntryAssemblyProvider());
+        var builder = new TestRunBuilder<int>(new DefaultTestRunReporterFactory(), new EntryAssemblyProvider(), null);
         
         // Act
         var func = () => builder.UseOperation((int _, int _) => "test").Expect(2).WithInput(1, 1).Run();
@@ -144,7 +144,7 @@ public class TestRunBuilderTests
         entryAssemblyProviderMock
             .Setup(x => x.Get())
             .Returns(Assembly.GetAssembly(typeof(TestRunBuilderTests)));
-        var builder = new TestRunBuilder<int>(new DefaultTestRunReporterFactory(), entryAssemblyProviderMock.Object);
+        var builder = new TestRunBuilder<int>(new DefaultTestRunReporterFactory(), entryAssemblyProviderMock.Object, null);
         
         // Act
         var reporter = builder
@@ -157,18 +157,85 @@ public class TestRunBuilderTests
         var firstTestCase = testCases.FirstOrDefault(x => x.Number == 1);
         AssertValidTestCase(firstTestCase, 2, [1, 1]);
     }
+    
+    [Fact]
+    public void AddTestCase_WithCustomEquatableObject_ValidReturn()
+    {
+        // Arrange
+        var builder = TestSuite
+            .WithExpectedReturnType<EquatableTestObject>()
+            .UseOperation((EquatableTestObject a, EquatableTestObject b) => new EquatableTestObject(a.Value + b.Value));
+        
+        // Act
+        var reporter = builder
+            .Expect(new EquatableTestObject(2)).WithInput(new EquatableTestObject(1), new EquatableTestObject(1))
+            .Run();
+        
+        // Assert
+        var testCases = GetTestCasesFromReporter(reporter);
+        
+        var firstTestCase = testCases.FirstOrDefault(x => x.Number == 1);
+        AssertValidTestCase(firstTestCase, new EquatableTestObject(2), [new EquatableTestObject(1), new EquatableTestObject(1)]);
+    }
+    
+    [Fact]
+    public void UseOperation_WithCustomObjectAndComparer_ValidReturn()
+    {
+        // Arrange
+        var comparer = (TestObject a, TestObject b) => a.Value == b.Value;
+        var setup = TestSuite
+            .WithExpectedReturnType(comparer);
+        
+        // Act
+        var reporter = setup
+            .UseOperation((TestObject a, TestObject b) => new TestObject(a.Value + b.Value))
+            .Expect(new TestObject(2)).WithInput([new TestObject(1), new TestObject(1)])
+            .Run();
 
-    private static void AssertValidTestCase<TOutput>(TestCase<TOutput>? testCase, TOutput expected, object[] inputs)
+        // Assert
+        var testCases = GetTestCasesFromReporter(reporter);
+        var firstTestCase = testCases.FirstOrDefault(x => x.Number == 1);
+        AssertValidTestCase(firstTestCase, new TestObject(2), [new TestObject(1), new TestObject(1)], comparer);
+    }
+    
+    [Fact]
+    public void UseOperation_WithCustomObject_ShouldThrow()
+    {
+        // Arrange
+        
+        // Act
+        var func = () => TestSuite.WithExpectedReturnType<TestObject>();
+
+        // Assert
+        Assert.Throws<InvalidOperationException>(func);
+    }
+
+    private static void AssertValidTestCase<TOutput>(TestCase<TOutput>? testCase, 
+        TOutput expected, 
+        object[] inputs,
+        Func<TOutput, TOutput, bool>? comparer = null)
     {
         Assert.NotNull(testCase);
         Assert.True(testCase.ShouldBeCalculated);
-        Assert.Equal(expected, testCase.Expected);
-        Assert.Equal(inputs, testCase.Inputs);
+        
         Assert.True(testCase.LazyResult.IsValueCreated);
+        if (typeof(IEquatable<TOutput>).IsAssignableFrom(typeof(TOutput)))
+        {
+            Assert.Equal(expected, testCase.Expected);
+            Assert.Equal(inputs, testCase.Inputs);
+            Assert.Equal(testCase.Expected, testCase.LazyResult.Value.Output.Value);
+        }
+        else
+        {
+            Assert.True(comparer?.Invoke(expected, testCase.Expected));
+            Assert.True(comparer?.Invoke(testCase.Expected, testCase.LazyResult.Value.Output.Value));
+            foreach (var input in inputs.Zip(testCase.Inputs))
+                Assert.True(comparer?.Invoke((TOutput)input.First, (TOutput)input.Second));
+        }
+            
         Assert.True(testCase.LazyResult.Value.Passed);
         Assert.Null(testCase.LazyResult.Value.Exception);
         Assert.NotNull(testCase.LazyResult.Value.Output);
-        Assert.Equal(testCase.Expected, testCase.LazyResult.Value.Output.Value);
         Assert.True(testCase.LazyResult.Value.ElapsedTime.TotalMilliseconds > 0);
     }
 
@@ -197,5 +264,35 @@ public class TestRunBuilderTests
     private static int AdderWithAttribute(int number1, int number2)
     {
         return number1 + number2;
+    }
+    
+    private class EquatableTestObject(int value) : IEquatable<EquatableTestObject>
+    {
+        public int Value { get; } = value;
+
+        public bool Equals(EquatableTestObject? other)
+        {
+            if (ReferenceEquals(null, other)) return false;
+            if (ReferenceEquals(this, other)) return true;
+            return Value == other.Value;
+        }
+
+        public override bool Equals(object? obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != this.GetType()) return false;
+            return Equals((EquatableTestObject)obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return Value;
+        }
+    }
+    
+    private class TestObject(int value)
+    {
+        public int Value { get; } = value;
     }
 }
