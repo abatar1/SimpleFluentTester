@@ -5,8 +5,8 @@
 > Simple and user-friendly C# testing tool.
 
 [![Latest release](https://github.com/abatar1/SimpleFluentTester/actions/workflows/main.yml/badge.svg)](https://github.com/abatar1/SimpleFluentTester/actions/workflows/main.yml)
-[![Coverage Status](https://coveralls.io/repos/github/abatar1/SimpleFluentTester/badge.svg?branch=main)](https://coveralls.io/github/abatar1/SimpleFluentTester?branch=main)
-![NuGet Version](https://img.shields.io/nuget/v/SimpleFluentTester)
+![Coveralls](https://img.shields.io/coverallsCoverage/github/abatar1/SimpleFluentTester?label=Test%20coverage)
+![NuGet Version](https://img.shields.io/nuget/v/SimpleFluentTester?label=NuGet%20version&color=white)
 
 </div>
 
