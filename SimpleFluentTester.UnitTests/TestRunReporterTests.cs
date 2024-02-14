@@ -71,7 +71,7 @@ public class TestRunReporterTests
     }
     
     [Fact]
-    public void CustomReporter_WithSkippedTestCase_ShouldNotThrow()
+    public void CustomReporter_WithAllSkippedTestCase_ShouldNotThrow()
     {
         // Assign
         
@@ -79,7 +79,6 @@ public class TestRunReporterTests
         TestSuite.Ignore
             .WithExpectedReturnType<int>()
             .UseOperation(StaticMethods.Adder)
-            .Expect(3).WithInput(1, 1)
             .Expect(2).WithInput(1, 1)
             .Run(1)
             .Report();
