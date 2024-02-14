@@ -85,7 +85,6 @@ Also, you can write your custom reporter that will generate a report in the form
 TestSuite
     .WithExpectedReturnType<int>()
     .WithCustomReporterFactory<CustomReporterFactory>() 
-    .Setup()
     .UseOperation<int>(CustomMethods.Adder) 
     .Expect(2).WithInput(1, 1) 
     .Run()
@@ -98,7 +97,6 @@ you don't need to comment out the code; simply follow these steps:
 ```csharp
 TestSuite.Ignore // <- add Ignore here and this test run will be fully ignored.
     .WithExpectedReturnType<int>()
-    .Setup()
     .UseOperation<int>(CustomMethods.Adder) 
     .Expect(2).WithInput(1, 1) 
     .Run()
