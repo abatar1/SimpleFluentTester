@@ -92,6 +92,19 @@ TestSuite
     .Report();
 ```
 
+
+If your project contains multiple test suites simultaneously, and you wish to debug only one of them, 
+you don't need to comment out the code; simply follow these steps:
+```csharp
+TestSuite.Ignore // <- add Ignore here and this test run will be fully ignored.
+    .WithExpectedReturnType<int>()
+    .Setup()
+    .UseOperation<int>(CustomMethods.Adder) 
+    .Expect(2).WithInput(1, 1) 
+    .Run()
+    .Report();
+```
+
 If you have any questions, you can find all these examples in [this project](/SimpleFluentTester.Examples) 
 or ask me directly via [email](mailto:evgenyhalzov@gmail.com?Subject=SimpleFluentTester)!
 

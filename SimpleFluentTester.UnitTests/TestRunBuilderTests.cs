@@ -127,7 +127,7 @@ public class TestRunBuilderTests
     public void TestRunBuilder_InvalidDelegateReturnType_ThrowsException()
     {
         // Arrange
-        var builder = new TestRunBuilder<int>(new DefaultTestRunReporterFactory(), new EntryAssemblyProvider(), null);
+        var builder = new TestRunBuilder<int>(new DefaultTestRunReporterFactory(), new EntryAssemblyProvider(), new DefaultActivator(), null);
         
         // Act
         var func = () => builder.UseOperation((int _, int _) => "test").Expect(2).WithInput(1, 1).Run();
@@ -144,7 +144,7 @@ public class TestRunBuilderTests
         entryAssemblyProviderMock
             .Setup(x => x.Get())
             .Returns(Assembly.GetAssembly(typeof(TestRunBuilderTests)));
-        var builder = new TestRunBuilder<int>(new DefaultTestRunReporterFactory(), entryAssemblyProviderMock.Object, null);
+        var builder = new TestRunBuilder<int>(new DefaultTestRunReporterFactory(), entryAssemblyProviderMock.Object, new DefaultActivator(),null);
         
         // Act
         var reporter = builder
@@ -204,10 +204,30 @@ public class TestRunBuilderTests
         // Arrange
         
         // Act
-        var func = () => TestSuite.WithExpectedReturnType<TestObject>();
+        var func = () => TestSuite.WithExpectedReturnType<TestObject>().Run();
 
         // Assert
         Assert.Throws<InvalidOperationException>(func);
+    }
+    
+    [Fact]
+    public void TestSuite_Ignored_TestCasesShouldBeIgnored()
+    {
+        // Arrange
+        var builder = TestSuite.Ignore.WithExpectedReturnType<int>()
+            .UseOperation(StaticMethods.Adder)
+            .Expect(2).WithInput(1, 1, 1)
+            .Expect(3).WithInput(1, 1, 1);
+            
+        // Act    
+        var reporter = builder.Run();
+        
+        // Assert
+        var testCases = GetTestCasesFromReporter(reporter);
+        var firstTestCase = testCases.First(x => x.Number == 1);
+        Assert.False(firstTestCase.ShouldBeCalculated);
+        var secondTestCase = testCases.First(x => x.Number == 2);
+        Assert.False(secondTestCase.ShouldBeCalculated); 
     }
 
     private static void AssertValidTestCase<TOutput>(TestCase<TOutput>? testCase, 
@@ -217,8 +237,9 @@ public class TestRunBuilderTests
     {
         Assert.NotNull(testCase);
         Assert.True(testCase.ShouldBeCalculated);
-        
         Assert.True(testCase.LazyResult.IsValueCreated);
+        Assert.NotNull(testCase.LazyResult.Value.Output);
+        Assert.NotNull(testCase.LazyResult.Value.Output.Value);
         if (typeof(IEquatable<TOutput>).IsAssignableFrom(typeof(TOutput)))
         {
             Assert.Equal(expected, testCase.Expected);
@@ -232,10 +253,8 @@ public class TestRunBuilderTests
             foreach (var input in inputs.Zip(testCase.Inputs))
                 Assert.True(comparer?.Invoke((TOutput)input.First, (TOutput)input.Second));
         }
-            
         Assert.True(testCase.LazyResult.Value.Passed);
         Assert.Null(testCase.LazyResult.Value.Exception);
-        Assert.NotNull(testCase.LazyResult.Value.Output);
         Assert.True(testCase.LazyResult.Value.ElapsedTime.TotalMilliseconds > 0);
     }
 

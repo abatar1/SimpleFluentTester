@@ -23,7 +23,7 @@ public sealed class TestCaseInputBuilder<TOutput>(TOutput expected, TestRunBuild
             return ExecuteTestIteration(context.Operation.Value, context.Comparer, inputs, expected);
         });
         
-        var innerResult = new TestCase<TOutput>(inputs, expected, calculatedResult, true, context.TestCases.Count + 1);
+        var innerResult = new TestCase<TOutput>(inputs, expected, calculatedResult, false, context.TestCases.Count + 1);
         context.TestCases.Add(innerResult);
 
         return new TestRunBuilder<TOutput>(context);

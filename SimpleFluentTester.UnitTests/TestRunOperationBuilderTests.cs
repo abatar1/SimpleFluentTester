@@ -12,7 +12,7 @@ public class TestRunOperationBuilderTests
         var setup = TestSuite.WithExpectedReturnType<string>();
         
         // Act
-        var useOperationFunc = () => setup.UseOperation(StaticMethods.Adder);
+        var useOperationFunc = () => setup.UseOperation(StaticMethods.Adder).Run();
 
         // Assert
         Assert.Throws<InvalidCastException>(useOperationFunc);
@@ -25,7 +25,7 @@ public class TestRunOperationBuilderTests
         var setup = TestSuite.WithExpectedReturnType<int>();
         
         // Act
-        var useOperationFunc = () => setup.UseOperation(StaticMethods.Empty);
+        var useOperationFunc = () => setup.UseOperation(StaticMethods.Empty).Run();
 
         // Assert
         Assert.Throws<InvalidCastException>(useOperationFunc);
@@ -36,10 +36,10 @@ public class TestRunOperationBuilderTests
     {
         // Arrange
         Delegate @delegate = StaticMethods.Adder;
-        var expectedTestRunBuilder = new TestRunBuilder<int>(new DefaultTestRunReporterFactory(), new EntryAssemblyProvider(), null);
+        var expectedTestRunBuilder = new TestRunBuilder<int>(new DefaultTestRunReporterFactory(), new EntryAssemblyProvider(), new DefaultActivator(), null);
         
         // Act
-        var testRunBuilder = TestSuite.WithExpectedReturnType<int>().UseOperation(@delegate);
+        var testRunBuilder = TestSuite.WithExpectedReturnType<int>().UseOperation(@delegate).Run();
 
         // Assert
         Assert.Equivalent(expectedTestRunBuilder, testRunBuilder, strict: true);

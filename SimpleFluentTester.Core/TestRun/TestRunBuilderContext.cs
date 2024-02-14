@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq.Expressions;
 using System.Reflection;
 using SimpleFluentTester.Entities;
 using SimpleFluentTester.Reporter;
@@ -9,12 +8,18 @@ namespace SimpleFluentTester.TestRun;
 
 public sealed class TestRunBuilderContext<TOutput>(
     IEntryAssemblyProvider entryAssemblyProvider,
+    IActivator activator,
     IList<TestCase<TOutput>> testCases,
     BaseTestRunReporterFactory reporterFactory,
     ValueWrapper<Delegate> operation,
-    Func<TOutput, TOutput, bool>? comparer)
+    Func<TOutput, TOutput, bool>? comparer,
+    bool shouldBeExecuted)
 {
+    public bool ShouldBeExecuted { get; } = shouldBeExecuted;
+    
     public IEntryAssemblyProvider EntryAssemblyProvider { get; } = entryAssemblyProvider;
+
+    public IActivator Activator { get; } = activator;
 
     public IList<TestCase<TOutput>> TestCases { get; } = testCases;
 

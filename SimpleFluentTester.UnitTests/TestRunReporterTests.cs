@@ -12,7 +12,8 @@ public class TestRunReporterTests
         // Assign
         
         // Act
-        TestSuite.WithExpectedReturnType<int>()
+        TestSuite
+            .WithExpectedReturnType<int>()
             .UseOperation(StaticMethods.Adder)
             .Run()
             .Report();
@@ -26,7 +27,8 @@ public class TestRunReporterTests
         // Assign
         
         // Act
-        TestSuite.WithExpectedReturnType<int>()
+        TestSuite
+            .WithExpectedReturnType<int>()
             .UseOperation(StaticMethods.Adder)
             .Expect(2).WithInput(1, 1)
             .Run()
@@ -41,7 +43,8 @@ public class TestRunReporterTests
         // Assign
         
         // Act
-        TestSuite.WithExpectedReturnType<int>()
+        TestSuite
+            .WithExpectedReturnType<int>()
             .UseOperation(StaticMethods.Adder)
             .Expect(3).WithInput(1, 1)
             .Run()
@@ -51,16 +54,34 @@ public class TestRunReporterTests
     }
     
     [Fact]
-    public void CustomReporter_NoReportActions_ShouldNotThrow()
+    public void CustomReporter_NoFailedCases_ShouldNotThrow()
     {
         // Assign
         
         // Act
-        TestSuite.WithExpectedReturnType<int>()
+        TestSuite
+            .WithExpectedReturnType<int>()
             .WithCustomReporterFactory<CustomReporterFactory>()
             .UseOperation(StaticMethods.Adder)
-            .Expect(3).WithInput(1, 1)
+            .Expect(2).WithInput(1, 1)
             .Run()
+            .Report();
+            
+        // Arrange
+    }
+    
+    [Fact]
+    public void CustomReporter_WithSkippedTestCase_ShouldNotThrow()
+    {
+        // Assign
+        
+        // Act
+        TestSuite.Ignore
+            .WithExpectedReturnType<int>()
+            .UseOperation(StaticMethods.Adder)
+            .Expect(3).WithInput(1, 1)
+            .Expect(2).WithInput(1, 1)
+            .Run(1)
             .Report();
             
         // Arrange
@@ -68,13 +89,13 @@ public class TestRunReporterTests
 
     private class CustomReporterFactory : BaseTestRunReporterFactory
     {
-        public override ITestRunReporter GetReporter<TOutput>(IList testCases, MethodInfo methodInfo)
+        public override ITestRunReporter GetReporter<TOutput>(IEnumerable testCases, MethodInfo methodInfo)
         {
             return new CustomReporter(testCases, methodInfo);
         }
     }
     
-    private class CustomReporter(IList innerTestResults, MethodInfo methodInfo) : BaseTestRunReporter<int>(innerTestResults, methodInfo)
+    private class CustomReporter(IEnumerable innerTestResults, MethodInfo methodInfo) : BaseTestRunReporter<int>(innerTestResults, methodInfo)
     {
         public override void Report()
         {

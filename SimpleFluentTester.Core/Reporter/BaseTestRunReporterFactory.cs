@@ -8,5 +8,5 @@ namespace SimpleFluentTester.Reporter;
 /// </summary>
 public abstract class BaseTestRunReporterFactory
 {
-    public abstract ITestRunReporter GetReporter<TOutput>(IList testCases, MethodInfo methodInfo);
+    public abstract ITestRunReporter GetReporter<TOutput>(IEnumerable testCases, MethodInfo methodInfo);
 }

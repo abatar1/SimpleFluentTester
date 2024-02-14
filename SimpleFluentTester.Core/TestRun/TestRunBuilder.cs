@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
-using System.Reflection;
 using SimpleFluentTester.Entities;
 using SimpleFluentTester.Reporter;
 
@@ -14,13 +12,17 @@ public sealed class TestRunBuilder<TOutput>
 
     internal TestRunBuilder(BaseTestRunReporterFactory reporterFactory, 
         IEntryAssemblyProvider entryAssemblyProvider,
-        Func<TOutput, TOutput, bool>? comparer)
+        IActivator activator,
+        Func<TOutput, TOutput, bool>? comparer,
+        bool shouldBeExecuted = true)
     {
         _context = new TestRunBuilderContext<TOutput>(entryAssemblyProvider, 
+            activator,
             new List<TestCase<TOutput>>(),
             reporterFactory, 
             new ValueWrapper<Delegate>(),
-            comparer);
+            comparer,
+            shouldBeExecuted);
     }
     
     internal TestRunBuilder(TestRunBuilderContext<TOutput> context)
@@ -41,7 +43,6 @@ public sealed class TestRunBuilder<TOutput>
     /// </summary>
     public TestRunBuilder<TOutput> UseOperation(Delegate operation)
     {
-        ValidateOperation(operation);
         _context.Operation.Value = operation;
         return this;
     }
@@ -62,12 +63,13 @@ public sealed class TestRunBuilder<TOutput>
     /// </summary>
     public BaseTestRunReporter<TOutput> Run(params int[] testNumbers)
     {
-        if (_context.Operation.Value == null)
-        {
-            var operation = GetDelegateFromAttributedMethod(_context.EntryAssemblyProvider);
-            ValidateOperation(operation);
-            _context.Operation.Value = operation;
-        }
+        if (!_context.ShouldBeExecuted)
+            return new EmptyTestRunReporter<TOutput>(_context.TestCases);
+        
+        _context.Operation.Value ??= TestSuiteDelegateHelper.GetDelegateFromAttributedMethod(_context.EntryAssemblyProvider, _context.Activator);
+        
+        ValidateOperation(_context);
+        ValidateComparer(_context);
         
         var testNumbersHash = new HashSet<int>(testNumbers);
         
@@ -88,64 +90,15 @@ public sealed class TestRunBuilder<TOutput>
         return (BaseTestRunReporter<TOutput>)_context.ReporterFactory.GetReporter<TOutput>(executedTestCases, _context.Operation.Value.Method);
     }
 
-    private static MethodInfo? _assemblyMethodOfTestSuite;
-    private static Type? _delegateType;
-    private static ConstructorInfo? _assemblyMethodClassCtorOfTestSuite;
-
-    private static Delegate GetDelegateFromAttributedMethod(IEntryAssemblyProvider entryAssemblyProvider)
+    private static void ValidateOperation(TestRunBuilderContext<TOutput> context)
     {
-        if (_assemblyMethodOfTestSuite == null)
-        {
-            var entryAssembly = entryAssemblyProvider.Get();
-            if (entryAssembly == null)
-                throw new InvalidOperationException("No entry Assembly have been found when trying to find TestSuiteDelegateAttribute definitions");
-            
-            var operationMembers = entryAssembly.GetTypes()
-                .SelectMany(type => type.GetMembers(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static))
-                .Where(x => Attribute.IsDefined(x, typeof(TestSuiteDelegateAttribute)))
-                .ToList();
-            
-            if (operationMembers.Count == 0)
-                throw new InvalidOperationException($"You should specify an operation first with an {nameof(TestSuiteDelegateAttribute)} attribute or using UseOperation method");
-            if (operationMembers.Count > 1)
-                throw new InvalidOperationException($"You defined more than one method with {nameof(TestSuiteDelegateAttribute)}");
-            
-            _assemblyMethodOfTestSuite = (MethodInfo)operationMembers.Single();
-        }
-
-        if (_delegateType == null)
-        {
-            var assemblyMethodParameterOfTestSuite = _assemblyMethodOfTestSuite.GetParameters()
-                .Select(x => x.ParameterType)
-                .Append(_assemblyMethodOfTestSuite.ReturnType)
-                .ToArray();
-            _delegateType = Expression.GetDelegateType(assemblyMethodParameterOfTestSuite);
-        }
-
-        if (_assemblyMethodOfTestSuite.IsStatic)
-            return _assemblyMethodOfTestSuite.CreateDelegate(_delegateType);
-
-        var methodClassType = _assemblyMethodOfTestSuite.DeclaringType;
-        if (methodClassType == null)
-            throw new InvalidOperationException("No declaring type for non-static method, should be the bug");
-
-        if (_assemblyMethodClassCtorOfTestSuite == null)
-        {
-            var methodClassCtor = methodClassType.GetConstructors(BindingFlags.Public | BindingFlags.Instance);
-            _assemblyMethodClassCtorOfTestSuite = methodClassCtor
-                .FirstOrDefault(x => x.GetParameters().Length == 0);
-            if (_assemblyMethodClassCtorOfTestSuite == null)
-                throw new InvalidOperationException("TestSuiteDelegateAttribute has been defined");
-        }
-
-        var target = Activator.CreateInstance(methodClassType);
-        
-        return _assemblyMethodOfTestSuite.CreateDelegate(_delegateType, target);
+        if (context.Operation.Value != null && context.Operation.Value.Method.ReturnParameter?.ParameterType != typeof(TOutput))
+            throw new InvalidCastException($"{nameof(UseOperation)} thrown an exception, operation return type is not the same as used generic type.");
     }
 
-    private static void ValidateOperation(Delegate operation)
+    private static void ValidateComparer(TestRunBuilderContext<TOutput> context)
     {
-        if (operation.Method.ReturnParameter?.ParameterType != typeof(TOutput))
-            throw new InvalidCastException($"{nameof(UseOperation)} thrown an exception, operation return type is not the same as used generic type.");
+        if (!typeof(IEquatable<TOutput>).IsAssignableFrom(typeof(TOutput)) && context.Comparer == null)
+            throw new InvalidOperationException("TOutput type should be assignable from IEquatable<TOutput> or comparer should be defined");
     }
 }

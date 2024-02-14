@@ -3,9 +3,9 @@ using System.Reflection;
 
 namespace SimpleFluentTester.Reporter;
 
-public sealed class DefaultTestRunReporterFactory : BaseTestRunReporterFactory
+internal sealed class DefaultTestRunReporterFactory : BaseTestRunReporterFactory
 {
-    public override ITestRunReporter GetReporter<TOutput>(IList innerTestResult, MethodInfo methodInfo)
+    public override ITestRunReporter GetReporter<TOutput>(IEnumerable innerTestResult, MethodInfo methodInfo)
     {
         return new DefaultTestRunReporter<TOutput>(innerTestResult, methodInfo);
     }

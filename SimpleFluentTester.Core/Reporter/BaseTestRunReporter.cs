@@ -10,9 +10,9 @@ namespace SimpleFluentTester.Reporter;
 /// <summary>
 /// Base class that should be used for defining your own custom reporter.
 /// </summary>
-public abstract class BaseTestRunReporter<TOutput>(IList innerTestResults, MethodInfo methodInfo) : ITestRunReporter
+public abstract class BaseTestRunReporter<TOutput>(IEnumerable innerTestResults, MethodInfo methodInfo) : ITestRunReporter
 {
-    protected readonly IList<TestCase<TOutput>> InnerTestResults = (IList<TestCase<TOutput>>) innerTestResults;
+    protected readonly IList<TestCase<TOutput>>? InnerTestResults = innerTestResults as IList<TestCase<TOutput>>;
 
     protected readonly MethodInfo MethodInfo = methodInfo;
 

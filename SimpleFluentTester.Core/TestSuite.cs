@@ -15,9 +15,12 @@ public static class TestSuite
     /// </summary>
     public static TestRunBuilder<TOutput> WithExpectedReturnType<TOutput>(Func<TOutput, TOutput, bool>? comparer = null)
     {
-        if (!typeof(IEquatable<TOutput>).IsAssignableFrom(typeof(TOutput)) && comparer == null)
-            throw new InvalidOperationException("TOutput type should be assignable from IEquatable<TOutput> or comparer should be defined");
-        
-        return new TestRunBuilder<TOutput>(new DefaultTestRunReporterFactory(), new EntryAssemblyProvider(), comparer);
+        return new TestRunBuilder<TOutput>(new DefaultTestRunReporterFactory(), new EntryAssemblyProvider(), new DefaultActivator(), comparer);
     }
+
+    /// <summary>
+    /// Add this call if you want your test suite to be ignored instead of commenting it, useful when you have multiple
+    /// test cases in a single project.
+    /// </summary>
+    public static IgnoredTestRunBuilder Ignore => new();
 }

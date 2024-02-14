@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -7,27 +8,45 @@ using SimpleFluentTester.Entities;
 
 namespace SimpleFluentTester.Reporter;
 
-public sealed class DefaultTestRunReporter<TOutput>(IList innerTestResult, MethodInfo methodInfo)
+internal sealed class DefaultTestRunReporter<TOutput>(IEnumerable innerTestResult, MethodInfo methodInfo)
     : BaseTestRunReporter<TOutput>(innerTestResult, methodInfo)
 {
     public override void Report()
     {
         var logger = BuildLoggerFactory().CreateLogger<DefaultTestRunReporter<TOutput>>();
 
+        var allTestCases = LogHeader(logger, InnerTestResults, MethodInfo);
+        if (allTestCases == null)
+            return;
+
+        var failedTestCases = allTestCases
+            .Where(x => !x.LazyResult.Value.Passed)
+            .ToList();
+
+        foreach (var testResult in failedTestCases)
+            LogResult(logger, testResult);
+
+        LogFooter(logger, allTestCases, failedTestCases);
+    }
+
+    private static IList<TestCase<TOutput>>? LogHeader(ILogger logger, 
+        ICollection<TestCase<TOutput>>? testCases, 
+        MethodInfo methodInfo)
+    {
         var headerStringBuilder = new StringBuilder();
         
-        headerStringBuilder.AppendLine($"Executing tests for target method [{MethodInfo}]");
+        headerStringBuilder.AppendLine($"Executing tests for target method [{methodInfo}]");
 
-        if (InnerTestResults.Count == 0)
+        if (testCases.Count == 0)
         {
             headerStringBuilder.AppendLine("The test cases have not been added");
             logger.LogError(headerStringBuilder.ToString());
-            return;
+            return null;
         }
 
-        headerStringBuilder.AppendLine($"Total tests: {InnerTestResults.Count}");
+        headerStringBuilder.AppendLine($"Total tests: {testCases.Count}");
 
-        var testsToExecute = InnerTestResults
+        var testsToExecute = testCases
             .Where(x => x.ShouldBeCalculated)
             .ToList();
 
@@ -35,54 +54,54 @@ public sealed class DefaultTestRunReporter<TOutput>(IList innerTestResult, Metho
         {
             headerStringBuilder.AppendLine("Not a single test was found to be executed");
             logger.LogError(headerStringBuilder.ToString());
-            return;
+            return null;
         }
 
         headerStringBuilder.Append($"Tests to execute: {testsToExecute.Count}");
         logger.LogInformation(headerStringBuilder.ToString());
 
-        var failedTestResults = testsToExecute
-            .Where(x => !x.LazyResult.Value.Passed)
-            .ToList();
+        return testsToExecute;
+    }
 
-        foreach (var testResult in failedTestResults)
-            PrintResult(logger, testResult);
+    private static void LogFooter(ILogger logger, 
+        ICollection<TestCase<TOutput>> testCases, 
+        ICollection<TestCase<TOutput>> failedTestCases)
+    {
+        var footerStringBuilder = new StringBuilder();
+        LogLevel logLevel;
         
-        var outerStringBuilder = new StringBuilder();
-        var logLevel = LogLevel.None;
-        
-        if (failedTestResults.Count == 0)
+        if (failedTestCases.Count == 0)
         {
-            outerStringBuilder.AppendLine($"All {testsToExecute.Count} tests passed!");
+            footerStringBuilder.AppendLine($"All {testCases.Count} tests passed!");
             logLevel = LogLevel.Information;
         }
         else
         {
-            outerStringBuilder.Append(failedTestResults.Count);
-            outerStringBuilder.Append('/');
-            outerStringBuilder.Append(testsToExecute.Count);
-            outerStringBuilder.AppendLine(" tests haven't passed!");
-            outerStringBuilder.Append("Failed test cases: ");
-            outerStringBuilder.AppendLine(string.Join(", ", failedTestResults.Select(x => x.Number)));
+            footerStringBuilder.Append(failedTestCases.Count);
+            footerStringBuilder.Append('/');
+            footerStringBuilder.Append(testCases.Count);
+            footerStringBuilder.AppendLine(" tests haven't passed!");
+            footerStringBuilder.Append("Failed test cases: ");
+            footerStringBuilder.AppendLine(string.Join(", ", failedTestCases.Select(x => x.Number)));
             logLevel = LogLevel.Error;
         }
         
-        var totalElapsedMs = testsToExecute.Sum(x => x.LazyResult.Value.ElapsedTime.TotalMilliseconds);
-        var avgElapsedMs = totalElapsedMs / testsToExecute.Count;
-        var maxElapsedTest = testsToExecute.OrderByDescending(x => x.LazyResult.Value.ElapsedTime).First();
+        var totalElapsedMs = testCases.Sum(x => x.LazyResult.Value.ElapsedTime.TotalMilliseconds);
+        var avgElapsedMs = totalElapsedMs / testCases.Count;
+        var maxElapsedTest = testCases.OrderByDescending(x => x.LazyResult.Value.ElapsedTime).First();
         var statistics =
             $"Elapsed total: {totalElapsedMs:F5}ms; Avg: {avgElapsedMs:F5}ms; Max: {maxElapsedTest.LazyResult.Value.ElapsedTime.TotalMilliseconds:F5}ms [Number {maxElapsedTest.Number}]";
-        outerStringBuilder.Append(statistics);
+        footerStringBuilder.Append(statistics);
         
-        logger.Log(logLevel, null, outerStringBuilder.ToString());
+        logger.Log(logLevel, null, footerStringBuilder.ToString());
     }
 
-    private static void PrintResult(ILogger logger, TestCase<TOutput> testResult)
+    private static void LogResult(ILogger logger, TestCase<TOutput> testCase)
     {
-        var noError = testResult is { LazyResult.Value: { Passed: true, Exception: null } };
+        var noError = testCase is { LazyResult.Value: { Passed: true, Exception: null } };
         if (noError)
-            logger.LogInformation(testResult.ToString());
+            logger.LogInformation(testCase.ToString());
         else
-            logger.LogError(testResult.ToString());
+            logger.LogError(testCase.ToString());
     }
 }
