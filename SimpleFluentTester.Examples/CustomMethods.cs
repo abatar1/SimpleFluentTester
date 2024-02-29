@@ -13,10 +13,3 @@ internal static class CustomMethods
         return new CustomValue(number1.Value + number2.Value);
     }
 }
-
-internal class CustomValue(int value)
-{
-    public int Value { get; } = value;
-
-    public static CustomValue FromInt(int value) => new CustomValue(value);
-}

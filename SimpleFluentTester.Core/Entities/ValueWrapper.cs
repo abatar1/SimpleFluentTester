@@ -6,7 +6,7 @@ public sealed record ValueWrapper<TOutput>
     {
     }
 
-    public ValueWrapper(TOutput value)
+    public ValueWrapper(TOutput? value)
     {
         Value = value;
     }

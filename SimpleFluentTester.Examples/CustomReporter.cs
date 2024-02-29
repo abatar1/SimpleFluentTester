@@ -4,7 +4,7 @@ using SimpleFluentTester.Reporter;
 
 namespace SimpleFluentTester.Examples;
 
-internal sealed class CustomReporter(IList innerTestResults, MethodInfo methodInfo) : BaseTestRunReporter<int>(innerTestResults, methodInfo)
+internal sealed class CustomReporter(IEnumerable innerTestResults, MethodInfo methodInfo) : BaseTestRunReporter<int>(innerTestResults, methodInfo)
 {
     public override void Report()
     {

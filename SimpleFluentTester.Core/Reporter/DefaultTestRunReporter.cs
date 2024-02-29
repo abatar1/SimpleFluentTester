@@ -37,7 +37,7 @@ internal sealed class DefaultTestRunReporter<TOutput>(IEnumerable innerTestResul
         
         headerStringBuilder.AppendLine($"Executing tests for target method [{methodInfo}]");
 
-        if (testCases.Count == 0)
+        if (testCases == null || testCases.Count == 0)
         {
             headerStringBuilder.AppendLine("The test cases have not been added");
             logger.LogError(headerStringBuilder.ToString());

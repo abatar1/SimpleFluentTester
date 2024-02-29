@@ -13,7 +13,7 @@ public sealed class TestRunBuilder<TOutput>
     internal TestRunBuilder(BaseTestRunReporterFactory reporterFactory, 
         IEntryAssemblyProvider entryAssemblyProvider,
         IActivator activator,
-        Func<TOutput, TOutput, bool>? comparer,
+        Func<TOutput?, TOutput?, bool>? comparer,
         bool shouldBeExecuted = true)
     {
         _context = new TestRunBuilderContext<TOutput>(entryAssemblyProvider, 
@@ -33,8 +33,11 @@ public sealed class TestRunBuilder<TOutput>
     /// <summary>
     /// Specifies the expected value resulting from the execution of this test case.
     /// </summary>
-    public TestCaseInputBuilder<TOutput> Expect(TOutput expected)
+    public TestCaseInputBuilder<TOutput> Expect(TOutput? expected)
     {
+        if (_context.IsObjectOutput)
+            ValidateOperation(_context, expected?.GetType());
+        
         return new TestCaseInputBuilder<TOutput>(expected, _context);
     }
     
@@ -67,8 +70,9 @@ public sealed class TestRunBuilder<TOutput>
             return new EmptyTestRunReporter<TOutput>(_context.TestCases);
         
         _context.Operation.Value ??= TestSuiteDelegateHelper.GetDelegateFromAttributedMethod(_context.EntryAssemblyProvider, _context.Activator);
-        
-        ValidateOperation(_context);
+
+        if (!_context.IsObjectOutput)
+            ValidateOperation(_context, typeof(TOutput));
         ValidateComparer(_context);
         
         var testNumbersHash = new HashSet<int>(testNumbers);
@@ -90,15 +94,37 @@ public sealed class TestRunBuilder<TOutput>
         return (BaseTestRunReporter<TOutput>)_context.ReporterFactory.GetReporter<TOutput>(executedTestCases, _context.Operation.Value.Method);
     }
 
-    private static void ValidateOperation(TestRunBuilderContext<TOutput> context)
+    private static void ValidateOperation(TestRunBuilderContext<TOutput> context, Type? actualOperationType)
     {
-        if (context.Operation.Value != null && context.Operation.Value.Method.ReturnParameter?.ParameterType != typeof(TOutput))
-            throw new InvalidCastException($"{nameof(UseOperation)} thrown an exception, operation return type is not the same as used generic type.");
+        if (context.Operation.Value == null)
+            throw new InvalidCastException("Operation haven't been specified, please use UseOperation method");
+
+        if (context.Operation.Value.Method.ReturnParameter == null)
+            throw new InvalidOperationException("Operation must have return type to be testable");
+
+        Type? returnParameterType;
+
+        if (context.OutputUnderlyingType != null)
+        {
+            if (actualOperationType == null)
+                return;
+            returnParameterType = context.OutputUnderlyingType;
+        }
+        else
+        {
+            returnParameterType = context.Operation.Value.Method.ReturnParameter.ParameterType;
+        }
+        
+        if (returnParameterType != actualOperationType)
+            throw new InvalidCastException("Operation return type is not the same as used generic type.");
     }
 
     private static void ValidateComparer(TestRunBuilderContext<TOutput> context)
     {
-        if (!typeof(IEquatable<TOutput>).IsAssignableFrom(typeof(TOutput)) && context.Comparer == null)
+        if (context.Comparer != null || context.IsObjectOutput)
+            return;
+        
+        if (!typeof(IEquatable<TOutput>).IsAssignableFrom(typeof(TOutput)))
             throw new InvalidOperationException("TOutput type should be assignable from IEquatable<TOutput> or comparer should be defined");
     }
 }

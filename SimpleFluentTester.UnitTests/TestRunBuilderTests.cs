@@ -9,6 +9,86 @@ namespace SimpleFluentTester.UnitTests;
 public class TestRunBuilderTests
 {
     [Fact]
+    public void AddTestCase_NoReturnTypeSpecifiedWithValidExpectedType_ValidReturn()
+    {
+        // Arrange
+        var builder = TestSuite.UseOperation(StaticMethods.Adder);
+            
+        // Act    
+        var reporter = builder.Expect(2).WithInput(1, 1).Run();
+        
+        // Assert
+        var testCases = GetTestCasesFromReporter(reporter);
+        
+        var firstTestCase = testCases.FirstOrDefault(x => x.Number == 1);
+        AssertValidTestCase(firstTestCase, 2, [1, 1]);
+    }
+    
+    [Fact]
+    public void AddTestCase_NoReturnTypeSpecifiedWithInvalidExpectedType_ThrowsException()
+    {
+        // Arrange
+        var builder = TestSuite.UseOperation(StaticMethods.Adder);
+            
+        // Act    
+        var func = () => builder.Expect("123").WithInput(1, 1).Run();
+        
+        // Assert
+        Assert.Throws<InvalidCastException>(func);
+    }
+    
+    [Fact]
+    public void AddTestCase_OperationWithNullableParameter_ValidReturn()
+    {
+        // Arrange
+        var builder = TestSuite.UseOperation((int? a, int b) => a == null ? null : a + b);
+            
+        // Act    
+        var reporter = builder.Expect(null).WithInput(null, 1).Run();
+        
+        // Assert
+        var testCases = GetTestCasesFromReporter(reporter);
+        
+        var firstTestCase = testCases.FirstOrDefault(x => x.Number == 1);
+        AssertValidTestCase(firstTestCase, null, [null, 1]);
+    }
+    
+    [Fact]
+    public void AddTestCase_OperationWithNullableParameterButActualValue_ValidReturn()
+    {
+        // Arrange
+        var builder = TestSuite.UseOperation((int? a, int? b) => a == null ? null : a + b);
+            
+        // Act    
+        var reporter = builder
+            .Expect(2).WithInput(1, 1)
+            .Expect(3).WithInput(1, 1)
+            .Run();
+        
+        // Assert
+        var testCases = GetTestCasesFromReporter(reporter);
+        
+        var firstTestCase = testCases.FirstOrDefault(x => x.Number == 1);
+        AssertValidTestCase(firstTestCase, 2, [1, 1]);
+        
+        var secondTestCase = testCases.FirstOrDefault(x => x.Number == 2);
+        AssertInvalidTestCase(secondTestCase, 3, [1, 1]);
+    }
+    
+    [Fact]
+    public void AddTestCase_OperationWithoutNullableParameterButNullExpected_ThrowsException()
+    {
+        // Arrange
+        var builder = TestSuite.UseOperation((int a, int b) => a + b);
+            
+        // Act    
+        var func = () => builder.Expect(null).WithInput(1, 1).Run();
+        
+        // Assert
+        Assert.Throws<InvalidCastException>(func);
+    }
+    
+    [Fact]
     public void AddTestCase_ParametersNumberMoreThanExpected_ThrowsException()
     {
         // Arrange
@@ -67,16 +147,7 @@ public class TestRunBuilderTests
         AssertValidTestCase(firstTestCase, 2, [1, 1]);
         
         var secondTestCase = testCases.FirstOrDefault(x => x.Number == 2);
-        Assert.NotNull(secondTestCase);
-        Assert.True(secondTestCase.ShouldBeCalculated);
-        Assert.Equal(2, secondTestCase.Expected);
-        Assert.Equal([2, 1], secondTestCase.Inputs);
-        Assert.True(secondTestCase.LazyResult.IsValueCreated);
-        Assert.False(secondTestCase.LazyResult.Value.Passed);
-        Assert.Null(secondTestCase.LazyResult.Value.Exception);
-        Assert.NotNull(secondTestCase.LazyResult.Value.Output);
-        Assert.NotEqual(secondTestCase.Expected, secondTestCase.LazyResult.Value.Output.Value);
-        Assert.True(secondTestCase.LazyResult.Value.ElapsedTime.TotalMilliseconds > 0);
+        AssertInvalidTestCase(secondTestCase, 2, [2, 1]);
         
         var thirdTestCase = testCases.FirstOrDefault(x => x.Number == 3);
         Assert.NotNull(thirdTestCase);
@@ -239,8 +310,7 @@ public class TestRunBuilderTests
         Assert.True(testCase.ShouldBeCalculated);
         Assert.True(testCase.LazyResult.IsValueCreated);
         Assert.NotNull(testCase.LazyResult.Value.Output);
-        Assert.NotNull(testCase.LazyResult.Value.Output.Value);
-        if (typeof(IEquatable<TOutput>).IsAssignableFrom(typeof(TOutput)))
+        if (typeof(TOutput) == typeof(object) || typeof(IEquatable<TOutput>).IsAssignableFrom(typeof(TOutput)))
         {
             Assert.Equal(expected, testCase.Expected);
             Assert.Equal(inputs, testCase.Inputs);
@@ -255,6 +325,22 @@ public class TestRunBuilderTests
         }
         Assert.True(testCase.LazyResult.Value.Passed);
         Assert.Null(testCase.LazyResult.Value.Exception);
+        Assert.True(testCase.LazyResult.Value.ElapsedTime.TotalMilliseconds > 0);
+    }
+    
+    private static void AssertInvalidTestCase<TOutput>(TestCase<TOutput>? testCase, 
+        TOutput expected, 
+        object[] inputs)
+    {
+        Assert.NotNull(testCase);
+        Assert.True(testCase.ShouldBeCalculated);
+        Assert.Equal(expected, testCase.Expected);
+        Assert.Equal(inputs, testCase.Inputs);
+        Assert.True(testCase.LazyResult.IsValueCreated);
+        Assert.False(testCase.LazyResult.Value.Passed);
+        Assert.Null(testCase.LazyResult.Value.Exception);
+        Assert.NotNull(testCase.LazyResult.Value.Output);
+        Assert.NotEqual(testCase.Expected, testCase.LazyResult.Value.Output.Value);
         Assert.True(testCase.LazyResult.Value.ElapsedTime.TotalMilliseconds > 0);
     }
 

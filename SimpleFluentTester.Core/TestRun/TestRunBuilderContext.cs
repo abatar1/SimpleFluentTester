@@ -12,7 +12,7 @@ public sealed class TestRunBuilderContext<TOutput>(
     IList<TestCase<TOutput>> testCases,
     BaseTestRunReporterFactory reporterFactory,
     ValueWrapper<Delegate> operation,
-    Func<TOutput, TOutput, bool>? comparer,
+    Func<TOutput?, TOutput?, bool>? comparer,
     bool shouldBeExecuted)
 {
     public bool ShouldBeExecuted { get; } = shouldBeExecuted;
@@ -27,7 +27,36 @@ public sealed class TestRunBuilderContext<TOutput>(
 
     public ValueWrapper<Delegate> Operation { get; } = operation;
     
-    public Func<TOutput, TOutput, bool>? Comparer { get; } = comparer;
+    public Func<TOutput?, TOutput?, bool>? Comparer { get; } = comparer;
+
+    private bool? _isObjectOutput;
+    public bool IsObjectOutput
+    {
+        get
+        {
+            if (_isObjectOutput != null)
+                return _isObjectOutput.Value;
+
+            _isObjectOutput = typeof(TOutput) == typeof(object);
+            return _isObjectOutput.Value;
+        }
+    }
+
+    private Type? _outputUnderlyingType;
+    public Type? OutputUnderlyingType
+    {
+        get
+        {
+            if (_outputUnderlyingType != null)
+                return _outputUnderlyingType;
+
+            if (Operation.Value?.Method.ReturnParameter == null)
+                return null;
+
+            _outputUnderlyingType = Nullable.GetUnderlyingType(Operation.Value.Method.ReturnParameter.ParameterType);
+            return _outputUnderlyingType;
+        }
+    }
 
     private ParameterInfo[]? _operationParameters;
     public ParameterInfo[] OperationParameters

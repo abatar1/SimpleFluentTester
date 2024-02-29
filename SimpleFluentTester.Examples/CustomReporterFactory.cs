@@ -6,8 +6,8 @@ namespace SimpleFluentTester.Examples;
 
 internal sealed class CustomReporterFactory : BaseTestRunReporterFactory
 {
-    public override ITestRunReporter GetReporter<TOutput>(IList innerTestResult, MethodInfo methodInfo)
+    public override ITestRunReporter GetReporter<TOutput>(IEnumerable testCases, MethodInfo methodInfo)
     {
-        return new CustomReporter(innerTestResult, methodInfo);
+        return new CustomReporter(testCases, methodInfo);
     }
 }

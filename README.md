@@ -36,9 +36,7 @@ I assume that you have a very complex function to cover with test cases, but let
 Let's start writing test cases for it!
 
 ```csharp
- TestSuite
-     // Return type of your testable method should be specified.
-    .WithExpectedReturnType<int>()
+TestSuite
      // Here we specify the method we want to test.
     .UseOperation(Adder) 
      // Then we add 2 valid tests and one invalid test.
@@ -71,8 +69,7 @@ And the output of this code will indicate that one out of the three test cases h
 Furthermore, for debugging purposes, for the next run it would be most convenient to select only the unsuccessful test cases:
    
 ```csharp
- TestSuite
-    .WithExpectedReturnType<int>()
+TestSuite
     .UseOperation(Adder) 
     .Expect(2).WithInput(1, 1) 
     .Expect(-2).WithInput(-1, -1)
@@ -84,22 +81,30 @@ Furthermore, for debugging purposes, for the next run it would be most convenien
 Also, you can write your custom reporter that will generate a report in the format you need:
 ```csharp
 TestSuite
-    .WithExpectedReturnType<int>()
+    .UseOperation<int>(CustomMethods.Adder) 
     .WithCustomReporterFactory<CustomReporterFactory>() 
+    .Expect(2).WithInput(1, 1) 
+    .Run()
+    .Report();
+```
+
+If your project contains multiple test suites simultaneously, and you wish to debug only one of them, 
+you don't need to comment out the code; simply follow these steps:
+```csharp
+TestSuite.Ignore // <- add Ignore here and this test run will be fully ignored.
     .UseOperation<int>(CustomMethods.Adder) 
     .Expect(2).WithInput(1, 1) 
     .Run()
     .Report();
 ```
 
-
-If your project contains multiple test suites simultaneously, and you wish to debug only one of them, 
-you don't need to comment out the code; simply follow these steps:
+If you use non-standard object types in your function, you can define how the TestSuite should compare them yourself.
 ```csharp
-TestSuite.Ignore // <- add Ignore here and this test run will be fully ignored.
-    .WithExpectedReturnType<int>()
-    .UseOperation<int>(CustomMethods.Adder) 
-    .Expect(2).WithInput(1, 1) 
+TestSuite
+    // Return type of your testable method could be specified with a provided comparer.
+    .WithExpectedReturnType<CustomValue>((x, y) => x.Value == y.Value)
+    .UseOperation((CustomValue a, CustomValue b) => a.Value + b.Value)
+    .Expect(CustomValue.FromInt(2)).WithInput(CustomValue.FromInt(1), CustomValue.FromInt(1))
     .Run()
     .Report();
 ```

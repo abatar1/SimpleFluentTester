@@ -5,13 +5,13 @@ using System.Text;
 
 namespace SimpleFluentTester.Entities;
 
-public sealed record TestCase<TOutput>(object[] Inputs, TOutput Expected, Lazy<CalculatedTestResult<TOutput>> LazyResult, bool ShouldBeCalculated, int Number)
+public sealed record TestCase<TOutput>(object?[] Inputs, TOutput? Expected, Lazy<CalculatedTestResult<TOutput>> LazyResult, bool ShouldBeCalculated, int Number)
 {
     public Lazy<CalculatedTestResult<TOutput>> LazyResult { get; } = LazyResult;
     
-    public object[] Inputs { get; } = Inputs;
+    public object?[] Inputs { get; } = Inputs;
     
-    public TOutput Expected { get; } = Expected;
+    public TOutput? Expected { get; } = Expected;
     
     public bool ShouldBeCalculated { get; set; } = ShouldBeCalculated;
     
