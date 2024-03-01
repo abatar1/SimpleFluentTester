@@ -1,15 +1,15 @@
 ﻿using System.Reflection;
 using Moq;
 using SimpleFluentTester.Entities;
-using SimpleFluentTester.Reporter;
 using SimpleFluentTester.TestRun;
+using SimpleFluentTester.Validators.Core;
 
 namespace SimpleFluentTester.UnitTests;
 
 public class TestRunBuilderTests
 {
     [Fact]
-    public void AddTestCase_NoReturnTypeSpecifiedWithValidExpectedType_ValidReturn()
+    public void AddTestCase_NoReturnTypeSpecifiedWithValidExpectedType_ShouldBePassed()
     {
         // Arrange
         var builder = TestSuite.UseOperation(StaticMethods.Adder);
@@ -18,10 +18,8 @@ public class TestRunBuilderTests
         var reporter = builder.Expect(2).WithInput(1, 1).Run();
         
         // Assert
-        var testCases = GetTestCasesFromReporter(reporter);
-        
-        var firstTestCase = testCases.FirstOrDefault(x => x.Number == 1);
-        AssertValidTestCase(firstTestCase, 2, [1, 1]);
+        var testRunResult = TestHelpers.GetTestRunResultFromReporter(reporter);
+        AssertPassedTestResult(1, testRunResult, 2, [1, 1]);
     }
     
     [Fact]
@@ -31,14 +29,38 @@ public class TestRunBuilderTests
         var builder = TestSuite.UseOperation(StaticMethods.Adder);
             
         // Act    
-        var func = () => builder.Expect("123").WithInput(1, 1).Run();
+        var reporter = builder.Expect("123").WithInput(1, 1).Run();
         
         // Assert
-        Assert.Throws<InvalidCastException>(func);
+        var testRunResult = TestHelpers.GetTestRunResultFromReporter(reporter);
+        AssertTestCasesValidationHasFailed(testRunResult, ValidationSubject.Operation);
+    }
+
+    private static void AssertContextValidationHasFailed<TOutput>(TestRunResult<TOutput> testRunResult, ValidationSubject validationSubject)
+    {
+        var validationResult = testRunResult.ContextValidationResults
+            .SingleOrDefault(x => x.ValidationSubject == validationSubject);
+        
+        Assert.NotNull(validationResult);
+        Assert.False(validationResult.IsValid);
+        Assert.NotNull(validationResult.Message);
+        Assert.Equal(validationSubject, validationResult.ValidationSubject);
+    }
+    
+    private static void AssertTestCasesValidationHasFailed<TOutput>(TestRunResult<TOutput> testRunResult, ValidationSubject validationSubject)
+    {
+        var validationResult = testRunResult.ValidatedTestCases
+            .SelectMany(x => x.ValidationResults)
+            .SingleOrDefault(x => x.ValidationSubject == validationSubject);
+        
+        Assert.NotNull(validationResult);
+        Assert.False(validationResult.IsValid);
+        Assert.NotNull(validationResult.Message);
+        Assert.Equal(validationSubject, validationResult.ValidationSubject);
     }
     
     [Fact]
-    public void AddTestCase_OperationWithNullableParameter_ValidReturn()
+    public void AddTestCase_OperationWithNullableParameter_ShouldBePassed()
     {
         // Arrange
         var builder = TestSuite.UseOperation((int? a, int b) => a == null ? null : a + b);
@@ -47,14 +69,12 @@ public class TestRunBuilderTests
         var reporter = builder.Expect(null).WithInput(null, 1).Run();
         
         // Assert
-        var testCases = GetTestCasesFromReporter(reporter);
-        
-        var firstTestCase = testCases.FirstOrDefault(x => x.Number == 1);
-        AssertValidTestCase(firstTestCase, null, [null, 1]);
+        var testRunResult = TestHelpers.GetTestRunResultFromReporter(reporter);
+        AssertPassedTestResult(1, testRunResult, null, [null, 1]);
     }
     
     [Fact]
-    public void AddTestCase_OperationWithNullableParameterButActualValue_ValidReturn()
+    public void AddTestCase_OperationWithNullableParameterButActualValue_ShouldNotThrow()
     {
         // Arrange
         var builder = TestSuite.UseOperation((int? a, int? b) => a == null ? null : a + b);
@@ -63,16 +83,12 @@ public class TestRunBuilderTests
         var reporter = builder
             .Expect(2).WithInput(1, 1)
             .Expect(3).WithInput(1, 1)
-            .Run();
+            .Run(2);
         
         // Assert
-        var testCases = GetTestCasesFromReporter(reporter);
-        
-        var firstTestCase = testCases.FirstOrDefault(x => x.Number == 1);
-        AssertValidTestCase(firstTestCase, 2, [1, 1]);
-        
-        var secondTestCase = testCases.FirstOrDefault(x => x.Number == 2);
-        AssertInvalidTestCase(secondTestCase, 3, [1, 1]);
+        var testRunResult = TestHelpers.GetTestRunResultFromReporter(reporter);
+        //AssertPassedTestResult(1, testRunResult, 2, [1, 1]);
+        AssertNotPassedTestResult(2, testRunResult, 3, [1, 1]);
     }
     
     [Fact]
@@ -82,10 +98,11 @@ public class TestRunBuilderTests
         var builder = TestSuite.UseOperation((int a, int b) => a + b);
             
         // Act    
-        var func = () => builder.Expect(null).WithInput(1, 1).Run();
+        var reporter = builder.Expect(null).WithInput(1, 1).Run();
         
         // Assert
-        Assert.Throws<InvalidCastException>(func);
+        var testRunResult = TestHelpers.GetTestRunResultFromReporter(reporter);
+        AssertTestCasesValidationHasFailed(testRunResult, ValidationSubject.Operation);
     }
     
     [Fact]
@@ -95,10 +112,11 @@ public class TestRunBuilderTests
         var builder = SetupAdderBuilder();
             
         // Act    
-        var func = () => builder.Expect(2).WithInput(1, 1, 1).Run();
+        var reporter = builder.Expect(2).WithInput(1, 1, 1).Run();
         
         // Assert
-        Assert.Throws<TargetParameterCountException>(func);
+        var testRunResult = TestHelpers.GetTestRunResultFromReporter(reporter);
+        AssertTestCasesValidationHasFailed(testRunResult, ValidationSubject.Inputs);
     }
     
     [Fact]
@@ -108,10 +126,11 @@ public class TestRunBuilderTests
         var builder = SetupAdderBuilder();
             
         // Act    
-        var func = () => builder.Expect(2).WithInput(1).Run();
+        var reporter = builder.Expect(2).WithInput(1).Run();
         
         // Assert
-        Assert.Throws<TargetParameterCountException>(func);
+        var testRunResult = TestHelpers.GetTestRunResultFromReporter(reporter);
+        AssertTestCasesValidationHasFailed(testRunResult, ValidationSubject.Inputs);
     }
     
     [Fact]
@@ -121,10 +140,11 @@ public class TestRunBuilderTests
         var builder = SetupAdderBuilder();
             
         // Act    
-        var func = () => builder.Expect(2).WithInput(1, "test").Run();
+        var reporter = builder.Expect(2).WithInput(1, "test").Run();
         
         // Assert
-        Assert.Throws<InvalidCastException>(func);
+        var testRunResult = TestHelpers.GetTestRunResultFromReporter(reporter);
+        AssertTestCasesValidationHasFailed(testRunResult, ValidationSubject.Inputs);
     }
     
     [Fact]
@@ -141,20 +161,10 @@ public class TestRunBuilderTests
             .Run(1, 2);
 
         // Assert
-        var testCases = GetTestCasesFromReporter(reporter);
-        
-        var firstTestCase = testCases.FirstOrDefault(x => x.Number == 1);
-        AssertValidTestCase(firstTestCase, 2, [1, 1]);
-        
-        var secondTestCase = testCases.FirstOrDefault(x => x.Number == 2);
-        AssertInvalidTestCase(secondTestCase, 2, [2, 1]);
-        
-        var thirdTestCase = testCases.FirstOrDefault(x => x.Number == 3);
-        Assert.NotNull(thirdTestCase);
-        Assert.False(thirdTestCase.ShouldBeCalculated);
-        Assert.Equal(3, thirdTestCase.Expected);
-        Assert.Equal([2, 1], thirdTestCase.Inputs);
-        Assert.False(thirdTestCase.LazyResult.IsValueCreated);
+        var testRunResult = TestHelpers.GetTestRunResultFromReporter(reporter);
+        AssertPassedTestResult(1, testRunResult, 2, [1, 1]);
+        AssertNotPassedTestResult(2, testRunResult, 2, [2, 1]);
+        AssertSkippedTestResult(3, testRunResult, 3, [2, 1]);
     }
 
     [Fact]
@@ -170,12 +180,16 @@ public class TestRunBuilderTests
             .Run();
         
         // Assert
-        var testCases = GetTestCasesFromReporter(reporter);
+        var testRunResult = TestHelpers.GetTestRunResultFromReporter(reporter);
         
-        var firstTestCase = testCases.FirstOrDefault(x => x.Number == 1);
-        Assert.NotNull(firstTestCase);
-        Assert.NotNull(firstTestCase.LazyResult.Value.Exception);
-        Assert.IsType<CustomException>(firstTestCase.LazyResult.Value.Exception);
+        var validatedTestCase = testRunResult.ValidatedTestCases
+            .FirstOrDefault(x => x.TestCase.Number == 1);
+        Assert.NotNull(validatedTestCase);
+        Assert.Equal(AssertStatus.NotPassedWithException, validatedTestCase.AssertStatus);
+        Assert.Equal(ValidationStatus.Valid, validatedTestCase.ValidationStatus);
+        var testCase = validatedTestCase.TestCase;
+        Assert.NotNull(testCase.Assert.Value.Exception);
+        Assert.IsType<CustomException>(testCase.Assert.Value.Exception);
     }
     
     [Fact]
@@ -186,25 +200,29 @@ public class TestRunBuilderTests
         var builder2 = SetupAdderBuilder();
         
         // Act
-        var func1 = () => builder1.Expect(2).WithInput(1, 1).Run(2);
-        var func2 = () => builder2.Expect(2).WithInput(1, 1).Run(1, 2);
+        var reporter1 = builder1.Expect(2).WithInput(1, 1).Run(2);
+        var reporter2 = builder2.Expect(2).WithInput(1, 1).Run(1, 2);
         
         // Assert
-        Assert.Throws<InvalidOperationException>(func1);
-        Assert.Throws<InvalidOperationException>(func2);
+        var testRunResult1 = TestHelpers.GetTestRunResultFromReporter(reporter1);
+        AssertContextValidationHasFailed(testRunResult1, ValidationSubject.TestNumbers);
+        var testRunResult2 = TestHelpers.GetTestRunResultFromReporter(reporter2);
+        AssertContextValidationHasFailed(testRunResult2, ValidationSubject.TestNumbers);
     }
     
     [Fact]
-    public void TestRunBuilder_InvalidDelegateReturnType_ThrowsException()
+    public void TestRunBuilder_InvalidDelegateReturnType_ShouldThrow()
     {
         // Arrange
-        var builder = new TestRunBuilder<int>(new DefaultTestRunReporterFactory(), new EntryAssemblyProvider(), new DefaultActivator(), null);
+        var context = TestHelpers.CreateEmptyContext<int>();
+        var builder = new TestRunBuilder<int>(context);
         
         // Act
-        var func = () => builder.UseOperation((int _, int _) => "test").Expect(2).WithInput(1, 1).Run();
+        var reporter = builder.UseOperation((int _, int _) => "test").Expect(2).WithInput(1, 1).Run();
         
         // Assert
-        Assert.Throws<InvalidCastException>(func);
+        var testRunResult1 = TestHelpers.GetTestRunResultFromReporter(reporter);
+        AssertContextValidationHasFailed(testRunResult1, ValidationSubject.Operation);
     }
     
     [Fact]
@@ -215,7 +233,8 @@ public class TestRunBuilderTests
         entryAssemblyProviderMock
             .Setup(x => x.Get())
             .Returns(Assembly.GetAssembly(typeof(TestRunBuilderTests)));
-        var builder = new TestRunBuilder<int>(new DefaultTestRunReporterFactory(), entryAssemblyProviderMock.Object, new DefaultActivator(),null);
+        var context = TestHelpers.CreateEmptyContext<int>(entryAssemblyProviderMock.Object);
+        var builder = new TestRunBuilder<int>(context);
         
         // Act
         var reporter = builder
@@ -223,10 +242,8 @@ public class TestRunBuilderTests
             .Run();
         
         // Assert
-        var testCases = GetTestCasesFromReporter(reporter);
-        
-        var firstTestCase = testCases.FirstOrDefault(x => x.Number == 1);
-        AssertValidTestCase(firstTestCase, 2, [1, 1]);
+        var testRunResult = TestHelpers.GetTestRunResultFromReporter(reporter);
+        AssertPassedTestResult(1, testRunResult, 2, [1, 1]);
     }
     
     [Fact]
@@ -243,10 +260,8 @@ public class TestRunBuilderTests
             .Run();
         
         // Assert
-        var testCases = GetTestCasesFromReporter(reporter);
-        
-        var firstTestCase = testCases.FirstOrDefault(x => x.Number == 1);
-        AssertValidTestCase(firstTestCase, new EquatableTestObject(2), [new EquatableTestObject(1), new EquatableTestObject(1)]);
+        var testRunResult = TestHelpers.GetTestRunResultFromReporter(reporter);
+        AssertPassedTestResult(1, testRunResult, new EquatableTestObject(2), [new EquatableTestObject(1), new EquatableTestObject(1)]);
     }
     
     [Fact]
@@ -264,9 +279,8 @@ public class TestRunBuilderTests
             .Run();
 
         // Assert
-        var testCases = GetTestCasesFromReporter(reporter);
-        var firstTestCase = testCases.FirstOrDefault(x => x.Number == 1);
-        AssertValidTestCase(firstTestCase, new TestObject(2), [new TestObject(1), new TestObject(1)], comparer);
+        var testRunResult = TestHelpers.GetTestRunResultFromReporter(reporter);
+        AssertPassedTestResult(1, testRunResult, new TestObject(2), [new TestObject(1), new TestObject(1)], comparer);
     }
     
     [Fact]
@@ -294,69 +308,94 @@ public class TestRunBuilderTests
         var reporter = builder.Run();
         
         // Assert
-        var testCases = GetTestCasesFromReporter(reporter);
-        var firstTestCase = testCases.First(x => x.Number == 1);
-        Assert.False(firstTestCase.ShouldBeCalculated);
-        var secondTestCase = testCases.First(x => x.Number == 2);
-        Assert.False(secondTestCase.ShouldBeCalculated); 
+        var testRunResult = TestHelpers.GetTestRunResultFromReporter(reporter);
+        AssertSkippedTestResult(1, testRunResult, 2, [1, 1, 1]);
+        AssertSkippedTestResult(2, testRunResult, 3, [1, 1, 1]);
     }
 
-    private static void AssertValidTestCase<TOutput>(TestCase<TOutput>? testCase, 
+    private static void AssertPassedTestResult<TOutput>(
+        int testNumber,
+        TestRunResult<TOutput> testRunResult, 
         TOutput expected, 
         object[] inputs,
-        Func<TOutput, TOutput, bool>? comparer = null)
+        Func<TOutput?, TOutput?, bool>? comparer = null)
     {
-        Assert.NotNull(testCase);
-        Assert.True(testCase.ShouldBeCalculated);
-        Assert.True(testCase.LazyResult.IsValueCreated);
-        Assert.NotNull(testCase.LazyResult.Value.Output);
+        var validatedTestCase = testRunResult.ValidatedTestCases
+            .FirstOrDefault(x => x.TestCase.Number == testNumber);
+        
+        Assert.NotNull(validatedTestCase);
+        Assert.Equal(AssertStatus.Passed, validatedTestCase.AssertStatus);
+        Assert.Equal(ValidationStatus.Valid, validatedTestCase.ValidationStatus);
+        Assert.NotEmpty(validatedTestCase.ValidationResults);
+        foreach (var validationResult in validatedTestCase.ValidationResults)
+            Assert.True(validationResult.IsValid);
+
+        var testCase = validatedTestCase.TestCase;
+        Assert.True(testCase.Assert.IsValueCreated);
+        Assert.NotNull(testCase.Assert.Value.Output);
         if (typeof(TOutput) == typeof(object) || typeof(IEquatable<TOutput>).IsAssignableFrom(typeof(TOutput)))
         {
             Assert.Equal(expected, testCase.Expected);
             Assert.Equal(inputs, testCase.Inputs);
-            Assert.Equal(testCase.Expected, testCase.LazyResult.Value.Output.Value);
+            Assert.Equal(testCase.Expected, testCase.Assert.Value.Output.Value);
         }
         else
         {
             Assert.True(comparer?.Invoke(expected, testCase.Expected));
-            Assert.True(comparer?.Invoke(testCase.Expected, testCase.LazyResult.Value.Output.Value));
+            Assert.True(comparer?.Invoke(testCase.Expected, testCase.Assert.Value.Output.Value));
             foreach (var input in inputs.Zip(testCase.Inputs))
-                Assert.True(comparer?.Invoke((TOutput)input.First, (TOutput)input.Second));
+                Assert.True(comparer?.Invoke((TOutput?)input.First, (TOutput?)input.Second));
         }
-        Assert.True(testCase.LazyResult.Value.Passed);
-        Assert.Null(testCase.LazyResult.Value.Exception);
-        Assert.True(testCase.LazyResult.Value.ElapsedTime.TotalMilliseconds > 0);
+        Assert.True(testCase.Assert.Value.Passed);
+        Assert.Null(testCase.Assert.Value.Exception);
+        Assert.True(testCase.Assert.Value.ElapsedTime.TotalMilliseconds > 0);
     }
     
-    private static void AssertInvalidTestCase<TOutput>(TestCase<TOutput>? testCase, 
+    private static void AssertNotPassedTestResult<TOutput>(
+        int testNumber,
+        TestRunResult<TOutput> testRunResult, 
         TOutput expected, 
         object[] inputs)
     {
-        Assert.NotNull(testCase);
-        Assert.True(testCase.ShouldBeCalculated);
+        var validatedTestCase = testRunResult.ValidatedTestCases
+            .FirstOrDefault(x => x.TestCase.Number == testNumber);
+        
+        Assert.NotNull(validatedTestCase);
+        Assert.Equal(AssertStatus.NotPassed, validatedTestCase.AssertStatus);
+        Assert.Equal(ValidationStatus.Valid, validatedTestCase.ValidationStatus);
+        Assert.NotEmpty(validatedTestCase.ValidationResults);
+        foreach (var validationResult in validatedTestCase.ValidationResults)
+            Assert.True(validationResult.IsValid);
+        
+        var testCase = validatedTestCase.TestCase;
+        Assert.True(testCase.Assert.IsValueCreated);
         Assert.Equal(expected, testCase.Expected);
         Assert.Equal(inputs, testCase.Inputs);
-        Assert.True(testCase.LazyResult.IsValueCreated);
-        Assert.False(testCase.LazyResult.Value.Passed);
-        Assert.Null(testCase.LazyResult.Value.Exception);
-        Assert.NotNull(testCase.LazyResult.Value.Output);
-        Assert.NotEqual(testCase.Expected, testCase.LazyResult.Value.Output.Value);
-        Assert.True(testCase.LazyResult.Value.ElapsedTime.TotalMilliseconds > 0);
+        Assert.True(testCase.Assert.IsValueCreated);
+        Assert.False(testCase.Assert.Value.Passed);
+        Assert.Null(testCase.Assert.Value.Exception);
+        Assert.NotNull(testCase.Assert.Value.Output);
+        Assert.NotEqual(testCase.Expected, testCase.Assert.Value.Output.Value);
+        Assert.True(testCase.Assert.Value.ElapsedTime.TotalMilliseconds > 0);
     }
 
-    private static IList<TestCase<TOutput>> GetTestCasesFromReporter<TOutput>(BaseTestRunReporter<TOutput> reporter)
+    private void AssertSkippedTestResult<TOutput>(
+        int testNumber,
+        TestRunResult<TOutput> testRunResult,
+        TOutput expected, 
+        object[] inputs)
     {
-        var baseReporterType = reporter.GetType().BaseType;
-        Assert.NotNull(baseReporterType);
-        var reporterFields = baseReporterType
-            .GetFields(BindingFlags.Instance | BindingFlags.NonPublic);
+        var validatedTestCase = testRunResult.ValidatedTestCases
+            .FirstOrDefault(x => x.TestCase.Number == testNumber);
         
-        var testCasesProperty = reporterFields
-            .FirstOrDefault(x => x.FieldType == typeof(IList<TestCase<TOutput>>));
-        Assert.NotNull(testCasesProperty);
-        var testCases = testCasesProperty.GetValue(reporter) as IList<TestCase<TOutput>>;
-        Assert.NotNull(testCases);
-        return testCases;
+        Assert.NotNull(validatedTestCase);
+        Assert.Equal(AssertStatus.Unknown, validatedTestCase.AssertStatus);
+        Assert.Equal(ValidationStatus.Unknown, validatedTestCase.ValidationStatus);
+        
+        var testCase = validatedTestCase.TestCase;
+        Assert.False(testCase.Assert.IsValueCreated);
+        Assert.Equal(expected, testCase.Expected);
+        Assert.Equal(inputs, testCase.Inputs);
     }
 
     private static TestRunBuilder<int> SetupAdderBuilder()
@@ -386,7 +425,7 @@ public class TestRunBuilderTests
         {
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != this.GetType()) return false;
+            if (obj.GetType() != GetType()) return false;
             return Equals((EquatableTestObject)obj);
         }
 

@@ -1,20 +1,15 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using System.Reflection;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Console;
-using SimpleFluentTester.Entities;
+using SimpleFluentTester.TestRun;
 
 namespace SimpleFluentTester.Reporter;
 
 /// <summary>
 /// Base class that should be used for defining your own custom reporter.
 /// </summary>
-public abstract class BaseTestRunReporter<TOutput>(IEnumerable innerTestResults, MethodInfo methodInfo) : ITestRunReporter
+public abstract class BaseTestRunReporter<TOutput>(TestRunResult<TOutput> testRunResult) : ITestRunReporter
 {
-    protected readonly IList<TestCase<TOutput>>? InnerTestResults = innerTestResults as IList<TestCase<TOutput>>;
-
-    protected readonly MethodInfo MethodInfo = methodInfo;
+    protected readonly TestRunResult<TOutput> TestRunResult = testRunResult;
 
     public abstract void Report();
 

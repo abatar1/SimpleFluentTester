@@ -1,13 +1,12 @@
-using System.Collections;
-using System.Reflection;
 using SimpleFluentTester.Reporter;
+using SimpleFluentTester.TestRun;
 
 namespace SimpleFluentTester.Examples;
 
-internal sealed class CustomReporterFactory : BaseTestRunReporterFactory
+internal sealed class CustomReporterFactory : ITestRunReporterFactory
 {
-    public override ITestRunReporter GetReporter<TOutput>(IEnumerable testCases, MethodInfo methodInfo)
+    public ITestRunReporter GetReporter<TOutput>(TestRunResult<TOutput> testRunResult)
     {
-        return new CustomReporter(testCases, methodInfo);
+        return new CustomReporter<TOutput>(testRunResult);
     }
 }

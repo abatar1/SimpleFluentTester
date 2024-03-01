@@ -2,7 +2,7 @@
 
 namespace SimpleFluentTester.Entities;
 
-public sealed record CalculatedTestResult<TOutput>(bool Passed, ValueWrapper<TOutput>? Output, Exception? Exception, TimeSpan ElapsedTime)
+public sealed record Assert<TOutput>(bool Passed, ValueWrapper<TOutput>? Output, Exception? Exception, TimeSpan ElapsedTime)
 {
     public bool Passed { get; } = Passed;
     

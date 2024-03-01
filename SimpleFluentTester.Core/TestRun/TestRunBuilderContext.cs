@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using SimpleFluentTester.Entities;
 using SimpleFluentTester.Reporter;
+using SimpleFluentTester.Validators.Core;
 
 namespace SimpleFluentTester.TestRun;
 
@@ -10,7 +11,8 @@ public sealed class TestRunBuilderContext<TOutput>(
     IEntryAssemblyProvider entryAssemblyProvider,
     IActivator activator,
     IList<TestCase<TOutput>> testCases,
-    BaseTestRunReporterFactory reporterFactory,
+    ISet<ValidationInvoker<TOutput>> validators,
+    ITestRunReporterFactory reporterFactory,
     ValueWrapper<Delegate> operation,
     Func<TOutput?, TOutput?, bool>? comparer,
     bool shouldBeExecuted)
@@ -23,11 +25,13 @@ public sealed class TestRunBuilderContext<TOutput>(
 
     public IList<TestCase<TOutput>> TestCases { get; } = testCases;
 
-    public BaseTestRunReporterFactory ReporterFactory { get; set; } = reporterFactory;
+    public ITestRunReporterFactory ReporterFactory { get; set; } = reporterFactory;
 
     public ValueWrapper<Delegate> Operation { get; } = operation;
     
     public Func<TOutput?, TOutput?, bool>? Comparer { get; } = comparer;
+
+    public ISet<ValidationInvoker<TOutput>> Validators { get; } = validators;
 
     private bool? _isObjectOutput;
     public bool IsObjectOutput
@@ -58,8 +62,8 @@ public sealed class TestRunBuilderContext<TOutput>(
         }
     }
 
-    private ParameterInfo[]? _operationParameters;
-    public ParameterInfo[] OperationParameters
+    private IReadOnlyCollection<ParameterInfo>? _operationParameters;
+    public IReadOnlyCollection<ParameterInfo> OperationParameters
     {
         get
         {

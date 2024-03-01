@@ -67,7 +67,6 @@ And the output of this code will indicate that one out of the three test cases h
 ```
 
 Furthermore, for debugging purposes, for the next run it would be most convenient to select only the unsuccessful test cases:
-   
 ```csharp
 TestSuite
     .UseOperation(Adder) 

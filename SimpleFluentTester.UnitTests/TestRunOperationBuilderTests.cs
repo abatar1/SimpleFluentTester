@@ -1,5 +1,7 @@
+using SimpleFluentTester.Entities;
 using SimpleFluentTester.Reporter;
 using SimpleFluentTester.TestRun;
+using SimpleFluentTester.Validators.Core;
 
 namespace SimpleFluentTester.UnitTests;
 
@@ -12,10 +14,17 @@ public class TestRunOperationBuilderTests
         var setup = TestSuite.WithExpectedReturnType<string>();
         
         // Act
-        var useOperationFunc = () => setup.UseOperation(StaticMethods.Adder).Run();
+        var reporter = setup.UseOperation(StaticMethods.Adder).Run();
 
         // Assert
-        Assert.Throws<InvalidCastException>(useOperationFunc);
+        var testRunResult = TestHelpers.GetTestRunResultFromReporter(reporter);
+        var validationResult = testRunResult.ContextValidationResults
+            .SingleOrDefault(x => x.ValidationSubject == ValidationSubject.Operation);
+        
+        Assert.NotNull(validationResult);
+        Assert.False(validationResult.IsValid);
+        Assert.Equal(ValidationSubject.Operation, validationResult.ValidationSubject);
+        Assert.NotNull(validationResult.Message);
     }
     
     [Fact]
@@ -25,21 +34,28 @@ public class TestRunOperationBuilderTests
         var setup = TestSuite.WithExpectedReturnType<int>();
         
         // Act
-        var useOperationFunc = () => setup.UseOperation(StaticMethods.Empty).Run();
+        var reporter = setup.UseOperation(StaticMethods.Empty).Run();
 
         // Assert
-        Assert.Throws<InvalidCastException>(useOperationFunc);
+        var testRunResult = TestHelpers.GetTestRunResultFromReporter(reporter);
+        var validationResult = testRunResult.ContextValidationResults
+            .SingleOrDefault(x => x.ValidationSubject == ValidationSubject.Operation);
+        
+        Assert.NotNull(validationResult);
+        Assert.False(validationResult.IsValid);
+        Assert.Equal(ValidationSubject.Operation, validationResult.ValidationSubject);
+        Assert.NotNull(validationResult.Message);
     }
     
     [Fact]
     public void UseOperation_ValidReturnType_ShouldBeValid()
     {
         // Arrange
-        Delegate @delegate = StaticMethods.Adder;
-        var expectedTestRunBuilder = new TestRunBuilder<int>(new DefaultTestRunReporterFactory(), new EntryAssemblyProvider(), new DefaultActivator(), null);
+        var context = TestHelpers.CreateEmptyContext<int>();
+        var expectedTestRunBuilder = new TestRunBuilder<int>(context);
         
         // Act
-        var testRunBuilder = TestSuite.WithExpectedReturnType<int>().UseOperation(@delegate).Run();
+        var testRunBuilder = TestSuite.WithExpectedReturnType<int>().UseOperation(StaticMethods.Adder).Run();
 
         // Assert
         Assert.Equivalent(expectedTestRunBuilder, testRunBuilder, strict: true);

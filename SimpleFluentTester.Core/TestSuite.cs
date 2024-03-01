@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using SimpleFluentTester.Entities;
 using SimpleFluentTester.Reporter;
 using SimpleFluentTester.TestRun;
+using SimpleFluentTester.Validators.Core;
 
 namespace SimpleFluentTester;
 
@@ -15,9 +16,10 @@ public static class TestSuite
     /// Defines the return type of the function that we plan to test.
     /// The type should implement IEquatable interface or comparer should be provided. 
     /// </summary>
-    public static TestRunBuilder<TOutput> WithExpectedReturnType<TOutput>(Func<TOutput, TOutput, bool>? comparer = null)
+    public static TestRunBuilder<TOutput> WithExpectedReturnType<TOutput>(Func<TOutput?, TOutput?, bool>? comparer = null)
     {
-        return new TestRunBuilder<TOutput>(GetDefaultContext(true, comparer, null));
+        var context = CreateDefaultContext(true, comparer, null);
+        return new TestRunBuilder<TOutput>(context);
     }
     
     /// <summary>
@@ -26,7 +28,19 @@ public static class TestSuite
     /// </summary>
     public static TestRunBuilder<object> UseOperation(Delegate operation)
     {
-        return new TestRunBuilder<object>(GetDefaultContext<object>(true, null, operation));
+        var context = CreateDefaultContext<object>(true, null, null);
+        var builder = new TestRunBuilder<object>(context);
+        return builder.UseOperation(operation);
+    }
+    
+    /// <summary>
+    /// Specifies the expected value resulting from the execution of this test case without operation specification.
+    /// </summary>
+    public static TestCaseBuilder<object> Expect(object? expected)
+    {
+        var context = CreateDefaultContext<object>(true, null, null);
+        var builder = new TestRunBuilder<object>(context);
+        return builder.Expect(expected);
     }
 
     /// <summary>
@@ -40,18 +54,20 @@ public static class TestSuite
         /// <summary>
         /// This method fakes <see cref="TestSuite.WithExpectedReturnType{TOutput}"/> declaration just to keep fluent flow of methods.
         /// </summary>
-        public TestRunBuilder<TOutput> WithExpectedReturnType<TOutput>(Func<TOutput, TOutput, bool>? comparer = null)
+        public TestRunBuilder<TOutput> WithExpectedReturnType<TOutput>(Func<TOutput?, TOutput?, bool>? comparer = null)
         {
-            return new TestRunBuilder<TOutput>(GetDefaultContext(false, comparer, null));
+            var context = CreateDefaultContext(false, comparer, null);
+            return new TestRunBuilder<TOutput>(context);
         }
     }
 
-    private static TestRunBuilderContext<TOutput> GetDefaultContext<TOutput>(bool shouldBeExecuted, Func<TOutput, TOutput, bool>? comparer, Delegate? operation)
+    private static TestRunBuilderContext<TOutput> CreateDefaultContext<TOutput>(bool shouldBeExecuted, Func<TOutput?, TOutput?, bool>? comparer, Delegate? operation)
     {
         return new TestRunBuilderContext<TOutput>(
             new EntryAssemblyProvider(), 
             new DefaultActivator(),
             new List<TestCase<TOutput>>(), 
+            new HashSet<ValidationInvoker<TOutput>>(),
             new DefaultTestRunReporterFactory(), 
             new ValueWrapper<Delegate>(operation), 
             comparer,

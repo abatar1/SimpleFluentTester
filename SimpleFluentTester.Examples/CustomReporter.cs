@@ -1,18 +1,19 @@
-using System.Collections;
-using System.Reflection;
+using System.Text;
+using Microsoft.Extensions.Logging;
 using SimpleFluentTester.Reporter;
+using SimpleFluentTester.TestRun;
 
 namespace SimpleFluentTester.Examples;
 
-internal sealed class CustomReporter(IEnumerable innerTestResults, MethodInfo methodInfo) : BaseTestRunReporter<int>(innerTestResults, methodInfo)
+internal sealed class CustomReporter<TOutput>(TestRunResult<TOutput> testRunResult) : BaseTestRunReporter<TOutput>(testRunResult)
 {
     public override void Report()
     {
-        Console.WriteLine($"\nCustom console test reporter for method [{MethodInfo}]\n");
-        foreach (var innerTestResult in InnerTestResults)
-        {
-            Console.WriteLine(innerTestResult);
-            Console.WriteLine();
-        }
+        var stringBuilder = new StringBuilder();
+        stringBuilder.AppendLine("Custom console test reporter example");
+        stringBuilder.AppendLine($"Executing tests for target method [{testRunResult.OperationMethodInfo}]");
+        stringBuilder.AppendLine($"Total tests: {testRunResult.ValidatedTestCases.Count}");
+        var logger = BuildLoggerFactory().CreateLogger<CustomReporter<TOutput>>();
+        logger.LogInformation(stringBuilder.ToString());
     }
 }
