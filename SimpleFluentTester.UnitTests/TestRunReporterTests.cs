@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Reflection;
+﻿using System.Reflection;
 using SimpleFluentTester.Entities;
 using SimpleFluentTester.Reporter;
 using SimpleFluentTester.TestRun;

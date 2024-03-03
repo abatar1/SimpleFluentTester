@@ -1,5 +1,3 @@
-using SimpleFluentTester.Entities;
-using SimpleFluentTester.Reporter;
 using SimpleFluentTester.TestRun;
 using SimpleFluentTester.Validators.Core;
 
@@ -51,13 +49,19 @@ public class TestRunOperationBuilderTests
     public void UseOperation_ValidReturnType_ShouldBeValid()
     {
         // Arrange
-        var context = TestHelpers.CreateEmptyContext<int>();
-        var expectedTestRunBuilder = new TestRunBuilder<int>(context);
+        var setup = TestSuite.Sequential.WithExpectedReturnType<int>();
         
         // Act
-        var testRunBuilder = TestSuite.Sequential.WithExpectedReturnType<int>().UseOperation(StaticMethods.Adder).Run();
+        var reporter = setup.UseOperation(StaticMethods.Adder).Run();
 
         // Assert
-        Assert.Equivalent(expectedTestRunBuilder, testRunBuilder, strict: true);
+        var testRunResult = TestHelpers.GetTestRunResultFromReporter(reporter);
+        var validationResult = testRunResult.ContextValidationResults
+            .SingleOrDefault(x => x.ValidationSubject == ValidationSubject.Operation);
+        
+        Assert.NotNull(validationResult);
+        Assert.True(validationResult.IsValid);
+        Assert.Equal(ValidationSubject.Operation, validationResult.ValidationSubject);
+        Assert.Null(validationResult.Message);
     }
 }
