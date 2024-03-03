@@ -46,7 +46,7 @@ jobs:
         id: nuget-latest-version
         with:
           url: 'https://api.nuget.org/v3/registration5-semver1/simplefluenttester/index.json'
-          property_path: items[0].upper
+          property_path: items.0.upper
           
       - name: Increase latest nuget version
         id: nuget-next-version
