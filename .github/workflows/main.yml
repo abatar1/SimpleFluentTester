@@ -40,8 +40,23 @@ jobs:
       
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
-      
-      - run: dotnet pack SimpleFluentTester.Core -c Release -o ${{ env.NuGetDirectory }}
+
+      - name: Get latest nuget version
+        uses: senmu/download-json-property-action@v1.4.0
+        id: nuget-latest-version
+        with:
+          url: 'https://api.nuget.org/v3/registration5-semver1/simplefluenttester/index.json'
+          property_path: items[0].upper
+          
+      - name: Increase latest nuget version
+        id: nuget-next-version
+        uses: christian-draeger/increment-semantic-version@1.1.0
+        with:
+          current-version: ${{ steps.nuget-latest-version.outputs.value }}
+          version-fragment: 'bug'
+        
+      - name: Pack nuget
+        run: dotnet pack SimpleFluentTester.Core -c Release -o ${{ env.NuGetDirectory }} /p:Version=${{ steps.nuget-next-version.outputs.next-version }}
 
       - name: Upload nuget artifact
         uses: actions/upload-artifact@v4
