@@ -14,7 +14,7 @@ public sealed class TestCaseBuilder<TOutput>(TOutput? expected, TestRunBuilderCo
     /// </summary>
     public TestRunBuilder<TOutput> WithInput(params object?[] inputs)
     {
-        var assert = new Lazy<Assert<TOutput>>(() => ExecuteTestIteration(context, inputs, expected));
+        var assert = new LazyAssert<TOutput>(() => ExecuteTestIteration(context, inputs, expected));
         
         var testCase = new TestCase<TOutput>(inputs, expected, assert, context.TestCases.Count + 1);
         

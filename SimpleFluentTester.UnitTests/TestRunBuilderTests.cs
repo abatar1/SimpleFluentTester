@@ -12,7 +12,7 @@ public class TestRunBuilderTests
     public void AddTestCase_NoReturnTypeSpecifiedWithValidExpectedType_ShouldBePassed()
     {
         // Arrange
-        var builder = TestSuite.UseOperation(StaticMethods.Adder);
+        var builder = TestSuite.Sequential.UseOperation(StaticMethods.Adder);
             
         // Act    
         var reporter = builder.Expect(2).WithInput(1, 1).Run();
@@ -26,7 +26,7 @@ public class TestRunBuilderTests
     public void AddTestCase_NoReturnTypeSpecifiedWithInvalidExpectedType_ThrowsException()
     {
         // Arrange
-        var builder = TestSuite.UseOperation(StaticMethods.Adder);
+        var builder = TestSuite.Sequential.UseOperation(StaticMethods.Adder);
             
         // Act    
         var reporter = builder.Expect("123").WithInput(1, 1).Run();
@@ -63,7 +63,7 @@ public class TestRunBuilderTests
     public void AddTestCase_OperationWithNullableParameter_ShouldBePassed()
     {
         // Arrange
-        var builder = TestSuite.UseOperation((int? a, int b) => a == null ? null : a + b);
+        var builder = TestSuite.Sequential.UseOperation((int? a, int b) => a == null ? null : a + b);
             
         // Act    
         var reporter = builder.Expect(null).WithInput(null, 1).Run();
@@ -77,7 +77,7 @@ public class TestRunBuilderTests
     public void AddTestCase_OperationWithNullableParameterButActualValue_ShouldNotThrow()
     {
         // Arrange
-        var builder = TestSuite.UseOperation((int? a, int? b) => a == null ? null : a + b);
+        var builder = TestSuite.Sequential.UseOperation((int? a, int? b) => a == null ? null : a + b);
             
         // Act    
         var reporter = builder
@@ -95,7 +95,7 @@ public class TestRunBuilderTests
     public void AddTestCase_OperationWithoutNullableParameterButNullExpected_ThrowsException()
     {
         // Arrange
-        var builder = TestSuite.UseOperation((int a, int b) => a + b);
+        var builder = TestSuite.Sequential.UseOperation((int a, int b) => a + b);
             
         // Act    
         var reporter = builder.Expect(null).WithInput(1, 1).Run();
@@ -171,7 +171,7 @@ public class TestRunBuilderTests
     public void AddTestCase_TestingOperationIsBroken_TestCaseHasException()
     {
         // Arrange
-        var builder = TestSuite.WithExpectedReturnType<int>()
+        var builder = TestSuite.Sequential.WithExpectedReturnType<int>()
             .UseOperation(StaticMethods.AdderThrowsCustomException);
         
         // Act
@@ -250,7 +250,7 @@ public class TestRunBuilderTests
     public void AddTestCase_WithCustomEquatableObject_ValidReturn()
     {
         // Arrange
-        var builder = TestSuite
+        var builder = TestSuite.Sequential
             .WithExpectedReturnType<EquatableTestObject>()
             .UseOperation((EquatableTestObject a, EquatableTestObject b) => new EquatableTestObject(a.Value + b.Value));
         
@@ -269,7 +269,7 @@ public class TestRunBuilderTests
     {
         // Arrange
         var comparer = (TestObject a, TestObject b) => a.Value == b.Value;
-        var setup = TestSuite
+        var setup = TestSuite.Sequential
             .WithExpectedReturnType(comparer);
         
         // Act
@@ -289,7 +289,7 @@ public class TestRunBuilderTests
         // Arrange
         
         // Act
-        var func = () => TestSuite.WithExpectedReturnType<TestObject>().Run();
+        var func = () => TestSuite.Sequential.WithExpectedReturnType<TestObject>().Run();
 
         // Assert
         Assert.Throws<InvalidOperationException>(func);
@@ -299,7 +299,7 @@ public class TestRunBuilderTests
     public void TestSuite_Ignored_TestCasesShouldBeIgnored()
     {
         // Arrange
-        var builder = TestSuite.Ignore.WithExpectedReturnType<int>()
+        var builder = TestSuite.Sequential.Ignore.WithExpectedReturnType<int>()
             .UseOperation(StaticMethods.Adder)
             .Expect(2).WithInput(1, 1, 1)
             .Expect(3).WithInput(1, 1, 1);
@@ -400,7 +400,7 @@ public class TestRunBuilderTests
 
     private static TestRunBuilder<int> SetupAdderBuilder()
     {
-        return TestSuite.WithExpectedReturnType<int>()
+        return TestSuite.Sequential.WithExpectedReturnType<int>()
             .UseOperation(StaticMethods.Adder);
     }
     

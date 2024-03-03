@@ -8,7 +8,7 @@
         <RootNamespace>SimpleFluentTester</RootNamespace>
         
         <PackageId>SimpleFluentTester</PackageId>
-        <Version>0.0.9</Version>
+        <Version>0.1.0</Version>
         <Authors>Evgeny Halzov</Authors>
         <PackageLicenseFile>LICENSE</PackageLicenseFile>
         <PackageReadmeFile>README.md</PackageReadmeFile>

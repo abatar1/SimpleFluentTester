@@ -20,7 +20,7 @@ public sealed class TestNumbersValidator : BaseValidator
     }
 }
 
-public sealed class TestNumbersValidatedObject(HashSet<int> testNumbers) : IValidatedObject
+public sealed class TestNumbersValidatedObject(ISet<int> testNumbers) : IValidatedObject
 {
-    public HashSet<int> TestNumbers { get; } = testNumbers;
+    public ISet<int> TestNumbers { get; } = testNumbers;
 }

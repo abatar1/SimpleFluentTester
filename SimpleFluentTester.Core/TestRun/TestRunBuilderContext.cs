@@ -17,7 +17,7 @@ public sealed class TestRunBuilderContext<TOutput>(
     Func<TOutput?, TOutput?, bool>? comparer,
     bool shouldBeExecuted)
 {
-    public bool ShouldBeExecuted { get; } = shouldBeExecuted;
+    public bool ShouldBeExecuted { get; internal set; } = shouldBeExecuted;
     
     public IEntryAssemblyProvider EntryAssemblyProvider { get; } = entryAssemblyProvider;
 
@@ -25,11 +25,11 @@ public sealed class TestRunBuilderContext<TOutput>(
 
     public IList<TestCase<TOutput>> TestCases { get; } = testCases;
 
-    public ITestRunReporterFactory ReporterFactory { get; set; } = reporterFactory;
+    public ITestRunReporterFactory ReporterFactory { get; internal set; } = reporterFactory;
 
     public ValueWrapper<Delegate> Operation { get; } = operation;
     
-    public Func<TOutput?, TOutput?, bool>? Comparer { get; } = comparer;
+    public Func<TOutput?, TOutput?, bool>? Comparer { get; internal set; } = comparer;
 
     public ISet<ValidationInvoker<TOutput>> Validators { get; } = validators;
 

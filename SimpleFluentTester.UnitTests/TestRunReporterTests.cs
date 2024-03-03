@@ -15,7 +15,7 @@ public class TestRunReporterTests
         // Assign
         
         // Act
-        TestSuite
+        TestSuite.Sequential
             .WithExpectedReturnType<int>()
             .UseOperation(StaticMethods.Adder)
             .Run()
@@ -30,7 +30,7 @@ public class TestRunReporterTests
         // Assign
         
         // Act
-        TestSuite
+        TestSuite.Sequential
             .WithExpectedReturnType<int>()
             .UseOperation(StaticMethods.Adder)
             .Expect(2).WithInput(1, 1)
@@ -46,7 +46,7 @@ public class TestRunReporterTests
         // Assign
         
         // Act
-        TestSuite
+        TestSuite.Sequential
             .WithExpectedReturnType<int>()
             .UseOperation(StaticMethods.Adder)
             .Expect(3).WithInput(1, 1)
@@ -62,7 +62,7 @@ public class TestRunReporterTests
         // Assign
         
         // Act
-        TestSuite
+        TestSuite.Sequential
             .WithExpectedReturnType<int>()
             .WithCustomReporterFactory<CustomReporterFactory>()
             .UseOperation(StaticMethods.Adder)
@@ -79,7 +79,7 @@ public class TestRunReporterTests
         // Assign
         
         // Act
-        TestSuite.Ignore
+        TestSuite.Sequential.Ignore
             .WithExpectedReturnType<int>()
             .UseOperation(StaticMethods.Adder)
             .Expect(2).WithInput(1, 1)
@@ -93,7 +93,7 @@ public class TestRunReporterTests
     public void TestCase_CreateMultipleInputsAndToString_ShouldNotThrow()
     {
         // Assign
-        var lazyResult = new Lazy<Assert<int>>(() => new Assert<int>(true, new ValueWrapper<int>(2),
+        var lazyResult = new LazyAssert<int>(() => new Assert<int>(true, new ValueWrapper<int>(2),
             new TargetInvocationException(new Exception()), TimeSpan.Zero));
         _ = lazyResult.Value;
         var testCase = new TestCase<int>(new[] { 1, 2 }.Cast<object>().ToArray(), 3, lazyResult, 1);
@@ -109,7 +109,7 @@ public class TestRunReporterTests
     public void TestCase_CreateSingleInputAndToString_ShouldNotThrow()
     {
         // Assign
-        var lazyResult = new Lazy<Assert<int>>(() => new Assert<int>(true, new ValueWrapper<int>(2),
+        var lazyResult = new LazyAssert<int>(() => new Assert<int>(true, new ValueWrapper<int>(2),
             new TargetInvocationException(new Exception()), TimeSpan.Zero));
         _ = lazyResult.Value;
         var testCase = new TestCase<int>(new[] { 1 }.Cast<object>().ToArray(), 3, lazyResult, 1);
@@ -125,7 +125,7 @@ public class TestRunReporterTests
     public void TestCase_ValueNotCreated_ShouldNotThrow()
     {
         // Assign
-        var lazyResult = new Lazy<Assert<int>>(() => new Assert<int>(true, new ValueWrapper<int>(2),
+        var lazyResult = new LazyAssert<int>(() => new Assert<int>(true, new ValueWrapper<int>(2),
             new TargetInvocationException(new Exception()), TimeSpan.Zero));
         var testCase = new TestCase<int>(new[] { 1 }.Cast<object>().ToArray(), 3, lazyResult, 1);
         var reporter = CreateReporterFromTestCase(testCase);
@@ -156,7 +156,7 @@ public class TestRunReporterTests
     
     private class CustomReporter<TOutput>(TestRunResult<TOutput> testRunResult) : BaseTestRunReporter<TOutput>(testRunResult)
     {
-        public override void Report()
+        protected override void ReportInternal()
         {
         }
     }

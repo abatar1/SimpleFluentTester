@@ -7,7 +7,7 @@ namespace SimpleFluentTester.Examples;
 
 internal sealed class CustomReporter<TOutput>(TestRunResult<TOutput> testRunResult) : BaseTestRunReporter<TOutput>(testRunResult)
 {
-    public override void Report()
+    protected override void ReportInternal()
     {
         var stringBuilder = new StringBuilder();
         stringBuilder.AppendLine("Custom console test reporter example");

@@ -11,7 +11,7 @@ public class TestRunOperationBuilderTests
     public void UseOperation_InvalidReturnType_ShouldThrow()
     {
         // Arrange
-        var setup = TestSuite.WithExpectedReturnType<string>();
+        var setup = TestSuite.Sequential.WithExpectedReturnType<string>();
         
         // Act
         var reporter = setup.UseOperation(StaticMethods.Adder).Run();
@@ -31,7 +31,7 @@ public class TestRunOperationBuilderTests
     public void UseOperation_NoReturn_ShouldThrow()
     {
         // Arrange
-        var setup = TestSuite.WithExpectedReturnType<int>();
+        var setup = TestSuite.Sequential.WithExpectedReturnType<int>();
         
         // Act
         var reporter = setup.UseOperation(StaticMethods.Empty).Run();
@@ -55,7 +55,7 @@ public class TestRunOperationBuilderTests
         var expectedTestRunBuilder = new TestRunBuilder<int>(context);
         
         // Act
-        var testRunBuilder = TestSuite.WithExpectedReturnType<int>().UseOperation(StaticMethods.Adder).Run();
+        var testRunBuilder = TestSuite.Sequential.WithExpectedReturnType<int>().UseOperation(StaticMethods.Adder).Run();
 
         // Assert
         Assert.Equivalent(expectedTestRunBuilder, testRunBuilder, strict: true);

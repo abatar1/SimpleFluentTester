@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -14,12 +15,13 @@ internal sealed class DefaultTestRunReporter<TOutput>(TestRunResult<TOutput> tes
 {
     private readonly TestRunResult<TOutput> _testRunResult = testRunResult;
 
-    public override void Report()
+    protected override void ReportInternal()
     {
-        if (testRunResult.Ignored)
+        if (_testRunResult.Ignored)
             return;
         
         var logger = BuildLoggerFactory().CreateLogger<DefaultTestRunReporter<TOutput>>();
+      
 
         if (!CheckNoTests(logger, _testRunResult.ValidatedTestCases))
             return;
@@ -28,22 +30,35 @@ internal sealed class DefaultTestRunReporter<TOutput>(TestRunResult<TOutput> tes
             .Where(x => x.AssertStatus != AssertStatus.Unknown)
             .ToList();
         
-        if (!CheckNoTestsToExecute(logger, executedTestCases))
-            return;
+        var stringBuilder = new StringBuilder();
 
-        LogHeader(logger,
+        AppendHeader(stringBuilder,
             _testRunResult.ValidatedTestCases,
             executedTestCases,
             _testRunResult.OperationMethodInfo);
 
-        var printableTestCases = executedTestCases
+        var printableTestCases = _testRunResult.ValidatedTestCases
             .Where(x => x.AssertStatus == AssertStatus.NotPassed || x.ValidationStatus != ValidationStatus.Valid)
             .ToList();
 
         foreach (var printableTestCase in printableTestCases)
-            LogResult(logger, printableTestCase);
+            AppendResult(stringBuilder, printableTestCase);
 
-        LogFooter(logger, executedTestCases, printableTestCases);
+        AppendFooter(stringBuilder, executedTestCases, printableTestCases);
+
+        var someTestCasesNotPassed = _testRunResult.ValidatedTestCases
+            .Any(x => x.AssertStatus is not (AssertStatus.Passed or AssertStatus.Unknown));
+        var someTestCasesNotValid = _testRunResult.ValidatedTestCases
+            .Any(x => x.ValidationStatus != ValidationStatus.Valid);
+        var suiteContextNotValid = _testRunResult.ContextValidationResults
+            .Any(x => !x.IsValid);
+
+        var printedMessage = stringBuilder.ToString();
+
+        if (someTestCasesNotPassed || someTestCasesNotValid || suiteContextNotValid)
+            logger.LogError(printedMessage);
+        else
+            logger.LogInformation(printedMessage);
     }
 
     private static bool CheckNoTests(ILogger logger, IList<ValidatedTestCase<TOutput>>? testCases)
@@ -54,46 +69,51 @@ internal sealed class DefaultTestRunReporter<TOutput>(TestRunResult<TOutput> tes
         logger.LogError("No test cases were added.\n");
         return false;
     }
-    
-    private static bool CheckNoTestsToExecute(ILogger logger, IList<ValidatedTestCase<TOutput>>? executedTestCases)
-    {
-        if (executedTestCases != null && executedTestCases.Count != 0) 
-            return true;
-        
-        logger.LogError("No test cases were executed.\n");
-        return false;
-    }
 
-    private static void LogHeader(ILogger logger, 
+    private void AppendHeader(StringBuilder stringBuilder,
         IList<ValidatedTestCase<TOutput>> testCases, 
         IList<ValidatedTestCase<TOutput>> testCasesToExecute, 
         MethodInfo? methodInfo)
     {
-        var headerStringBuilder = new StringBuilder();
-        headerStringBuilder.AppendLine($"Executing tests for target method [{methodInfo}]");
-        headerStringBuilder.AppendLine($"Total tests: {testCases.Count}");
-        headerStringBuilder.Append($"Tests to execute: {testCasesToExecute.Count}");
-        logger.LogInformation(headerStringBuilder.ToString());
+        stringBuilder.AppendLine($"Executing tests for target method [{methodInfo}]");
+        stringBuilder.AppendLine($"Total tests: {testCases.Count}");
+        stringBuilder.AppendLine($"Tests to execute: {testCasesToExecute.Count}");
+
+        var nonValidContextResults = _testRunResult.ContextValidationResults
+            .Where(x => !x.IsValid)
+            .ToList();
+        if (nonValidContextResults.Count != 0)
+        {
+            stringBuilder.AppendLine("Test suite did not pass a validation");
+            foreach (var validationResult in nonValidContextResults)
+                AppendValidationResult(stringBuilder, validationResult);
+        }
+
+        stringBuilder.AppendLine();
     }
 
-    private static void LogFooter(ILogger logger, 
+    private static void AppendValidationResult(StringBuilder stringBuilder, ValidationResult validationResult)
+    {
+        stringBuilder.AppendLine("\t-Validation subject: " + validationResult.ValidationSubject);
+        stringBuilder.AppendLine("\tError message: " + validationResult.Message);
+    }
+
+    private static void AppendFooter(StringBuilder stringBuilder, 
         ICollection<ValidatedTestCase<TOutput>> executedTestCases, 
         ICollection<ValidatedTestCase<TOutput>> printableTestCases)
     {
-        var footerStringBuilder = new StringBuilder();
-        LogLevel logLevel;
+        stringBuilder.AppendLine();
         
         if (printableTestCases.Count == 0)
         {
-            footerStringBuilder.AppendLine($"All {executedTestCases.Count} tests passed!");
-            logLevel = LogLevel.Information;
+            stringBuilder.AppendLine($"All {executedTestCases.Count} tests passed!");
         }
         else
         {
-            footerStringBuilder.Append(printableTestCases.Count);
-            footerStringBuilder.Append('/');
-            footerStringBuilder.Append(executedTestCases.Count);
-            footerStringBuilder.AppendLine(" tests haven't passed!");
+            stringBuilder.Append(printableTestCases.Count);
+            stringBuilder.Append('/');
+            stringBuilder.Append(executedTestCases.Count);
+            stringBuilder.AppendLine(" tests haven't passed!");
 
             var failedTestCaseNumbers = executedTestCases
                 .Where(x => x.AssertStatus == AssertStatus.NotPassed)
@@ -101,8 +121,8 @@ internal sealed class DefaultTestRunReporter<TOutput>(TestRunResult<TOutput> tes
                 .ToList();
             if (failedTestCaseNumbers.Any())
             {
-                footerStringBuilder.Append("Failed test cases: ");
-                footerStringBuilder.AppendLine(string.Join(", ", failedTestCaseNumbers));
+                stringBuilder.Append("Failed test cases: ");
+                stringBuilder.AppendLine(string.Join(", ", failedTestCaseNumbers));
             }
             
             var nonValidTestCaseNumbers =  executedTestCases
@@ -111,30 +131,29 @@ internal sealed class DefaultTestRunReporter<TOutput>(TestRunResult<TOutput> tes
                 .ToList();
             if (nonValidTestCaseNumbers.Any())
             {
-                footerStringBuilder.Append("Non-valid test cases: ");
-                footerStringBuilder.AppendLine(string.Join(", ", nonValidTestCaseNumbers));
+                stringBuilder.Append("Non-valid test cases: ");
+                stringBuilder.AppendLine(string.Join(", ", nonValidTestCaseNumbers));
             }
-            
-            logLevel = LogLevel.Error;
         }
-        
+
+        AppendStatisticsString(stringBuilder, executedTestCases);
+    }
+
+    private static void AppendStatisticsString(StringBuilder stringBuilder, ICollection<ValidatedTestCase<TOutput>> executedTestCases)
+    {
+        if (!executedTestCases.Any())
+            return;
         var totalElapsedMs = executedTestCases.Sum(x => x.TestCase.Assert.Value.ElapsedTime.TotalMilliseconds);
         var avgElapsedMs = totalElapsedMs / executedTestCases.Count;
         var maxElapsedTest = executedTestCases.OrderByDescending(x => x.TestCase.Assert.Value.ElapsedTime).First();
-        var statistics =
-            $"Elapsed total: {totalElapsedMs:F5}ms; Avg: {avgElapsedMs:F5}ms; Max: {maxElapsedTest.TestCase.Assert.Value.ElapsedTime.TotalMilliseconds:F5}ms [Number {maxElapsedTest.TestCase.Number}]";
-        footerStringBuilder.Append(statistics);
-        
-        logger.Log(logLevel, null, footerStringBuilder.ToString());
+        var statistics = $"Elapsed total: {totalElapsedMs:F5}ms; Avg: {avgElapsedMs:F5}ms; Max: {maxElapsedTest.TestCase.Assert.Value.ElapsedTime.TotalMilliseconds:F5}ms [Number {maxElapsedTest.TestCase.Number}]";
+        stringBuilder.AppendLine(statistics);
     }
-
-    private static void LogResult(ILogger logger, ValidatedTestCase<TOutput> validatedTestCase)
+    
+    private static void AppendResult(StringBuilder stringBuilder, ValidatedTestCase<TOutput> validatedTestCase)
     {
         var formattedTestCase = FormatTestCaseToString(validatedTestCase);
-        if (validatedTestCase.AssertStatus == AssertStatus.Passed)
-            logger.LogInformation(formattedTestCase);
-        else
-            logger.LogError(formattedTestCase);
+        stringBuilder.AppendLine(formattedTestCase);
     }
     
     private static string FormatTestCaseToString(ValidatedTestCase<TOutput> validatedTestCase)
@@ -142,36 +161,50 @@ internal sealed class DefaultTestRunReporter<TOutput>(TestRunResult<TOutput> tes
         var stringBuilder = new StringBuilder();
 
         var testCase = validatedTestCase.TestCase;
-
-        if (validatedTestCase.AssertStatus == AssertStatus.Unknown)
+        
+        if (validatedTestCase.ValidationStatus == ValidationStatus.NonValid)
         {
-            stringBuilder.AppendLine($"Test case [{testCase.Number}] not calculated");
-            AddInputString(testCase, stringBuilder);
-            AddExpectedString(testCase, stringBuilder);
-            return stringBuilder.ToString();
+            stringBuilder.AppendLine($"Test case [{testCase.Number}] not passed with a validation error:");
+            foreach (var validationResult in validatedTestCase.ValidationResults.Where(x => !x.IsValid))
+                AppendValidationResult(stringBuilder, validationResult);
         }
 
-        var calculatedAssert = testCase.Assert.Value;
-
-        var noError = calculatedAssert.Passed && calculatedAssert.Exception == null;
-
-        stringBuilder.AppendLine($"Test case [{testCase.Number}] {(!noError ? "not " : "")}passed");
+        switch (validatedTestCase.AssertStatus)
+        {
+            case AssertStatus.Unknown:
+                stringBuilder.AppendLine($"Test case [{testCase.Number}] not calculated");
+                AddInputString(testCase, stringBuilder);
+                AddExpectedString(testCase, stringBuilder);
+                return stringBuilder.ToString();
+            case AssertStatus.NotPassedWithException:
+            {
+                stringBuilder.AppendLine($"Test case [{testCase.Number}] not passed with an exception");
+                var exception = testCase.Assert.Value.Exception;
+                if (exception is TargetInvocationException targetInvocationException)
+                    exception = targetInvocationException.InnerException;
+                stringBuilder.AppendLine();
+                stringBuilder.Append($"Exception: {exception}");
+                break;
+            }
+            case AssertStatus.Passed:
+                stringBuilder.AppendLine($"Test case [{testCase.Number}] passed");
+                break;
+            case AssertStatus.NotPassed:
+                stringBuilder.AppendLine($"Test case [{testCase.Number}] not passed");
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
 
         AddInputString(testCase, stringBuilder);
         AddExpectedString(testCase, stringBuilder);
 
-        if (calculatedAssert.Output != null)
-            stringBuilder.AppendLine($"Output: '{calculatedAssert.Output.Value}'");
-      
-        stringBuilder.Append($"Elapsed: {calculatedAssert.ElapsedTime.TotalMilliseconds:F5}ms");
-
-        if (calculatedAssert.Exception != null)
+        if (validatedTestCase.ValidationStatus == ValidationStatus.Valid)
         {
-            var exception = calculatedAssert.Exception;
-            if (exception is TargetInvocationException targetInvocationException)
-                exception = targetInvocationException.InnerException;
-            stringBuilder.AppendLine();
-            stringBuilder.Append($"Exception: {exception}");
+            var assert = validatedTestCase.TestCase.Assert.Value;
+            if (assert.Output != null && validatedTestCase.AssertStatus != AssertStatus.NotPassedWithException)
+                stringBuilder.AppendLine($"\tOutput: '{assert.Output.Value}'");
+            stringBuilder.Append($"\tElapsed: {assert.ElapsedTime.TotalMilliseconds:F5}ms");
         }
 
         return stringBuilder.ToString();
@@ -180,15 +213,15 @@ internal sealed class DefaultTestRunReporter<TOutput>(TestRunResult<TOutput> tes
     private static StringBuilder AddInputString(TestCase<TOutput> testCase, StringBuilder stringBuilder)
     {
         if (testCase.Inputs.Length == 1)
-            stringBuilder.AppendLine($"Input: '{testCase.Inputs}'");
+            stringBuilder.AppendLine($"\tInput: '{testCase.Inputs}'");
         else
-            stringBuilder.AppendLine($"Inputs: {string.Join(", ", testCase.Inputs.Select(x => $"'{x}'"))}");
+            stringBuilder.AppendLine($"\tInputs: {string.Join(", ", testCase.Inputs.Select(x => $"'{x}'"))}");
         return stringBuilder;
     }
     
     private static StringBuilder AddExpectedString(TestCase<TOutput> testCase, StringBuilder stringBuilder)
     {
-        stringBuilder.AppendLine($"Expected: '{testCase.Expected}'");
+        stringBuilder.AppendLine($"\tExpected: '{testCase.Expected}'");
         return stringBuilder;
     }
 }

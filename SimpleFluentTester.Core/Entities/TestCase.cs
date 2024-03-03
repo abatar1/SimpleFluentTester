@@ -1,15 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using SimpleFluentTester.Validators.Core;
 
 namespace SimpleFluentTester.Entities;
 
 public sealed class TestCase<TOutput>(object?[] inputs, 
     TOutput? expected, 
-    Lazy<Assert<TOutput>> assert, 
+    LazyAssert<TOutput> assert, 
     int number)
 {
-    public Lazy<Assert<TOutput>> Assert { get; } = assert;
+    public LazyAssert<TOutput> Assert { get; } = assert;
 
     public ISet<ValidationInvoker<TOutput>> Validators { get; } = new HashSet<ValidationInvoker<TOutput>>();
     

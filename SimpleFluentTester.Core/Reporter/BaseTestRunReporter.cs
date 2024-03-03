@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using System;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Console;
 using SimpleFluentTester.TestRun;
 
@@ -11,7 +12,20 @@ public abstract class BaseTestRunReporter<TOutput>(TestRunResult<TOutput> testRu
 {
     protected readonly TestRunResult<TOutput> TestRunResult = testRunResult;
 
-    public abstract void Report();
+    public void Report()
+    {
+        try
+        {
+            ReportInternal();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine("Couldn't report a result of TestSuite. Exception: {0}", e);
+            throw;
+        }
+    }
+
+    protected abstract void ReportInternal();
 
     protected virtual ILoggerFactory BuildLoggerFactory()
     {
