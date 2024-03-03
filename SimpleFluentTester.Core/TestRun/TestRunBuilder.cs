@@ -55,7 +55,7 @@ public sealed class TestRunBuilder<TOutput>
             .Select(testCase =>
             {
                 if (testCase.Expected is not TNewOutput castedExpected)
-                    throw new InvalidCastException("Expected type is not the same as ");
+                    throw new InvalidCastException("Expected type is not the same as operation type");
                 var conversionExpression = Expression.Convert(testCase.Assert.AssertExpression.Body, typeof(TNewOutput));
                 var castedAssertExpression = Expression.Lambda<Func<Assert<TNewOutput>>>(conversionExpression,
                     testCase.Assert.AssertExpression.Parameters);
@@ -69,7 +69,7 @@ public sealed class TestRunBuilder<TOutput>
             .Select(x => x as ValidationInvoker<TNewOutput>)
             .ToList();
         if (castedValidators == null || castedValidators.Any(x => x == null))
-            throw new InvalidCastException("TODO");
+            throw new InvalidCastException("Couldn't cast validators, this should be a bug");
         var castedValidatorsHash = new HashSet<ValidationInvoker<TNewOutput>>(castedValidators);
         
         var newContext = new TestRunBuilderContext<TNewOutput>(
