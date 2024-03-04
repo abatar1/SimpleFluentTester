@@ -92,11 +92,10 @@ public class TestRunReporterTests
     public void TestCase_CreateMultipleInputsAndToString_ShouldNotThrow()
     {
         // Assign
-        var lazyResult = new LazyAssert<int>(() => new Assert<int>(true, new ValueWrapper<int>(2),
-            new TargetInvocationException(new Exception()), TimeSpan.Zero));
-        _ = lazyResult.Value;
-        var testCase = new TestCase<int>(new[] { 1, 2 }.Cast<object>().ToArray(), 3, lazyResult, 1);
-        var reporter = CreateReporterFromTestCase(testCase);
+        var assert = new Assert<int>(true, new ValueWrapper<int>(2),
+            new TargetInvocationException(new Exception()), TimeSpan.Zero);
+        var testCase = new TestCase<int>(new[] { 1, 2 }.Cast<object>().ToArray(), 3, 1);
+        var reporter = CreateReporterFromTestCase(assert, testCase);
 
         // Act
         reporter.Report();
@@ -108,11 +107,10 @@ public class TestRunReporterTests
     public void TestCase_CreateSingleInputAndToString_ShouldNotThrow()
     {
         // Assign
-        var lazyResult = new LazyAssert<int>(() => new Assert<int>(true, new ValueWrapper<int>(2),
-            new TargetInvocationException(new Exception()), TimeSpan.Zero));
-        _ = lazyResult.Value;
-        var testCase = new TestCase<int>(new[] { 1 }.Cast<object>().ToArray(), 3, lazyResult, 1);
-        var reporter = CreateReporterFromTestCase(testCase);
+        var assert = new Assert<int>(true, new ValueWrapper<int>(2),
+            new TargetInvocationException(new Exception()), TimeSpan.Zero);
+        var testCase = new TestCase<int>(new[] { 1 }.Cast<object>().ToArray(), 3, 1);
+        var reporter = CreateReporterFromTestCase(assert, testCase);
         
         // Act
         reporter.Report();
@@ -124,10 +122,10 @@ public class TestRunReporterTests
     public void TestCase_ValueNotCreated_ShouldNotThrow()
     {
         // Assign
-        var lazyResult = new LazyAssert<int>(() => new Assert<int>(true, new ValueWrapper<int>(2),
-            new TargetInvocationException(new Exception()), TimeSpan.Zero));
-        var testCase = new TestCase<int>(new[] { 1 }.Cast<object>().ToArray(), 3, lazyResult, 1);
-        var reporter = CreateReporterFromTestCase(testCase);
+        var assert = new Assert<int>(true, new ValueWrapper<int>(2),
+            new TargetInvocationException(new Exception()), TimeSpan.Zero);
+        var testCase = new TestCase<int>(new[] { 1 }.Cast<object>().ToArray(), 3, 1);
+        var reporter = CreateReporterFromTestCase(assert, testCase);
 
         // Act
         reporter.Report();
@@ -135,25 +133,27 @@ public class TestRunReporterTests
         // Assert
     }
 
-    private static ITestRunReporter CreateReporterFromTestCase<TOutput>(TestCase<TOutput> testCase)
+    private static ITestRunReporter CreateReporterFromTestCase<TOutput>(Assert<TOutput> assert, TestCase<TOutput> testCase, string? name = null)
     {
-        var validatedTestCase = new ValidatedTestCase<TOutput>(ValidationStatus.Valid, testCase, new List<ValidationResult>());
-        var runResult = new TestRunResult<TOutput>(
-            new List<ValidatedTestCase<TOutput>> { validatedTestCase },
+        var validatedTestCase = new CompletedTestCase<TOutput>(assert, ValidationStatus.Valid, testCase, new List<ValidationResult>());
+        var runResult = new TestSuiteResult<TOutput>(
+            new List<CompletedTestCase<TOutput>> { validatedTestCase },
             new List<ValidationResult>(), 
-            StaticMethods.AdderMethodInfo);
+            StaticMethods.AdderMethodInfo, 
+            name,
+            0);
         return new DefaultTestRunReporter<TOutput>(runResult);
     }
 
     private class CustomReporterFactory : ITestRunReporterFactory
     {
-        public ITestRunReporter GetReporter<TOutput>(TestRunResult<TOutput> testRunResult)
+        public ITestRunReporter GetReporter<TOutput>(TestSuiteResult<TOutput> testRunResult)
         {
             return new CustomReporter<TOutput>(testRunResult);
         }
     }
     
-    private class CustomReporter<TOutput>(TestRunResult<TOutput> testRunResult) : BaseTestRunReporter<TOutput>(testRunResult)
+    private class CustomReporter<TOutput>(TestSuiteResult<TOutput> testRunResult) : BaseTestRunReporter<TOutput>(testRunResult)
     {
         protected override void ReportInternal()
         {

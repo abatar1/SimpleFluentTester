@@ -6,8 +6,8 @@ namespace SimpleFluentTester.Validators.Core;
 
 public static class BuilderContextValidatorExtensions
 {
-    public static TestRunBuilderContext<TOutput> RegisterValidator<TOutput>(
-        this TestRunBuilderContext<TOutput> context,
+    public static TestSuiteBuilderContext<TOutput> RegisterValidator<TOutput>(
+        this TestSuiteBuilderContext<TOutput> context,
         Type validatorType, 
         IValidatedObject validatedObject)
     {
@@ -18,7 +18,7 @@ public static class BuilderContextValidatorExtensions
     
     public static TestCase<TOutput> RegisterValidator<TOutput>(
         this TestCase<TOutput> testCase,
-        TestRunBuilderContext<TOutput> context,
+        TestSuiteBuilderContext<TOutput> context,
         Type validatorType, 
         IValidatedObject validatedObject)
     {
@@ -28,7 +28,7 @@ public static class BuilderContextValidatorExtensions
     }
 
     private static ValidationInvoker<TOutput> CreateValidationInvoker<TOutput>(Type validatorType,
-        TestRunBuilderContext<TOutput> context,
+        TestSuiteBuilderContext<TOutput> context,
         IValidatedObject validatedObject)
     {
         var validator = (IValidator)Activator.CreateInstance(validatorType);

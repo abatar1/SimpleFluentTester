@@ -7,5 +7,5 @@ namespace SimpleFluentTester.Reporter;
 /// </summary>
 public interface ITestRunReporterFactory
 {
-    ITestRunReporter GetReporter<TOutput>(TestRunResult<TOutput> testRunResult);
+    ITestRunReporter GetReporter<TOutput>(TestSuiteResult<TOutput> testRunResult);
 }

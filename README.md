@@ -37,6 +37,8 @@ Let's start writing test cases for it!
 
 ```csharp
 TestSuite.Sequential
+     // Here we could optionally specify how test suite result log entry will be shown in output.
+     .WithDisplayName("Example of TestSuite")
      // Here we specify the method we want to test.
     .UseOperation(Adder) 
      // Then we add 2 valid tests and one invalid test.
@@ -50,7 +52,7 @@ TestSuite.Sequential
 And the output of this code will indicate that one out of the three test cases has not passed: 
    
 ```
-05:10:31.455 fail: SimpleFluentTester.Reporter.DefaultTestRunReporter[0]
+05:10:31.455 fail: Example of TestSuite[0]
       Executing tests for target method [Int32 Adder(Int32, Int32)]
       Total tests: 3
       Tests to execute: 3
@@ -110,6 +112,19 @@ TestSuite.Sequential
 
 If you have any questions, you can find all these examples in [this project](/SimpleFluentTester.Examples) 
 or ask me directly via [email](mailto:evgenyhalzov@gmail.com?Subject=SimpleFluentTester)!
+
+## Contribution
+
+Would you like to contribute? I am always completely open to ideas or bug reports, and I also have a couple of open issues. 
+Please, follow the instructions below:
+
+Each modification of code should be introduced through a PR originating from the cloned repository. 
+
+`prerelease` branch should be selected as the target branch for a PR.
+
+Every PR undergoes checks to ensure that tests are passed and cover all the changes. 
+Test coverage must not decrease, and comprehensive unit tests should accompany any new implemented functionality. 
+In the case of substantial features, comprehensive documentation should also be included if needed.
 
 ## License
 

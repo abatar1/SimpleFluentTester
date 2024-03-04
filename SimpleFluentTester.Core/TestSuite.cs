@@ -12,11 +12,17 @@ namespace SimpleFluentTester;
 /// </summary>
 public static class TestSuite
 {
-    public static TestRunBuilder<object> Sequential
+
+    private static int _testSuiteNumber;
+        
+    public static TestSuiteBuilder<object> Sequential
     {
         get
         {
-            var context = new TestRunBuilderContext<object>(
+            _testSuiteNumber += 1;
+            var context = new TestSuiteBuilderContext<object>(
+                _testSuiteNumber,
+                nameof(TestSuite),
                 new EntryAssemblyProvider(), 
                 new DefaultActivator(),
                 new List<TestCase<object>>(), 
@@ -25,7 +31,7 @@ public static class TestSuite
                 new ValueWrapper<Delegate>(), 
                 null,
                 true);
-            return new TestRunBuilder<object>(context);
+            return new TestSuiteBuilder<object>(context);
         }
     }
 }
