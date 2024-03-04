@@ -1,29 +1,29 @@
-name: Latest release
+name: Prerelease
 
 on:
   push:
     branches:
-      - 'main'
-        
+      - 'prerelease'
+
 env:
   DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
   DOTNET_NOLOGO: true
   NuGetDirectory: ${{ github.workspace }}/nuget
   NuGetSource: https://api.nuget.org/v3/index.json
-    
-jobs:       
+
+jobs:
   unit_tests:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        
+
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
-        
+
       - name: Run unit tests
-        run: dotnet test SimpleFluentTester.UnitTests -c Release 
-          /p:CollectCoverage=true 
-          /p:CoverletOutput=TestResults/ 
+        run: dotnet test SimpleFluentTester.UnitTests -c Release
+          /p:CollectCoverage=true
+          /p:CoverletOutput=TestResults/
           /p:CoverletOutputFormat=lcov
 
       - name: Publish coverage report to coveralls.io
@@ -31,14 +31,14 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           path-to-lcov: SimpleFluentTester.UnitTests/TestResults/coverage.info
-          flag-name: release
+          flag-name: prerelease
   
   create_nuget:
     runs-on: ubuntu-latest
     needs: [ unit_tests ]
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
 
@@ -48,14 +48,14 @@ jobs:
         with:
           url: 'https://api.nuget.org/v3/registration5-semver1/simplefluenttester/index.json'
           property_path: items.0.upper
-          
+
       - name: Increase latest nuget version
         id: nuget-next-version
         uses: christian-draeger/increment-semantic-version@1.1.0
         with:
           current-version: ${{ steps.nuget-latest-version.outputs.value }}
-          version-fragment: 'feature'
-        
+          version-fragment: 'bug'
+
       - name: Pack nuget
         run: dotnet pack SimpleFluentTester.Core -c Release -o ${{ env.NuGetDirectory }} /p:Version=${{ steps.nuget-next-version.outputs.next-version }}
 
@@ -80,7 +80,7 @@ jobs:
 
       - name: Setup .NET Core
         uses: actions/setup-dotnet@v4
-          
+
       - name: Publish NuGet package to NuGet Packages
         run: |
           dotnet nuget push ${{ env.NuGetDirectory }}/SimpleFluentTester.*.nupkg -k "${{ secrets.NUGET_TOKEN }}" -s ${{ env.NuGetSource }} --skip-duplicate
