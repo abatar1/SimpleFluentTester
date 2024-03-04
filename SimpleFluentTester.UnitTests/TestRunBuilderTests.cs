@@ -36,7 +36,7 @@ public class TestRunBuilderTests
         AssertTestCasesValidationHasFailed(testRunResult, ValidationSubject.Operation);
     }
 
-    private static void AssertContextValidationHasFailed<TOutput>(TestRunResult<TOutput> testRunResult, ValidationSubject validationSubject)
+    private static void AssertContextValidationHasFailed<TOutput>(TestSuiteResult<TOutput> testRunResult, ValidationSubject validationSubject)
     {
         var validationResult = testRunResult.ContextValidationResults
             .SingleOrDefault(x => x.ValidationSubject == validationSubject);
@@ -47,9 +47,9 @@ public class TestRunBuilderTests
         Assert.Equal(validationSubject, validationResult.ValidationSubject);
     }
     
-    private static void AssertTestCasesValidationHasFailed<TOutput>(TestRunResult<TOutput> testRunResult, ValidationSubject validationSubject)
+    private static void AssertTestCasesValidationHasFailed<TOutput>(TestSuiteResult<TOutput> testRunResult, ValidationSubject validationSubject)
     {
-        var validationResult = testRunResult.ValidatedTestCases
+        var validationResult = testRunResult.TestCases
             .SelectMany(x => x.ValidationResults)
             .SingleOrDefault(x => x.ValidationSubject == validationSubject);
         
@@ -63,21 +63,21 @@ public class TestRunBuilderTests
     public void AddTestCase_OperationWithNullableParameter_ShouldBePassed()
     {
         // Arrange
-        var builder = TestSuite.Sequential.UseOperation((int? a, int b) => a == null ? null : a + b);
+        var builder = TestSuite.Sequential.UseOperation((int? a, int b) => a + b);
             
         // Act    
         var reporter = builder.Expect(null).WithInput(null, 1).Run();
         
         // Assert
-        var testRunResult = TestHelpers.GetTestRunResultFromReporter(reporter);
-        AssertPassedTestResult(1, testRunResult, null, [null, 1]);
+        var testSuiteResult = TestHelpers.GetTestRunResultFromReporter(reporter);
+        AssertPassedTestResult(1, testSuiteResult, null, [null, 1]);
     }
     
     [Fact]
     public void AddTestCase_OperationWithNullableParameterButActualValue_ShouldNotThrow()
     {
         // Arrange
-        var builder = TestSuite.Sequential.UseOperation((int? a, int? b) => a == null ? null : a + b);
+        var builder = TestSuite.Sequential.UseOperation((int? a, int? b) => a + b);
             
         // Act    
         var reporter = builder
@@ -182,14 +182,14 @@ public class TestRunBuilderTests
         // Assert
         var testRunResult = TestHelpers.GetTestRunResultFromReporter(reporter);
         
-        var validatedTestCase = testRunResult.ValidatedTestCases
-            .FirstOrDefault(x => x.TestCase.Number == 1);
-        Assert.NotNull(validatedTestCase);
-        Assert.Equal(AssertStatus.NotPassedWithException, validatedTestCase.AssertStatus);
-        Assert.Equal(ValidationStatus.Valid, validatedTestCase.ValidationStatus);
-        var testCase = validatedTestCase.TestCase;
-        Assert.NotNull(testCase.Assert.Value.Exception);
-        Assert.IsType<CustomException>(testCase.Assert.Value.Exception);
+        var testCase = testRunResult.TestCases
+            .FirstOrDefault(x => x.Number == 1);
+        Assert.NotNull(testCase);
+        Assert.Equal(AssertStatus.NotPassedWithException, testCase.AssertStatus);
+        Assert.Equal(ValidationStatus.Valid, testCase.ValidationStatus);
+        Assert.NotNull(testCase.Assert);
+        Assert.NotNull(testCase.Assert.Exception);
+        Assert.IsType<CustomException>(testCase.Assert.Exception);
     }
     
     [Fact]
@@ -215,7 +215,7 @@ public class TestRunBuilderTests
     {
         // Arrange
         var context = TestHelpers.CreateEmptyContext<int>();
-        var builder = new TestRunBuilder<int>(context);
+        var builder = new TestSuiteBuilder<int>(context);
         
         // Act
         var reporter = builder.UseOperation((int _, int _) => "test").Expect(2).WithInput(1, 1).Run();
@@ -234,7 +234,7 @@ public class TestRunBuilderTests
             .Setup(x => x.Get())
             .Returns(Assembly.GetAssembly(typeof(TestRunBuilderTests)));
         var context = TestHelpers.CreateEmptyContext<int>(entryAssemblyProviderMock.Object);
-        var builder = new TestRunBuilder<int>(context);
+        var builder = new TestSuiteBuilder<int>(context);
         
         // Act
         var reporter = builder
@@ -268,7 +268,7 @@ public class TestRunBuilderTests
     public void UseOperation_WithCustomObjectAndComparer_ValidReturn()
     {
         // Arrange
-        var comparer = (TestObject a, TestObject b) => a.Value == b.Value;
+        var comparer = (TestObject? a, TestObject? b) => a?.Value == b?.Value;
         var setup = TestSuite.Sequential
             .WithExpectedReturnType(comparer);
         
@@ -312,93 +312,105 @@ public class TestRunBuilderTests
         AssertSkippedTestResult(1, testRunResult, 2, [1, 1, 1]);
         AssertSkippedTestResult(2, testRunResult, 3, [1, 1, 1]);
     }
+    
+    [Fact]
+    public void TestSuite_WithDisplayName_ShouldBeCustomDisplayName()
+    {
+        // Arrange
+        var displayName = "test";
+        var builder = TestSuite.Sequential.WithDisplayName(displayName).UseOperation(StaticMethods.Adder);
+            
+        // Act    
+        var reporter = builder.Run();
+        
+        // Assert
+        var testRunResult = TestHelpers.GetTestRunResultFromReporter(reporter);
+        Assert.Equal(displayName, testRunResult.DisplayName);
+    }
 
     private static void AssertPassedTestResult<TOutput>(
         int testNumber,
-        TestRunResult<TOutput> testRunResult, 
-        TOutput expected, 
-        object[] inputs,
+        TestSuiteResult<TOutput>? testSuiteResult, 
+        TOutput? expected, 
+        object?[] inputs,
         Func<TOutput?, TOutput?, bool>? comparer = null)
     {
-        var validatedTestCase = testRunResult.ValidatedTestCases
-            .FirstOrDefault(x => x.TestCase.Number == testNumber);
+        Assert.NotNull(testSuiteResult);
+        var testCase = testSuiteResult.TestCases
+            .FirstOrDefault(x => x.Number == testNumber);
         
-        Assert.NotNull(validatedTestCase);
-        Assert.Equal(AssertStatus.Passed, validatedTestCase.AssertStatus);
-        Assert.Equal(ValidationStatus.Valid, validatedTestCase.ValidationStatus);
-        Assert.NotEmpty(validatedTestCase.ValidationResults);
-        foreach (var validationResult in validatedTestCase.ValidationResults)
+        Assert.NotNull(testCase);
+        Assert.Equal(AssertStatus.Passed, testCase.AssertStatus);
+        Assert.Equal(ValidationStatus.Valid, testCase.ValidationStatus);
+        Assert.NotEmpty(testCase.ValidationResults);
+        foreach (var validationResult in testCase.ValidationResults)
             Assert.True(validationResult.IsValid);
-
-        var testCase = validatedTestCase.TestCase;
-        Assert.True(testCase.Assert.IsValueCreated);
-        Assert.NotNull(testCase.Assert.Value.Output);
+        
+        Assert.NotNull(testCase.Assert);
+        Assert.NotNull(testCase.Assert.Output);
         if (typeof(TOutput) == typeof(object) || typeof(IEquatable<TOutput>).IsAssignableFrom(typeof(TOutput)))
         {
             Assert.Equal(expected, testCase.Expected);
             Assert.Equal(inputs, testCase.Inputs);
-            Assert.Equal(testCase.Expected, testCase.Assert.Value.Output.Value);
+            Assert.Equal(testCase.Expected, testCase.Assert.Output.Value);
         }
         else
         {
             Assert.True(comparer?.Invoke(expected, testCase.Expected));
-            Assert.True(comparer?.Invoke(testCase.Expected, testCase.Assert.Value.Output.Value));
+            Assert.True(comparer?.Invoke(testCase.Expected, testCase.Assert.Output.Value));
             foreach (var input in inputs.Zip(testCase.Inputs))
                 Assert.True(comparer?.Invoke((TOutput?)input.First, (TOutput?)input.Second));
         }
-        Assert.True(testCase.Assert.Value.Passed);
-        Assert.Null(testCase.Assert.Value.Exception);
-        Assert.True(testCase.Assert.Value.ElapsedTime.TotalMilliseconds > 0);
+        Assert.True(testCase.Assert.Passed);
+        Assert.Null(testCase.Assert.Exception);
+        Assert.True(testCase.Assert.ElapsedTime.TotalMilliseconds > 0);
     }
     
     private static void AssertNotPassedTestResult<TOutput>(
         int testNumber,
-        TestRunResult<TOutput> testRunResult, 
+        TestSuiteResult<TOutput> testRunResult, 
         TOutput expected, 
         object[] inputs)
     {
-        var validatedTestCase = testRunResult.ValidatedTestCases
-            .FirstOrDefault(x => x.TestCase.Number == testNumber);
+        var testCase = testRunResult.TestCases
+            .FirstOrDefault(x => x.Number == testNumber);
         
-        Assert.NotNull(validatedTestCase);
-        Assert.Equal(AssertStatus.NotPassed, validatedTestCase.AssertStatus);
-        Assert.Equal(ValidationStatus.Valid, validatedTestCase.ValidationStatus);
-        Assert.NotEmpty(validatedTestCase.ValidationResults);
-        foreach (var validationResult in validatedTestCase.ValidationResults)
+        Assert.NotNull(testCase);
+        Assert.Equal(AssertStatus.NotPassed, testCase.AssertStatus);
+        Assert.Equal(ValidationStatus.Valid, testCase.ValidationStatus);
+        Assert.NotEmpty(testCase.ValidationResults);
+        foreach (var validationResult in testCase.ValidationResults)
             Assert.True(validationResult.IsValid);
         
-        var testCase = validatedTestCase.TestCase;
-        Assert.True(testCase.Assert.IsValueCreated);
+        Assert.NotNull(testCase.Assert);
         Assert.Equal(expected, testCase.Expected);
         Assert.Equal(inputs, testCase.Inputs);
-        Assert.True(testCase.Assert.IsValueCreated);
-        Assert.False(testCase.Assert.Value.Passed);
-        Assert.Null(testCase.Assert.Value.Exception);
-        Assert.NotNull(testCase.Assert.Value.Output);
-        Assert.NotEqual(testCase.Expected, testCase.Assert.Value.Output.Value);
-        Assert.True(testCase.Assert.Value.ElapsedTime.TotalMilliseconds > 0);
+        Assert.False(testCase.Assert.Passed);
+        Assert.Null(testCase.Assert.Exception);
+        Assert.NotNull(testCase.Assert.Output);
+        Assert.NotEqual(testCase.Expected, testCase.Assert.Output.Value);
+        Assert.True(testCase.Assert.ElapsedTime.TotalMilliseconds > 0);
     }
 
     private void AssertSkippedTestResult<TOutput>(
         int testNumber,
-        TestRunResult<TOutput> testRunResult,
+        TestSuiteResult<TOutput> testRunResult,
         TOutput expected, 
         object[] inputs)
     {
-        var validatedTestCase = testRunResult.ValidatedTestCases
-            .FirstOrDefault(x => x.TestCase.Number == testNumber);
+        var testCase = testRunResult.TestCases
+            .FirstOrDefault(x => x.Number == testNumber);
         
-        Assert.NotNull(validatedTestCase);
-        Assert.Equal(AssertStatus.Unknown, validatedTestCase.AssertStatus);
-        Assert.Equal(ValidationStatus.Unknown, validatedTestCase.ValidationStatus);
+        Assert.NotNull(testCase);
+        Assert.Equal(AssertStatus.Unknown, testCase.AssertStatus);
+        Assert.Equal(ValidationStatus.Unknown, testCase.ValidationStatus);
         
-        var testCase = validatedTestCase.TestCase;
-        Assert.False(testCase.Assert.IsValueCreated);
+        Assert.Null(testCase.Assert);
         Assert.Equal(expected, testCase.Expected);
         Assert.Equal(inputs, testCase.Inputs);
     }
 
-    private static TestRunBuilder<int> SetupAdderBuilder()
+    private static TestSuiteBuilder<int> SetupAdderBuilder()
     {
         return TestSuite.Sequential.WithExpectedReturnType<int>()
             .UseOperation(StaticMethods.Adder);

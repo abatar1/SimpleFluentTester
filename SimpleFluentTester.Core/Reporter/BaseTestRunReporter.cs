@@ -8,9 +8,9 @@ namespace SimpleFluentTester.Reporter;
 /// <summary>
 /// Base class that should be used for defining your own custom reporter.
 /// </summary>
-public abstract class BaseTestRunReporter<TOutput>(TestRunResult<TOutput> testRunResult) : ITestRunReporter
+public abstract class BaseTestRunReporter<TOutput>(TestSuiteResult<TOutput> testRunResult) : ITestRunReporter
 {
-    protected readonly TestRunResult<TOutput> TestRunResult = testRunResult;
+    protected readonly TestSuiteResult<TOutput> TestRunResult = testRunResult;
 
     public void Report()
     {
@@ -27,9 +27,9 @@ public abstract class BaseTestRunReporter<TOutput>(TestRunResult<TOutput> testRu
 
     protected abstract void ReportInternal();
 
-    protected virtual ILoggerFactory BuildLoggerFactory()
+    protected virtual ILogger CreateLogger()
     {
-        return LoggerFactory.Create(loggerBuilder =>
+        var loggerFactory = LoggerFactory.Create(loggerBuilder =>
         {
             loggerBuilder.ClearProviders();
             loggerBuilder.AddSimpleConsole(x =>
@@ -39,5 +39,7 @@ public abstract class BaseTestRunReporter<TOutput>(TestRunResult<TOutput> testRu
                 x.ColorBehavior = LoggerColorBehavior.Enabled;
             });
         });
+
+        return loggerFactory.CreateLogger(TestRunResult.DisplayName ?? GetType().Name);
     }
 }

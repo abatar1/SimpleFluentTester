@@ -6,7 +6,7 @@ namespace SimpleFluentTester.Validators;
 
 public sealed class ComparerValidator : BaseValidator
 {
-    public override ValidationResult Validate<TOutput>(TestRunBuilderContext<TOutput> context, IValidatedObject validatedObject)
+    public override ValidationResult Validate<TOutput>(TestSuiteBuilderContext<TOutput> context, IValidatedObject validatedObject)
     {
         if (context.Comparer != null || context.IsObjectOutput)
             return ValidationResult.Ok(ValidationSubject.Comparer);

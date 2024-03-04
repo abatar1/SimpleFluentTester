@@ -7,7 +7,9 @@ using SimpleFluentTester.Validators.Core;
 
 namespace SimpleFluentTester.TestRun;
 
-public sealed class TestRunBuilderContext<TOutput>(
+public sealed class TestSuiteBuilderContext<TOutput>(
+    int number,
+    string name,
     IEntryAssemblyProvider entryAssemblyProvider,
     IActivator activator,
     IList<TestCase<TOutput>> testCases,
@@ -17,6 +19,10 @@ public sealed class TestRunBuilderContext<TOutput>(
     Func<TOutput?, TOutput?, bool>? comparer,
     bool shouldBeExecuted)
 {
+    public int Number { get; } = number;
+    
+    public string Name { get; internal set; } = name;
+    
     public bool ShouldBeExecuted { get; internal set; } = shouldBeExecuted;
     
     public IEntryAssemblyProvider EntryAssemblyProvider { get; } = entryAssemblyProvider;

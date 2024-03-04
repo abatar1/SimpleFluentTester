@@ -14,7 +14,7 @@ public abstract class BaseValidator : IValidator
     public virtual string Key => _key;
 
     public abstract ValidationResult Validate<TOutput>(
-        TestRunBuilderContext<TOutput> context,
+        TestSuiteBuilderContext<TOutput> context,
         IValidatedObject validatedObject);
 
     public bool Equals(IValidator other)

@@ -8,7 +8,7 @@ namespace SimpleFluentTester.UnitTests;
 
 public static class TestHelpers
 {
-    public static TestRunResult<TOutput> GetTestRunResultFromReporter<TOutput>(BaseTestRunReporter<TOutput> reporter)
+    public static TestSuiteResult<TOutput> GetTestRunResultFromReporter<TOutput>(BaseTestRunReporter<TOutput> reporter)
     {
         var baseReporterType = reporter.GetType().BaseType;
         Assert.NotNull(baseReporterType);
@@ -16,17 +16,19 @@ public static class TestHelpers
             .GetFields(BindingFlags.Instance | BindingFlags.NonPublic);
         
         var testRunResultProperty = reporterFields
-            .FirstOrDefault(x => x.FieldType == typeof(TestRunResult<TOutput>));
+            .FirstOrDefault(x => x.FieldType == typeof(TestSuiteResult<TOutput>));
         Assert.NotNull(testRunResultProperty);
-        var testCases = testRunResultProperty.GetValue(reporter) as TestRunResult<TOutput>;
+        var testCases = testRunResultProperty.GetValue(reporter) as TestSuiteResult<TOutput>;
         Assert.NotNull(testCases);
         return testCases;
     }
     
-    public static TestRunBuilderContext<TOutput> CreateEmptyContext<TOutput>(IEntryAssemblyProvider? assemblyProvider = null)
+    public static TestSuiteBuilderContext<TOutput> CreateEmptyContext<TOutput>(IEntryAssemblyProvider? assemblyProvider = null)
     {
         assemblyProvider ??= new EntryAssemblyProvider();
-        return new TestRunBuilderContext<TOutput>(
+        return new TestSuiteBuilderContext<TOutput>(
+            0,
+            "TestSuite",
             assemblyProvider, 
             new DefaultActivator(),
             new List<TestCase<TOutput>>(), 

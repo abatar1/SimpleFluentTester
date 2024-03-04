@@ -6,7 +6,7 @@ namespace SimpleFluentTester.Validators;
 
 public sealed class OperationValidator : BaseValidator
 {
-    public override ValidationResult Validate<TOutput>(TestRunBuilderContext<TOutput> context, IValidatedObject validatedObject)
+    public override ValidationResult Validate<TOutput>(TestSuiteBuilderContext<TOutput> context, IValidatedObject validatedObject)
     {
         if (validatedObject is not OperationValidatedObject nonTypedOperationValidatedObject)
             throw new ValidationUnexpectedException("Was not able to cast validated object to it's type, seems like a bug.");

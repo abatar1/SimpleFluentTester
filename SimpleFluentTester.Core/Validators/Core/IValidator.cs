@@ -7,5 +7,5 @@ public interface IValidator : IEquatable<IValidator>
 {
     string Key { get; }
     
-    ValidationResult Validate<TOutput>(TestRunBuilderContext<TOutput> context, IValidatedObject validatedObject);
+    ValidationResult Validate<TOutput>(TestSuiteBuilderContext<TOutput> context, IValidatedObject validatedObject);
 }
