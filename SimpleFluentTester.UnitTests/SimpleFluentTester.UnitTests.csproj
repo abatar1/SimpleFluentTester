@@ -24,7 +24,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\SimpleFluentTester.Core\SimpleFluentTester.Core.csproj" />
+      <ProjectReference Include="..\SimpleFluentTester\SimpleFluentTester.csproj" />
     </ItemGroup>
 
 </Project>
