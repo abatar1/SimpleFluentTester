@@ -7,7 +7,9 @@ namespace SimpleFluentTester.Validators;
 
 internal sealed class TestNumbersValidator : BaseValidator
 {
-    public override ValidationResult Validate<TOutput>(ITestSuiteBuilderContext<TOutput> context, IValidatedObject validatedObject)
+    public override ValidationResult Validate<TOutput>(
+        ITestSuiteBuilderContext<TOutput> context, 
+        IValidatedObject validatedObject)
     {
         if (validatedObject is not TestNumbersValidatedObject testCasesValidatedObject)
             throw new ValidationUnexpectedException("Was not able to cast validated object to it's type, seems like a bug.");

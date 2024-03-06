@@ -26,7 +26,8 @@ internal sealed class DefaultTestSuiteReportBuilder<TOutput> : ITestSuiteReportB
         
         var stringBuilder = new StringBuilder();
 
-        AppendHeader(stringBuilder, testSuiteResult, executedTestCases);
+        if (!TryAppendHeader(stringBuilder, testSuiteResult, executedTestCases))
+            return new PrintableTestSuiteResult(LogLevel.Error, testSuiteResult.Number, stringBuilder.ToString());
 
         var printableTestCases = testSuiteResult.TestCases
             .Where(x => x.AssertStatus == AssertStatus.NotPassed || x.ValidationStatus != ValidationStatus.Valid)
@@ -52,11 +53,11 @@ internal sealed class DefaultTestSuiteReportBuilder<TOutput> : ITestSuiteReportB
         return new PrintableTestSuiteResult(logLevel, testSuiteResult.Number, stringBuilder.ToString());
     }
 
-    private void AppendHeader(StringBuilder stringBuilder,
+    private static bool TryAppendHeader(StringBuilder stringBuilder,
         TestSuiteResult<TOutput> testRunResult,
         IList<CompletedTestCase<TOutput>> testCasesToExecute)
     {
-        stringBuilder.AppendLine($"Executing tests for target method [{testRunResult.OperationMethodInfo}]");
+        stringBuilder.AppendLine($"Executing tests for target method [{testRunResult.Operation.Value.Method}]");
         stringBuilder.AppendLine($"Total tests: {testRunResult.TestCases.Count}");
         stringBuilder.AppendLine($"Tests to execute: {testCasesToExecute.Count}");
 
@@ -68,9 +69,11 @@ internal sealed class DefaultTestSuiteReportBuilder<TOutput> : ITestSuiteReportB
             stringBuilder.AppendLine("Test suite did not pass a validation");
             foreach (var validationResult in nonValidContextResults)
                 AppendValidationResult(stringBuilder, validationResult);
+            return false;
         }
 
         stringBuilder.AppendLine();
+        return true;
     }
 
     private static void AppendValidationResult(StringBuilder stringBuilder, ValidationResult validationResult)

@@ -12,7 +12,7 @@ internal sealed class CustomTestSuiteReportBuilder<TOutput>(TestSuiteResult<TOut
     {
         var stringBuilder = new StringBuilder();
         stringBuilder.AppendLine("Custom console test reporter example");
-        stringBuilder.AppendLine($"Executing tests for target method [{testRunResult.OperationMethodInfo}]");
+        stringBuilder.AppendLine($"Executing tests for target method [{testRunResult.Operation.Value!.Method}]");
         stringBuilder.AppendLine($"Total tests: {testRunResult.TestCases.Count}");
         stringBuilder.AppendLine($"Passed tests: {testRunResult.TestCases.Count(x => x.AssertStatus == AssertStatus.Passed)}");
         return new PrintableTestSuiteResult(LogLevel.Information, testSuiteResult.Number, stringBuilder.ToString());

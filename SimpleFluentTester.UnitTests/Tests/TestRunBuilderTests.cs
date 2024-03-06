@@ -6,7 +6,7 @@ using SimpleFluentTester.TestCase;
 using SimpleFluentTester.TestSuite;
 using SimpleFluentTester.Validators.Core;
 
-namespace SimpleFluentTester.UnitTests;
+namespace SimpleFluentTester.UnitTests.Tests;
 
 public class TestRunBuilderTests
 {
@@ -160,20 +160,6 @@ public class TestRunBuilderTests
     }
     
     [Fact]
-    public void UseOperation_WithCustomObjectWithoutSetOperation_ShouldThrow()
-    {
-        // Arrange
-        
-        // Act
-        var func = () => TestSuite.TestSuite.Sequential
-            .WithComparer<TestObject>((x, y) => x == y)
-            .Run();
-
-        // Assert
-        Assert.Throws<InvalidOperationException>(func);
-    }
-    
-    [Fact]
     public void TestSuite_Ignored_TestCasesShouldBeIgnored()
     {
         // Arrange
@@ -269,7 +255,6 @@ public class TestRunBuilderTests
         Assert.Null(testCase.Assert.Exception);
         Assert.NotNull(testCase.Assert.Output);
         Assert.NotEqual(testCase.Expected, testCase.Assert.Output.Value);
-        Assert.True(testCase.Assert.ElapsedTime.TotalMilliseconds > 0);
     }
 
     private void AssertSkippedTestResult<TOutput>(

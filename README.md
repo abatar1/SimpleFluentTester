@@ -99,11 +99,10 @@ TestSuite.Sequential.Ignore // <- add Ignore here and this test run will be full
     .Report();
 ```
 
-If you use non-standard object types in your function, you can define how the TestSuite should compare them yourself.
+If you use non-standard object type in your function which is not assignable from IEquatable, you can define how the TestSuite should compare them yourself.
 ```csharp
 TestSuite.Sequential
-    // Return type of your testable method could be specified with a provided comparer.
-    .WithExpectedReturnType<CustomValue>((x, y) => x.Value == y.Value)
+    .WithComparer<CustomValue>((x, y) => x.Value == y.Value)
     .UseOperation((CustomValue a, CustomValue b) => a.Value + b.Value)
     .Expect(CustomValue.FromInt(2)).WithInput(CustomValue.FromInt(1), CustomValue.FromInt(1))
     .Run()

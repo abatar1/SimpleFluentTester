@@ -7,11 +7,5 @@ internal sealed class ValidationInvoker<TOutput>(
     ITestSuiteBuilderContext<TOutput> context, 
     IValidatedObject validatedObject) : IValidationInvoker
 {
-    public ValidationResult Invoke() => Validator.Validate(Context, ValidatedObject);
-    
-    public IValidator Validator { get; } = validator;
-    
-    public ITestSuiteBuilderContext<TOutput> Context { get; } = context;
-    
-    public IValidatedObject ValidatedObject { get; } = validatedObject;
+    public ValidationResult Invoke() => validator.Validate(context, validatedObject);
 }

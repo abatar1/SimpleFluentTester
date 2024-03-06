@@ -2,12 +2,12 @@ using SimpleFluentTester.Reporter;
 using SimpleFluentTester.TestSuite;
 using SimpleFluentTester.Validators.Core;
 
-namespace SimpleFluentTester.UnitTests;
+namespace SimpleFluentTester.UnitTests.Tests;
 
 public sealed class TestSuiteBuilderTests
 {
     [Fact]
-    public void UseOperation_InvalidReturnType_ShouldThrow()
+    public void UseOperation_InvalidReturnType_ShouldBeInvalid()
     {
         // Arrange
         var setup = TestSuite.TestSuite.Sequential
@@ -23,7 +23,7 @@ public sealed class TestSuiteBuilderTests
     }
     
     [Fact]
-    public void UseOperation_NoReturn_ShouldThrow()
+    public void UseOperation_NoReturn_ShouldBeInvalid()
     {
         // Arrange
         var setup = TestSuite.TestSuite.Sequential
@@ -39,7 +39,37 @@ public sealed class TestSuiteBuilderTests
     }
     
     [Fact]
-    public void UseOperation_ValidReturnType_ShouldBeValid()
+    public void UseOperation_NoOperationSet_ShouldBeInvalid()
+    {
+        // Arrange
+        var setup = TestSuite.TestSuite.Sequential
+            .WithComparer<int>((x, y) => x == y);
+        
+        // Act
+        var reporter = setup
+            .Run();
+
+        // Assert
+        AssertInvalidContextValidation(reporter, ValidationSubject.Operation);
+    }
+    
+    [Fact]
+    public void UseOperation_WithCustomObjectWithoutSetOperation_ShouldBeInvalid()
+    {
+        // Arrange
+        var setup = TestSuite.TestSuite.Sequential
+            .WithComparer<int>((x, y) => x == y);
+        
+        // Act
+        var reporter = setup
+            .Run();
+
+        // Assert
+        AssertInvalidContextValidation(reporter, ValidationSubject.Operation);
+    }
+    
+    [Fact]
+    public void UseOperation_ValidReturnType_ShouldBeInvalid()
     {
         // Arrange
         var setup = TestSuite.TestSuite.Sequential
@@ -54,8 +84,9 @@ public sealed class TestSuiteBuilderTests
         AssertValidContextValidation(reporter, ValidationSubject.Operation);
     }
     
+    
     [Fact]
-    public void Expect_NoReturnTypeSpecifiedWithInvalidExpectedType_ThrowsException()
+    public void Expect_NoReturnTypeSpecifiedWithInvalidExpectedType_ShouldBeInvalid()
     {
         // Arrange
         var builder = TestSuite.TestSuite.Sequential
@@ -71,7 +102,7 @@ public sealed class TestSuiteBuilderTests
     }
     
     [Fact]
-    public void Expect_OperationWithoutNullableParameterButNullExpected_ThrowsException()
+    public void Expect_OperationWithoutNullableParameterButNullExpected_ShouldBeInvalid()
     {
         // Arrange
         var builder = TestSuite.TestSuite.Sequential
@@ -103,7 +134,7 @@ public sealed class TestSuiteBuilderTests
     }
     
     [Fact]
-    public void WithInput_ParametersNumberMoreThanExpected_ThrowsException()
+    public void WithInput_ParametersNumberMoreThanExpected_ShouldBeInvalid()
     {
         // Arrange
         var builder = TestSuite.TestSuite.Sequential
@@ -119,7 +150,7 @@ public sealed class TestSuiteBuilderTests
     }
     
     [Fact]
-    public void WithInput_ParametersNumberLessThanExpected_ThrowsException()
+    public void WithInput_ParametersNumberLessThanExpected_ShouldBeInvalid()
     {
         // Arrange
         var builder = TestSuite.TestSuite.Sequential
@@ -135,7 +166,7 @@ public sealed class TestSuiteBuilderTests
     }
     
     [Fact]
-    public void WithInput_ParametersWrongType_ThrowsException()
+    public void WithInput_ParametersWrongType_ShouldBeInvalid()
     {
         // Arrange
         var builder = TestSuite.TestSuite.Sequential
@@ -183,6 +214,22 @@ public sealed class TestSuiteBuilderTests
     }
     
     [Fact]
+    public void WithComparer_UseCustomObjectWithoutComparer_ShouldBeInvalid()
+    {
+        // Arrange
+        var setup = TestSuite.TestSuite.Sequential
+            .Expect(new TestObject(1)).WithInput(new TestObject(1))
+            .UseOperation((TestObject x) => x);
+        
+        // Act
+        var reporter = setup
+            .Run();
+
+        // Assert
+        AssertInvalidContextValidation(reporter, ValidationSubject.Comparer);
+    }
+    
+    [Fact]
     public void WithComparer_ExpectIntWithIntComparer_ShouldBeValid()
     {
         // Arrange
@@ -200,7 +247,7 @@ public sealed class TestSuiteBuilderTests
     }
     
     [Fact]
-    public void Run_InvalidIterationNumber_ThrowsException()
+    public void Run_InvalidIterationNumber_ShouldBeInvalid()
     {
         // Arrange
         var builder1 = TestSuite.TestSuite.Sequential
@@ -222,7 +269,7 @@ public sealed class TestSuiteBuilderTests
     }
     
     [Fact]
-    public void TestRunBuilder_InvalidDelegateReturnType_ShouldThrow()
+    public void TestRunBuilder_InvalidDelegateReturnType_ShouldBeInvalid()
     {
         // Arrange
         var context = TestHelpers.CreateEmptyContext<int>();
@@ -288,5 +335,10 @@ public sealed class TestSuiteBuilderTests
         Assert.False(validationResult.IsValid);
         Assert.Equal(validationSubject, validationResult.ValidationSubject);
         Assert.NotNull(validationResult.Message);
+    }
+    
+    private class TestObject(int value)
+    {
+        public int Value { get; } = value;
     }
 }

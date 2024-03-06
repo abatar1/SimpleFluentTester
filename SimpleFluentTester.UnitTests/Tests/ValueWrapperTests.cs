@@ -1,6 +1,6 @@
 ﻿using SimpleFluentTester.Helpers;
 
-namespace SimpleFluentTester.UnitTests;
+namespace SimpleFluentTester.UnitTests.Tests;
 
 public class ValueWrapperTests
 {

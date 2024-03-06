@@ -2,23 +2,28 @@ using System.Reflection;
 using Moq;
 using SimpleFluentTester.Helpers;
 using SimpleFluentTester.TestSuite;
+using SimpleFluentTester.Validators;
+using SimpleFluentTester.Validators.Core;
 
-namespace SimpleFluentTester.UnitTests;
+namespace SimpleFluentTester.UnitTests.Tests;
 
-public class TestSuiteDelegateHelperTests
+public class OperationValidatorOperatorNotSetTests
 {
     [Fact]
     public void GetDelegateFromAttributedMethod_AssemblyIsNull_ShouldThrow()
     {
         // Assign
         var entryAssemblyProviderMock = new Mock<IEntryAssemblyProvider>();
+        var context = TestHelpers.CreateEmptyContext<object>(entryAssemblyProviderMock.Object);
+        var operationValidator = new OperationValidator();
+        var operationValidatedObject = new OperationValidatedObject(typeof(object));
         
         // Act 
-        var func = () => TestSuiteDelegateHelper.GetDelegateFromAttributedMethod(entryAssemblyProviderMock.Object, new DefaultActivator());
+        var validationResult = operationValidator.Validate(context, operationValidatedObject);
 
         // Assert
-        var exception = Assert.Throws<InvalidOperationException>(func);
-        Assert.Equal("No entry Assembly have been found when trying to find TestSuiteDelegateAttribute definitions", exception.Message);
+        var message = $"No entry Assembly have been found when trying to find {nameof(TestSuiteDelegateAttribute)} definitions";
+        AssertNotValidValidation(validationResult, message);
     }
     
     [Fact]
@@ -31,12 +36,17 @@ public class TestSuiteDelegateHelperTests
         var entryAssemblyProviderMock = new Mock<IEntryAssemblyProvider>();
         entryAssemblyProviderMock.Setup(x => x.Get()).Returns(assemblyMock.Object);
         
+        var context = TestHelpers.CreateEmptyContext<object>(entryAssemblyProviderMock.Object);
+        var operationValidator = new OperationValidator();
+        var operationValidatedObject = new OperationValidatedObject(typeof(object));
+        
         // Act 
-        var func = () => TestSuiteDelegateHelper.GetDelegateFromAttributedMethod(entryAssemblyProviderMock.Object, new DefaultActivator());
+        var validationResult = operationValidator.Validate(context, operationValidatedObject);
 
         // Assert
-        var exception = Assert.Throws<InvalidOperationException>(func);
-        Assert.Equal($"You should specify an operation first with an {nameof(TestSuiteDelegateAttribute)} attribute or using UseOperation method", exception.Message);
+        var message =
+            $"You should specify an operation first with an {nameof(TestSuiteDelegateAttribute)} attribute or using {nameof(TestSuiteBuilder<object>.UseOperation)} method";
+        AssertNotValidValidation(validationResult, message);
     }
     
     [Fact]
@@ -55,30 +65,33 @@ public class TestSuiteDelegateHelperTests
         var entryAssemblyProviderMock = new Mock<IEntryAssemblyProvider>();
         entryAssemblyProviderMock.Setup(x => x.Get()).Returns(assemblyMock.Object);
         
+        var context = TestHelpers.CreateEmptyContext<object>(entryAssemblyProviderMock.Object);
+        var operationValidator = new OperationValidator();
+        var operationValidatedObject = new OperationValidatedObject(typeof(object));
+        
         // Act 
-        var func = () => TestSuiteDelegateHelper.GetDelegateFromAttributedMethod(entryAssemblyProviderMock.Object, new DefaultActivator());
+        var validationResult = operationValidator.Validate(context, operationValidatedObject);
 
         // Assert
-        var exception = Assert.Throws<InvalidOperationException>(func);
-        Assert.Equal($"You defined more than one method with {nameof(TestSuiteDelegateAttribute)}", exception.Message);
+        var message = $"You defined more than one method with {nameof(TestSuiteDelegateAttribute)}";
+        AssertNotValidValidation(validationResult, message);
     }
     
     [Fact]
     public void GetDelegateFromAttributedMethod_StaticMethodWithSingleAttribute_ShouldBeValid()
     {
         // Assign
-        var returnType = new Mock<Type>();
         var parameterTypeMock = new Mock<Type>();
         
         var parameterInfoMock = new Mock<ParameterInfo>();
         parameterInfoMock.SetupGet(x => x.ParameterType).Returns(parameterTypeMock.Object);
         
         var memberInfoMock = GetMockedMethodWithAttribute();
-        Delegate expectedDelegate = () => { };
+        Delegate expectedDelegate = () => 1;
         memberInfoMock
             .Setup(x => x.CreateDelegate(It.IsAny<Type>()))
             .Returns(expectedDelegate);
-        memberInfoMock.SetupGet(x => x.ReturnType).Returns(returnType.Object);
+        memberInfoMock.SetupGet(x => x.ReturnType).Returns(typeof(int));
         memberInfoMock.Setup(x => x.GetParameters()).Returns([parameterInfoMock.Object]);
         memberInfoMock.SetupGet(x => x.Attributes).Returns(MethodAttributes.Static);
             
@@ -90,41 +103,15 @@ public class TestSuiteDelegateHelperTests
         var entryAssemblyProviderMock = new Mock<IEntryAssemblyProvider>();
         entryAssemblyProviderMock.Setup(x => x.Get()).Returns(assemblyMock.Object);
         
-        // Act 
-        var resultDelegate = TestSuiteDelegateHelper.GetDelegateFromAttributedMethod(entryAssemblyProviderMock.Object, new DefaultActivator());
-
-        // Assert
-        Assert.Equal(expectedDelegate, resultDelegate);
-    }
-    
-    [Fact]
-    public void GetDelegateFromAttributedMethod_NoDeclaringTypeForNonStaticMethod_ShouldThrow()
-    {
-        // Assign
-        var returnType = new Mock<Type>();
-        var parameterTypeMock = new Mock<Type>();
-        
-        var parameterInfoMock = new Mock<ParameterInfo>();
-        parameterInfoMock.SetupGet(x => x.ParameterType).Returns(parameterTypeMock.Object);
-        
-        var memberInfoMock = GetMockedMethodWithAttribute();
-        memberInfoMock.SetupGet(x => x.ReturnType).Returns(returnType.Object);
-        memberInfoMock.Setup(x => x.GetParameters()).Returns([parameterInfoMock.Object]);
-
-        var classTypeMock = GetParentClassTypeMock(memberInfoMock.Object);
-        
-        var assemblyMock = new Mock<Assembly>();
-        assemblyMock.Setup(x => x.GetTypes()).Returns([classTypeMock.Object]);
-        
-        var entryAssemblyProviderMock = new Mock<IEntryAssemblyProvider>();
-        entryAssemblyProviderMock.Setup(x => x.Get()).Returns(assemblyMock.Object);
+        var context = TestHelpers.CreateEmptyContext<int>(entryAssemblyProviderMock.Object);
+        var operationValidator = new OperationValidator();
+        var operationValidatedObject = new OperationValidatedObject(typeof(int));
         
         // Act 
-        var func = () => TestSuiteDelegateHelper.GetDelegateFromAttributedMethod(entryAssemblyProviderMock.Object, new DefaultActivator());
+        var validationResult = operationValidator.Validate(context, operationValidatedObject);
 
         // Assert
-        var exception = Assert.Throws<InvalidOperationException>(func);
-        Assert.Equal("No declaring type for non-static method, should be the bug", exception.Message);
+        AssertValidValidation(validationResult, context, expectedDelegate);
     }
     
     [Fact]
@@ -157,12 +144,17 @@ public class TestSuiteDelegateHelperTests
         var entryAssemblyProviderMock = new Mock<IEntryAssemblyProvider>();
         entryAssemblyProviderMock.Setup(x => x.Get()).Returns(assemblyMock.Object);
         
+        var context = TestHelpers.CreateEmptyContext<object>(entryAssemblyProviderMock.Object);
+        var operationValidator = new OperationValidator();
+        var operationValidatedObject = new OperationValidatedObject(typeof(object));
+        
         // Act 
-        var func = () => TestSuiteDelegateHelper.GetDelegateFromAttributedMethod(entryAssemblyProviderMock.Object, new DefaultActivator());
+        var validationResult = operationValidator.Validate(context, operationValidatedObject);
 
         // Assert
-        var exception = Assert.Throws<InvalidOperationException>(func);
-        Assert.Equal("TestSuiteDelegateAttribute has been defined for non-static method where declaring type do not have empty constructors, please add empty constructor or consider using static method.", exception.Message);
+        var message =
+            $"{nameof(TestSuiteDelegateAttribute)} has been defined for non-static method where declaring type do not have empty constructors, please add empty constructor or consider using static method.";
+        AssertNotValidValidation(validationResult, message);
     }
     
     [Fact]
@@ -201,16 +193,38 @@ public class TestSuiteDelegateHelperTests
             .Setup(x => x.CreateInstance(It.Is<Type>(y => y == declaringTypeMock.Object)))
             .Returns(declaringTypeObjectMock.Object);
         
-        Delegate expectedDelegate = () => { };
+        Delegate expectedDelegate = () => 1;
         memberInfoMock
             .Setup(x => x.CreateDelegate(It.IsAny<Type>(), It.Is<object>(y => y == declaringTypeObjectMock.Object)))
             .Returns(expectedDelegate);
         
+        var context = TestHelpers.CreateEmptyContext<int>(entryAssemblyProviderMock.Object, activatorMock.Object);
+        var operationValidator = new OperationValidator();
+        var operationValidatedObject = new OperationValidatedObject(typeof(int));
+        
         // Act 
-        var resultDelegate = TestSuiteDelegateHelper.GetDelegateFromAttributedMethod(entryAssemblyProviderMock.Object, activatorMock.Object);
+        var validationResult = operationValidator.Validate(context, operationValidatedObject);
 
         // Assert
-        Assert.Equal(expectedDelegate, resultDelegate);
+        AssertValidValidation(validationResult, context, expectedDelegate);
+    }
+    
+    private static void AssertNotValidValidation(ValidationResult validationResult, string message)
+    {
+        Assert.False(validationResult.IsValid);
+        Assert.Equal(ValidationSubject.Operation, validationResult.ValidationSubject);
+        Assert.Equal(message, validationResult.Message);
+    }
+    
+    private static void AssertValidValidation<TOutput>(
+        ValidationResult validationResult,
+        ITestSuiteBuilderContext<TOutput> context,
+        Delegate expectedDelegate)
+    {
+        Assert.True(validationResult.IsValid);
+        Assert.Equal(expectedDelegate, context.Operation.Value);
+        Assert.Equal(ValidationSubject.Operation, validationResult.ValidationSubject);
+        Assert.Null(validationResult.Message);
     }
 
     private static Mock<Type> GetParentClassTypeMock(params MemberInfo[] methodInfos)

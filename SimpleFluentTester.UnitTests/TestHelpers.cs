@@ -6,20 +6,21 @@ namespace SimpleFluentTester.UnitTests;
 
 public static class TestHelpers
 {
-    public static ITestSuiteBuilderContext<TOutput> CreateEmptyContext<TOutput>(IEntryAssemblyProvider? assemblyProvider = null)
+    public static ITestSuiteBuilderContext<TOutput> CreateEmptyContext<TOutput>(
+        IEntryAssemblyProvider? assemblyProvider = null,
+        IActivator? activator = null)
     {
-        assemblyProvider ??= new EntryAssemblyProvider();
         return new TestSuiteBuilderContext<TOutput>(
             0,
             "TestSuite",
-            assemblyProvider, 
-            new DefaultActivator(),
-            new List<TestCase<TOutput>>(), 
-            new ValueWrapper<Delegate>(), 
-            null, 
+            assemblyProvider ?? new EntryAssemblyProvider(),
+            activator ?? new DefaultActivator(),
+            new List<TestCase<TOutput>>(),
+            new ValueWrapper<Delegate>(),
+            null,
             true);
     }
-    
+
     internal static int Adder(int number1, int number2)
     {
         return number1 + number2;

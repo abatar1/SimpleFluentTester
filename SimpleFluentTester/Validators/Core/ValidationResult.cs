@@ -2,11 +2,11 @@ using System;
 
 namespace SimpleFluentTester.Validators.Core;
 
-public sealed record ValidationResult(bool IsValid, ValidationSubject ValidationSubject, string? Message = null, Exception? Exception = null)
+public sealed record ValidationResult(bool IsValid, ValidationSubject ValidationSubject, string? Message = null)
 {
-    public static ValidationResult Failed(ValidationSubject validationSubject, string? message = null, Exception? exception = null)
+    public static ValidationResult Failed(ValidationSubject validationSubject, string? message = null)
     {
-        return new ValidationResult(false, validationSubject, message, exception);
+        return new ValidationResult(false, validationSubject, message);
     }
     
     public static ValidationResult Ok(ValidationSubject validationSubject)
@@ -19,6 +19,4 @@ public sealed record ValidationResult(bool IsValid, ValidationSubject Validation
     public ValidationSubject ValidationSubject { get; } = ValidationSubject;
     
     public string? Message { get; } = Message;
-    
-    public Exception? Exception { get; } = Exception;
 }

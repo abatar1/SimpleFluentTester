@@ -69,7 +69,7 @@ internal sealed class TestSuiteBuilderContext<TOutput>(
             if (_operationParameters != null)
                 return _operationParameters;
             if (Operation.Value == null)
-                throw new InvalidOperationException("_operationParameters where accessed before _operation has been initialized, this should be the bug");
+                throw new InvalidOperationException($"{nameof(OperationParameters)} were accessed before {nameof(Operation)} has been initialized, this should be the bug");
             
             _operationParameters = Operation.Value.Method.GetParameters();
             return _operationParameters;

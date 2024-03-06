@@ -92,20 +92,18 @@ internal sealed class TestSuiteBuilder<TOutput> : ITestSuiteBuilder<TOutput>
         if (!_context.ShouldBeExecuted)
             return ReturnNotExecutedTestReporter(_context);
         
-        _context.Operation.Value ??= TestSuiteDelegateHelper.GetDelegateFromAttributedMethod(_context.EntryAssemblyProvider, _context.Activator);
-        
         var testNumbersHash = new SortedSet<int>(testNumbers);
+        
+        var contextValidationResult = InvokeContextValidators(_context, testNumbersHash);
         
         var testCaseExecutor = new TestCaseExecutor<TOutput>(_context);
         var completedTestCases = _context.TestCases
             .Select(testCase => testCaseExecutor.TryCompeteTestCase(testCase, testNumbersHash))
             .ToList();
 
-        var contextValidationResult = InvokeContextValidators(_context, testNumbersHash);
-
         var testRunResult = new TestSuiteResult<TOutput>(completedTestCases, 
             contextValidationResult,
-            _context.Operation.Value.Method,
+            _context.Operation,
             _context.Name,
             _context.Number);
         return new TestSuiteReporter<TOutput>(testRunResult);
@@ -118,7 +116,7 @@ internal sealed class TestSuiteBuilder<TOutput> : ITestSuiteBuilder<TOutput>
             .ToList();
         var unknownTestRunResult = new TestSuiteResult<TOutput>(testCases, 
             new List<ValidationResult>(),
-            context.Operation.Value?.Method, 
+            context.Operation, 
             context.Name,
             context.Number,
             true);

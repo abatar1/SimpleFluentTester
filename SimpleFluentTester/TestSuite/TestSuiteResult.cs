@@ -1,5 +1,6 @@
+using System;
 using System.Collections.Generic;
-using System.Reflection;
+using SimpleFluentTester.Helpers;
 using SimpleFluentTester.TestCase;
 using SimpleFluentTester.Validators.Core;
 
@@ -8,7 +9,7 @@ namespace SimpleFluentTester.TestSuite;
 public sealed class TestSuiteResult<TOutput>(
     IList<CompletedTestCase<TOutput>> validatedTestCases,
     IList<ValidationResult> contextValidationResults,
-    MethodInfo? operationMethodInfo,
+    ValueWrapper<Delegate> operation,
     string? displayName,
     int number,
     bool? ignored = null)
@@ -17,7 +18,7 @@ public sealed class TestSuiteResult<TOutput>(
 
     public IList<ValidationResult> ContextValidationResults { get; } = contextValidationResults;
 
-    public MethodInfo? OperationMethodInfo { get; } = operationMethodInfo;
+    public  ValueWrapper<Delegate> Operation { get; } = operation;
     
     public bool Ignored { get; } = ignored ?? false;
 
