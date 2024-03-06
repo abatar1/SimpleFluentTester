@@ -1,9 +1,8 @@
-namespace SimpleFluentTester.Validators.Core
+namespace SimpleFluentTester.Validators.Core;
+
+public enum ValidationStatus
 {
-    public enum ValidationStatus
-    {
-        Valid,
-        NonValid,
-        Unknown
-    }
+    Valid,
+    NonValid,
+    Unknown
 }

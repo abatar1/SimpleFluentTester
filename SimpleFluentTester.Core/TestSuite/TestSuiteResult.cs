@@ -3,26 +3,25 @@ using System.Reflection;
 using SimpleFluentTester.TestCase;
 using SimpleFluentTester.Validators.Core;
 
-namespace SimpleFluentTester.Suite
+namespace SimpleFluentTester.TestSuite;
+
+public sealed class TestSuiteResult<TOutput>(
+    IList<CompletedTestCase<TOutput>> validatedTestCases,
+    IList<ValidationResult> contextValidationResults,
+    MethodInfo? operationMethodInfo,
+    string? displayName,
+    int number,
+    bool? ignored = null)
 {
-    public sealed class TestSuiteResult<TOutput>(
-        IList<CompletedTestCase<TOutput>> validatedTestCases,
-        IList<ValidationResult> contextValidationResults,
-        MethodInfo? operationMethodInfo,
-        string? displayName,
-        int number,
-        bool? ignored = null)
-    {
-        public IList<CompletedTestCase<TOutput>> TestCases { get; } = validatedTestCases;
+    public IList<CompletedTestCase<TOutput>> TestCases { get; } = validatedTestCases;
 
-        public IList<ValidationResult> ContextValidationResults { get; } = contextValidationResults;
+    public IList<ValidationResult> ContextValidationResults { get; } = contextValidationResults;
 
-        public MethodInfo? OperationMethodInfo { get; } = operationMethodInfo;
+    public MethodInfo? OperationMethodInfo { get; } = operationMethodInfo;
     
-        public bool Ignored { get; } = ignored ?? false;
+    public bool Ignored { get; } = ignored ?? false;
 
-        public string? DisplayName { get; } = displayName;
+    public string? DisplayName { get; } = displayName;
 
-        public int Number { get; } = number;
-    }
+    public int Number { get; } = number;
 }

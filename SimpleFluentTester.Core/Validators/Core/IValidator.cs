@@ -1,12 +1,11 @@
 using System;
-using SimpleFluentTester.Suite;
+using SimpleFluentTester.TestSuite;
 
-namespace SimpleFluentTester.Validators.Core
+namespace SimpleFluentTester.Validators.Core;
+
+public interface IValidator : IEquatable<IValidator>
 {
-    public interface IValidator : IEquatable<IValidator>
-    {
-        string Key { get; }
+    string Key { get; }
     
-        ValidationResult Validate<TOutput>(TestSuiteBuilderContext<TOutput> context, IValidatedObject validatedObject);
-    }
+    ValidationResult Validate<TOutput>(ITestSuiteBuilderContext<TOutput> context, IValidatedObject validatedObject);
 }

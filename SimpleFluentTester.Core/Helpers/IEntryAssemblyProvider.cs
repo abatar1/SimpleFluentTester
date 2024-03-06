@@ -1,9 +1,8 @@
 using System.Reflection;
 
-namespace SimpleFluentTester.Helpers
+namespace SimpleFluentTester.Helpers;
+
+public interface IEntryAssemblyProvider
 {
-    public interface IEntryAssemblyProvider
-    {
-        Assembly? Get();
-    }
+    Assembly? Get();
 }

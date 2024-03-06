@@ -1,24 +1,20 @@
 using System.Text;
 using Microsoft.Extensions.Logging;
 using SimpleFluentTester.Reporter;
-using SimpleFluentTester.Suite;
 using SimpleFluentTester.TestCase;
+using SimpleFluentTester.TestSuite;
 
-namespace SimpleFluentTester.Examples
+namespace SimpleFluentTester.Examples;
+
+internal sealed class CustomTestSuiteReportBuilder<TOutput>(TestSuiteResult<TOutput> testRunResult) : ITestSuiteReportBuilder<TOutput>
 {
-    internal sealed class CustomReporter<TOutput>(TestSuiteResult<TOutput> testRunResult) : BaseTestRunReporter<TOutput>(testRunResult)
+    public PrintableTestSuiteResult TestSuiteResultToString(TestSuiteResult<TOutput> testSuiteResult)
     {
-        private readonly TestSuiteResult<TOutput> _testRunResult = testRunResult;
-
-        protected override void ReportInternal()
-        {
-            var stringBuilder = new StringBuilder();
-            stringBuilder.AppendLine("Custom console test reporter example");
-            stringBuilder.AppendLine($"Executing tests for target method [{_testRunResult.OperationMethodInfo}]");
-            stringBuilder.AppendLine($"Total tests: {_testRunResult.TestCases.Count}");
-            stringBuilder.AppendLine($"Passed tests: {_testRunResult.TestCases.Count(x => x.AssertStatus == AssertStatus.Passed)}");
-            var logger = CreateLogger();
-            logger.LogInformation(_testRunResult.Number, null, stringBuilder.ToString());
-        }
+        var stringBuilder = new StringBuilder();
+        stringBuilder.AppendLine("Custom console test reporter example");
+        stringBuilder.AppendLine($"Executing tests for target method [{testRunResult.OperationMethodInfo}]");
+        stringBuilder.AppendLine($"Total tests: {testRunResult.TestCases.Count}");
+        stringBuilder.AppendLine($"Passed tests: {testRunResult.TestCases.Count(x => x.AssertStatus == AssertStatus.Passed)}");
+        return new PrintableTestSuiteResult(LogLevel.Information, testSuiteResult.Number, stringBuilder.ToString());
     }
 }

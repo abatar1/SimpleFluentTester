@@ -1,18 +1,17 @@
-using SimpleFluentTester.Suite;
+using SimpleFluentTester.TestSuite;
 
-namespace SimpleFluentTester.Validators.Core
+namespace SimpleFluentTester.Validators.Core;
+
+internal sealed class ValidationInvoker<TOutput>(
+    IValidator validator, 
+    ITestSuiteBuilderContext<TOutput> context, 
+    IValidatedObject validatedObject) : IValidationInvoker
 {
-    public sealed record ValidationInvoker<TOutput>(
-        IValidator Validator, 
-        TestSuiteBuilderContext<TOutput> Context, 
-        IValidatedObject ValidatedObject)
-    {
-        public ValidationResult Invoke() => Validator.Validate(Context, ValidatedObject);
+    public ValidationResult Invoke() => Validator.Validate(Context, ValidatedObject);
     
-        public IValidator Validator { get; } = Validator;
+    public IValidator Validator { get; } = validator;
     
-        public TestSuiteBuilderContext<TOutput> Context { get; } = Context;
+    public ITestSuiteBuilderContext<TOutput> Context { get; } = context;
     
-        public IValidatedObject ValidatedObject { get; } = ValidatedObject;
-    }
+    public IValidatedObject ValidatedObject { get; } = validatedObject;
 }

@@ -1,21 +1,20 @@
-namespace SimpleFluentTester.Helpers
+namespace SimpleFluentTester.Helpers;
+
+public sealed record ValueWrapper<TOutput>
 {
-    public sealed record ValueWrapper<TOutput>
+    public ValueWrapper()
     {
-        public ValueWrapper()
-        {
-        }
+    }
 
-        public ValueWrapper(TOutput? value)
-        {
-            Value = value;
-        }
+    public ValueWrapper(TOutput? value)
+    {
+        Value = value;
+    }
     
-        public TOutput? Value { get; set; }
+    public TOutput? Value { get; set; }
 
-        public override string ToString()
-        {
-            return Value?.ToString() ?? string.Empty;
-        }
+    public override string ToString()
+    {
+        return Value?.ToString() ?? string.Empty;
     }
 }

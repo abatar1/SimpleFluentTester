@@ -1,6 +1,5 @@
-namespace SimpleFluentTester.Validators.Core
-{
-    public interface IValidatedObject;
+namespace SimpleFluentTester.Validators.Core;
 
-    public sealed class EmptyValidatedObject : IValidatedObject;
-}
+public interface IValidatedObject;
+
+public sealed class EmptyValidatedObject : IValidatedObject;

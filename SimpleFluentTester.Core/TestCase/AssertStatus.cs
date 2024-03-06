@@ -1,10 +1,9 @@
-namespace SimpleFluentTester.TestCase
+namespace SimpleFluentTester.TestCase;
+
+public enum AssertStatus
 {
-    public enum AssertStatus
-    {
-        Passed,
-        NotPassed,
-        NotPassedWithException,
-        Unknown
-    }
+    Passed,
+    NotPassed,
+    NotPassedWithException,
+    Unknown
 }

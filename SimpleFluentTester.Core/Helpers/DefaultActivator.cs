@@ -1,9 +1,8 @@
 using System;
 
-namespace SimpleFluentTester.Helpers
+namespace SimpleFluentTester.Helpers;
+
+internal sealed class DefaultActivator : IActivator
 {
-    internal sealed class DefaultActivator : IActivator
-    {
-        public object? CreateInstance(Type type) => Activator.CreateInstance(type);
-    }
+    public object? CreateInstance(Type type) => Activator.CreateInstance(type);
 }

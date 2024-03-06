@@ -1,9 +1,8 @@
 using System;
 
-namespace SimpleFluentTester.Helpers
+namespace SimpleFluentTester.Helpers;
+
+public interface IActivator
 {
-    public interface IActivator
-    {
-        object? CreateInstance(Type type);
-    }
+    object? CreateInstance(Type type);
 }

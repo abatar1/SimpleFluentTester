@@ -1,6 +1,5 @@
-﻿using SimpleFluentTester;
-using SimpleFluentTester.Examples;
-using SimpleFluentTester.Suite;
+﻿using SimpleFluentTester.Examples;
+using SimpleFluentTester.TestSuite;
 
 // 1 Example.
 // Setup test suite with default reporter (default output format).
@@ -19,13 +18,15 @@ TestSuite.Sequential
 // Then add few test cases, run them and print report.
 TestSuite.Sequential
     .WithDisplayName("Second example")
-    .WithCustomReporterFactory<CustomReporterFactory>() 
     .UseOperation(CustomMethods.Adder) 
     .Expect(2).WithInput(1, 1)
     .Expect(-2).WithInput(-1, -1)
     .Expect(-3).WithInput(-1, -1)
     .Run()
-    .Report();
+    .Report((config, result) =>
+    {
+        config.ReportBuilder = new CustomTestSuiteReportBuilder<object>(result);
+    });
     
 // 3 Example.
 // This example shows that UseOperation could be skipped.
@@ -47,7 +48,7 @@ TestSuite.Sequential
     .Expect(CustomValue.FromInt(2)).WithInput(CustomValue.FromInt(1), CustomValue.FromInt(1))
     .Expect(CustomValue.FromInt(-2)).WithInput(CustomValue.FromInt(-1), CustomValue.FromInt(-1))
     .Expect(CustomValue.FromInt(-3)).WithInput(CustomValue.FromInt(-1), CustomValue.FromInt(-1))
-    .WithExpectedReturnType<CustomValue>((x, y) => x?.Value == y?.Value)
+    .WithComparer<CustomValue>((x, y) => x?.Value == y?.Value)
     .Run()
     .Report();
 

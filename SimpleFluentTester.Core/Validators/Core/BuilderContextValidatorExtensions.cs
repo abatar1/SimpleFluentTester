@@ -1,38 +1,37 @@
 using System;
-using SimpleFluentTester.Suite;
 using SimpleFluentTester.TestCase;
+using SimpleFluentTester.TestSuite;
 
-namespace SimpleFluentTester.Validators.Core
+namespace SimpleFluentTester.Validators.Core;
+
+internal static class BuilderContextValidatorExtensions
 {
-    public static class BuilderContextValidatorExtensions
+    public static TestCase<TOutput> RegisterValidator<TOutput>(
+        this TestCase<TOutput> testCase,
+        ITestSuiteBuilderContext<TOutput> context,
+        Type validatorType, 
+        IValidatedObject validatedObject)
     {
-        public static TestSuiteBuilderContext<TOutput> RegisterValidator<TOutput>(
-            this TestSuiteBuilderContext<TOutput> context,
-            Type validatorType, 
-            IValidatedObject validatedObject)
-        {
-            var validatorInvoker = CreateValidationInvoker(validatorType, context, validatedObject);
-            context.Validators.Add(validatorInvoker);
-            return context;
-        }
-    
-        public static TestCase<TOutput> RegisterValidator<TOutput>(
-            this TestCase<TOutput> testCase,
-            TestSuiteBuilderContext<TOutput> context,
-            Type validatorType, 
-            IValidatedObject validatedObject)
-        {
-            var validatorInvoker = CreateValidationInvoker(validatorType, context, validatedObject);
-            testCase.Validators.Add(validatorInvoker);
-            return testCase;
-        }
+        var validatorInvoker = context.CreateValidationInvoker(validatorType, validatedObject);
+        testCase.Validators.Add(validatorInvoker);
+        return testCase;
+    }
 
-        private static ValidationInvoker<TOutput> CreateValidationInvoker<TOutput>(Type validatorType,
-            TestSuiteBuilderContext<TOutput> context,
-            IValidatedObject validatedObject)
-        {
-            var validator = (IValidator)Activator.CreateInstance(validatorType);
-            return new ValidationInvoker<TOutput>(validator, context, validatedObject);
-        }
+    public static ValidationResult InvokeValidation<TOutput>(
+        this ITestSuiteBuilderContext<TOutput> context,
+        Type validatorType,
+        IValidatedObject validatedObject)
+    {
+        var validationInvoker = context.CreateValidationInvoker(validatorType, validatedObject);
+        return validationInvoker.Invoke();
+    }
+
+    private static ValidationInvoker<TOutput> CreateValidationInvoker<TOutput>(
+        this ITestSuiteBuilderContext<TOutput> context,
+        Type validatorType,
+        IValidatedObject validatedObject)
+    {
+        var validator = (IValidator)Activator.CreateInstance(validatorType);
+        return new ValidationInvoker<TOutput>(validator, context, validatedObject);
     }
 }
