@@ -53,7 +53,7 @@ public class TestRunBuilderTests
         var reporter = builder
             .Expect(2).WithInput(1, 1)
             .Expect(3).WithInput(1, 1)
-            .Run(2);
+            .Run();
         
         // Assert
         AssertPassedTestResult(1, reporter, 2, [1, 1]);
@@ -84,11 +84,9 @@ public class TestRunBuilderTests
     public void AddTestCase_TestingOperationIsBroken_TestCaseHasException()
     {
         // Arrange
+        Func<int, int, int> comparer = (_, _) => throw new CustomException();
         var builder = TestSuite.TestSuite.Sequential
-            .UseOperation((int _, int _) =>
-            {
-                throw new CustomException();
-            });
+            .UseOperation(comparer);
         
         // Act
         var reporter = builder

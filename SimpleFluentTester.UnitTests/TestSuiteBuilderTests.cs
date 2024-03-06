@@ -187,6 +187,7 @@ public sealed class TestSuiteBuilderTests
     {
         // Arrange
         var setup = TestSuite.TestSuite.Sequential
+            .UseOperation((int x) => x)
             .Expect(1).WithInput(1);
         
         // Act
@@ -195,7 +196,7 @@ public sealed class TestSuiteBuilderTests
             .Run();
 
         // Assert
-        AssertInvalidContextValidation(reporter, ValidationSubject.Operation);
+        AssertValidContextValidation(reporter, ValidationSubject.Operation);
     }
     
     [Fact]
@@ -234,7 +235,7 @@ public sealed class TestSuiteBuilderTests
             .Run();
         
         // Assert
-        AssertInvalidTestCaseValidation(reporter, 1, ValidationSubject.Operation);
+        AssertInvalidContextValidation(reporter, ValidationSubject.Operation);
     }
     
     private static void AssertValidContextValidation<TOutput>(ITestSuiteReporter<TOutput> reporter,
