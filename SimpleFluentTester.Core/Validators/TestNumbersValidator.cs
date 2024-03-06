@@ -1,26 +1,27 @@
 using System.Collections.Generic;
 using System.Linq;
-using SimpleFluentTester.TestRun;
+using SimpleFluentTester.Suite;
 using SimpleFluentTester.Validators.Core;
 
-namespace SimpleFluentTester.Validators;
-
-public sealed class TestNumbersValidator : BaseValidator
+namespace SimpleFluentTester.Validators
 {
-    public override ValidationResult Validate<TOutput>(TestSuiteBuilderContext<TOutput> context, IValidatedObject validatedObject)
+    public sealed class TestNumbersValidator : BaseValidator
     {
-        if (validatedObject is not TestNumbersValidatedObject testCasesValidatedObject)
-            throw new ValidationUnexpectedException("Was not able to cast validated object to it's type, seems like a bug.");
+        public override ValidationResult Validate<TOutput>(TestSuiteBuilderContext<TOutput> context, IValidatedObject validatedObject)
+        {
+            if (validatedObject is not TestNumbersValidatedObject testCasesValidatedObject)
+                throw new ValidationUnexpectedException("Was not able to cast validated object to it's type, seems like a bug.");
         
-        var testNumbersHash = testCasesValidatedObject.TestNumbers;
-        if (testNumbersHash.Count != 0 && (testNumbersHash.Count > context.TestCases.Count || testNumbersHash.Max() > context.TestCases.Count))
-            return ValidationResult.Failed(ValidationSubject.TestNumbers, "Invalid test case numbers were given as input");
+            var testNumbersHash = testCasesValidatedObject.TestNumbers;
+            if (testNumbersHash.Count != 0 && (testNumbersHash.Count > context.TestCases.Count || testNumbersHash.Max() > context.TestCases.Count))
+                return ValidationResult.Failed(ValidationSubject.TestNumbers, "Invalid test case numbers were given as input");
         
-        return ValidationResult.Ok(ValidationSubject.TestNumbers);
+            return ValidationResult.Ok(ValidationSubject.TestNumbers);
+        }
     }
-}
 
-public sealed class TestNumbersValidatedObject(ISet<int> testNumbers) : IValidatedObject
-{
-    public ISet<int> TestNumbers { get; } = testNumbers;
+    public sealed class TestNumbersValidatedObject(ISet<int> testNumbers) : IValidatedObject
+    {
+        public ISet<int> TestNumbers { get; } = testNumbers;
+    }
 }

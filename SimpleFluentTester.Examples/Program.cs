@@ -1,5 +1,6 @@
 ﻿using SimpleFluentTester;
 using SimpleFluentTester.Examples;
+using SimpleFluentTester.Suite;
 
 // 1 Example.
 // Setup test suite with default reporter (default output format).

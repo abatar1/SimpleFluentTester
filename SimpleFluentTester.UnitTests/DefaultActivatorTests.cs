@@ -1,21 +1,22 @@
-using SimpleFluentTester.TestRun;
+using SimpleFluentTester.Helpers;
 
-namespace SimpleFluentTester.UnitTests;
-
-public class DefaultActivatorTests
+namespace SimpleFluentTester.UnitTests
 {
-    [Fact]
-    public void CreateInstance_NotNullType_ShouldBeValid()
+    public class DefaultActivatorTests
     {
-        // Assign
-        var defaultActivator = new DefaultActivator();
+        [Fact]
+        public void CreateInstance_NotNullType_ShouldBeValid()
+        {
+            // Assign
+            var defaultActivator = new DefaultActivator();
         
-        // Act
-        var resultInstance = defaultActivator.CreateInstance(typeof(CustomClass));
+            // Act
+            var resultInstance = defaultActivator.CreateInstance(typeof(CustomClass));
 
-        // Assert
-        Assert.NotNull(resultInstance);
+            // Assert
+            Assert.NotNull(resultInstance);
+        }
+
+        private class CustomClass;
     }
-
-    private class CustomClass;
 }

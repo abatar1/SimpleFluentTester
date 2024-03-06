@@ -1,37 +1,38 @@
-using SimpleFluentTester.TestRun;
+using SimpleFluentTester.Suite;
 
-namespace SimpleFluentTester.Validators.Core;
-
-public abstract class BaseValidator : IValidator
+namespace SimpleFluentTester.Validators.Core
 {
-    private readonly string _key;
-
-    protected BaseValidator()
+    public abstract class BaseValidator : IValidator
     {
-        _key = GetType().Name;
-    }
+        private readonly string _key;
 
-    public virtual string Key => _key;
+        protected BaseValidator()
+        {
+            _key = GetType().Name;
+        }
 
-    public abstract ValidationResult Validate<TOutput>(
-        TestSuiteBuilderContext<TOutput> context,
-        IValidatedObject validatedObject);
+        public virtual string Key => _key;
 
-    public bool Equals(IValidator other)
-    {
-        return _key == other.Key;
-    }
+        public abstract ValidationResult Validate<TOutput>(
+            TestSuiteBuilderContext<TOutput> context,
+            IValidatedObject validatedObject);
 
-    public override bool Equals(object? obj)
-    {
-        if (ReferenceEquals(null, obj)) return false;
-        if (ReferenceEquals(this, obj)) return true;
-        if (obj.GetType() != GetType()) return false;
-        return Equals((BaseValidator)obj);
-    }
+        public bool Equals(IValidator other)
+        {
+            return _key == other.Key;
+        }
 
-    public override int GetHashCode()
-    {
-        return _key.GetHashCode();
+        public override bool Equals(object? obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != GetType()) return false;
+            return Equals((BaseValidator)obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return _key.GetHashCode();
+        }
     }
 }

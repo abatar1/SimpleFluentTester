@@ -1,15 +1,18 @@
-﻿namespace SimpleFluentTester.Examples;
+﻿using SimpleFluentTester.Suite;
 
-internal static class CustomMethods
+namespace SimpleFluentTester.Examples
 {
-    [TestSuiteDelegate]
-    internal static int Adder(int number1, int number2)
+    internal static class CustomMethods
     {
-        return number1 + number2;
-    }
+        [TestSuiteDelegate]
+        internal static int Adder(int number1, int number2)
+        {
+            return number1 + number2;
+        }
     
-    internal static CustomValue CustomAdder(CustomValue number1, CustomValue number2)
-    {
-        return new CustomValue(number1.Value + number2.Value);
+        internal static CustomValue CustomAdder(CustomValue number1, CustomValue number2)
+        {
+            return new CustomValue(number1.Value + number2.Value);
+        }
     }
 }

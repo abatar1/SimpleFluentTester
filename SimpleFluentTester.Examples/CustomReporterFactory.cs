@@ -1,12 +1,13 @@
 using SimpleFluentTester.Reporter;
-using SimpleFluentTester.TestRun;
+using SimpleFluentTester.Suite;
 
-namespace SimpleFluentTester.Examples;
-
-internal sealed class CustomReporterFactory : ITestRunReporterFactory
+namespace SimpleFluentTester.Examples
 {
-    public ITestRunReporter GetReporter<TOutput>(TestSuiteResult<TOutput> testRunResult)
+    internal sealed class CustomReporterFactory : ITestSuiteReporterFactory
     {
-        return new CustomReporter<TOutput>(testRunResult);
+        public ITestSuiteReporter GetReporter<TOutput>(TestSuiteResult<TOutput> testRunResult)
+        {
+            return new CustomReporter<TOutput>(testRunResult);
+        }
     }
 }

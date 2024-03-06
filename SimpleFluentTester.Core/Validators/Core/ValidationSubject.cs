@@ -1,9 +1,10 @@
-namespace SimpleFluentTester.Validators.Core;
-
-public enum ValidationSubject
+namespace SimpleFluentTester.Validators.Core
 {
-    Comparer,
-    Inputs,
-    Operation,
-    TestNumbers
+    public enum ValidationSubject
+    {
+        Comparer,
+        Inputs,
+        Operation,
+        TestNumbers
+    }
 }

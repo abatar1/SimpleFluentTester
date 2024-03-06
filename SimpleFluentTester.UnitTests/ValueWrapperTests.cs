@@ -1,32 +1,33 @@
-﻿using SimpleFluentTester.Entities;
+﻿using SimpleFluentTester.Helpers;
 
-namespace SimpleFluentTester.UnitTests;
-
-public class ValueWrapperTests
+namespace SimpleFluentTester.UnitTests
 {
-    [Fact]
-    public void ValueWrapper_HasPrintableValue_ShouldBeValid()
+    public class ValueWrapperTests
     {
-        // Assign
-        var value = new ValueWrapper<int>(2);
+        [Fact]
+        public void ValueWrapper_HasPrintableValue_ShouldBeValid()
+        {
+            // Assign
+            var value = new ValueWrapper<int>(2);
 
-        // Act
-        var printedResult = value.ToString();
+            // Act
+            var printedResult = value.ToString();
 
-        // Assert
-        Assert.Equal("2",printedResult);
-    }
+            // Assert
+            Assert.Equal("2",printedResult);
+        }
     
-    [Fact]
-    public void ValueWrapper_HasNullValue_ShouldBeEmpty()
-    {
-        // Assign
-        var value = new ValueWrapper<string?>(null);
+        [Fact]
+        public void ValueWrapper_HasNullValue_ShouldBeEmpty()
+        {
+            // Assign
+            var value = new ValueWrapper<string?>(null);
 
-        // Act
-        var printedResult = value.ToString();
+            // Act
+            var printedResult = value.ToString();
 
-        // Assert
-        Assert.Empty(printedResult);
+            // Assert
+            Assert.Empty(printedResult);
+        }
     }
 }
