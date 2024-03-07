@@ -1,41 +1,63 @@
-using System.Reflection;
-using SimpleFluentTester.Entities;
-using SimpleFluentTester.Reporter;
-using SimpleFluentTester.TestRun;
+using SimpleFluentTester.Helpers;
+using SimpleFluentTester.TestCase;
+using SimpleFluentTester.TestSuite;
+using SimpleFluentTester.TestSuite.Context;
+using SimpleFluentTester.Validators;
 using SimpleFluentTester.Validators.Core;
 
 namespace SimpleFluentTester.UnitTests;
 
 public static class TestHelpers
 {
-    public static TestSuiteResult<TOutput> GetTestRunResultFromReporter<TOutput>(BaseTestRunReporter<TOutput> reporter)
+    public static ITestSuiteBuilderContext<TOutput> CreateEmptyContext<TOutput>(
+        IEntryAssemblyProvider? assemblyProvider = null,
+        IActivator? activator = null,
+        Delegate? operation = null)
     {
-        var baseReporterType = reporter.GetType().BaseType;
-        Assert.NotNull(baseReporterType);
-        var reporterFields = baseReporterType
-            .GetFields(BindingFlags.Instance | BindingFlags.NonPublic);
-        
-        var testRunResultProperty = reporterFields
-            .FirstOrDefault(x => x.FieldType == typeof(TestSuiteResult<TOutput>));
-        Assert.NotNull(testRunResultProperty);
-        var testCases = testRunResultProperty.GetValue(reporter) as TestSuiteResult<TOutput>;
-        Assert.NotNull(testCases);
-        return testCases;
-    }
-    
-    public static TestSuiteBuilderContext<TOutput> CreateEmptyContext<TOutput>(IEntryAssemblyProvider? assemblyProvider = null)
-    {
-        assemblyProvider ??= new EntryAssemblyProvider();
         return new TestSuiteBuilderContext<TOutput>(
             0,
             "TestSuite",
-            assemblyProvider, 
-            new DefaultActivator(),
-            new List<TestCase<TOutput>>(), 
-            new HashSet<ValidationInvoker<TOutput>>(),
-            new DefaultTestRunReporterFactory(), 
-            new ValueWrapper<Delegate>(), 
-            null, 
+            assemblyProvider ?? new EntryAssemblyProvider(),
+            activator ?? new DefaultActivator(),
+            new List<TestCase<TOutput>>(),
+            operation,
+            null,
+            new Dictionary<ValidationSubject, IList<ValidationResult>>(),
             true);
     }
+
+    public static TestSuiteResult<TOutput> GetTestSuiteResult<TOutput>(
+        ValidationResult contextValidation,
+        Delegate operation,
+        TestCase<TOutput> testCase,
+        int testCaseToRun = 1,
+        bool ignored = false)
+    {
+        var validationResults = new Dictionary<ValidationSubject, IList<ValidationResult>>
+        {
+            {
+                contextValidation.Subject,
+                new List<ValidationResult> { contextValidation }
+            }
+        };
+        var context = CreateEmptyContext<TOutput>(operation: operation);
+        var testCaseExecutor = new TestCaseExecutor<TOutput>(context);
+        testCase.RegisterValidator(typeof(OperationValidator), new OperationValidatedObject(testCase.Expected?.GetType()));
+        testCase.RegisterValidator(typeof(InputsValidator), new InputsValidatedObject(testCase.Inputs));
+        var completedTestCase = testCaseExecutor.TryCompeteTestCase(testCase, new SortedSet<int>([testCaseToRun]));
+        return new TestSuiteResult<TOutput>(
+            new List<CompletedTestCase<TOutput>> { completedTestCase },
+            validationResults,
+            context.Operation,
+            context.Name,
+            context.Number,
+            ignored);
+    }
+
+    internal static int Adder(int number1, int number2)
+    {
+        return number1 + number2;
+    }
 }
+
+internal class CustomException : Exception;

@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleFluentTester.Core", "SimpleFluentTester.Core\SimpleFluentTester.Core.csproj", "{C0F31A77-7EAD-47F3-AFDE-4B8B91E85E14}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleFluentTester", "SimpleFluentTester\SimpleFluentTester.csproj", "{C0F31A77-7EAD-47F3-AFDE-4B8B91E85E14}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleFluentTester.Examples", "SimpleFluentTester.Examples\SimpleFluentTester.Examples.csproj", "{7889FEE9-296F-40AE-A9F1-0C616F187E66}"
 EndProject
