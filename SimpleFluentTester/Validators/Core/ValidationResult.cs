@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-
 namespace SimpleFluentTester.Validators.Core;
 
 public sealed record ValidationResult(ValidationStatus Status, ValidationSubject Subject, string? Message = null)

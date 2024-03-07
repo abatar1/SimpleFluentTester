@@ -16,7 +16,7 @@ internal sealed class TestSuiteReporter<TOutput>(TestSuiteResult<TOutput> testRu
         configurationBuilder?.Invoke(configuration, TestSuiteResult);
         
         var reportBuilder = configuration.ReportBuilder ?? new DefaultTestSuiteReportBuilder<TOutput>();
-        var logger = configuration.Logger ?? CreateDefaultLogger();;
+        var logger = configuration.Logger ?? CreateDefaultLogger();
         try
         {
             var printableResult = reportBuilder.TestSuiteResultToString(TestSuiteResult);

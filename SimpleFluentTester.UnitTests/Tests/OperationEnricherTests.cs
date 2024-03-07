@@ -3,7 +3,6 @@ using Moq;
 using SimpleFluentTester.Helpers;
 using SimpleFluentTester.TestSuite;
 using SimpleFluentTester.TestSuite.Context;
-using SimpleFluentTester.Validators;
 using SimpleFluentTester.Validators.Core;
 
 namespace SimpleFluentTester.UnitTests.Tests;

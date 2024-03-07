@@ -1,5 +1,4 @@
 using SimpleFluentTester.Reporter;
-using SimpleFluentTester.TestCase;
 using SimpleFluentTester.TestSuite;
 using SimpleFluentTester.Validators.Core;
 

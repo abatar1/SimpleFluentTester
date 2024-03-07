@@ -29,4 +29,17 @@ public class ValueWrapperTests
         // Assert
         Assert.Empty(printedResult);
     }
+    
+    [Fact]
+    public void ValueWrapper_HasNoValue_ShouldBeEmpty()
+    {
+        // Assign
+        var value = new ValueWrapper<string?>();
+
+        // Act
+        var printedResult = value.ToString();
+
+        // Assert
+        Assert.Empty(printedResult);
+    }
 }

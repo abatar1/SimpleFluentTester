@@ -34,7 +34,7 @@ internal sealed class DefaultTestSuiteReportBuilder<TOutput> : ITestSuiteReportB
         AppendHeader(stringBuilder, testSuiteResult, nonValidContextResults, executedTestCases);
 
         var printableTestCases = testSuiteResult.TestCases
-            .Where(x => x.AssertStatus == AssertStatus.NotPassed || x.ValidationStatus != ValidationStatus.Valid)
+            .Where(x => x.AssertStatus == AssertStatus.NotPassed || x.AssertStatus == AssertStatus.NotPassedWithException || x.ValidationStatus != ValidationStatus.Valid)
             .ToList();
 
         foreach (var printableTestCase in printableTestCases)
@@ -97,7 +97,7 @@ internal sealed class DefaultTestSuiteReportBuilder<TOutput> : ITestSuiteReportB
             stringBuilder.AppendLine(" tests haven't passed!");
 
             var failedTestCaseNumbers = executedTestCases
-                .Where(x => x.AssertStatus == AssertStatus.NotPassed)
+                .Where(x => x.AssertStatus is AssertStatus.NotPassed or AssertStatus.NotPassedWithException)
                 .Select(x => x.Number)
                 .ToList();
             if (failedTestCaseNumbers.Any())
