@@ -24,10 +24,14 @@ internal sealed class DefaultTestSuiteReportBuilder<TOutput> : ITestSuiteReportB
             .Where(x => x.AssertStatus != AssertStatus.Unknown)
             .ToList();
         
+        var nonValidContextResults = testSuiteResult.ValidationResults
+            .SelectMany(x => x.Value)
+            .Where(x => !x.IsValid)
+            .ToList();
+        
         var stringBuilder = new StringBuilder();
 
-        if (!TryAppendHeader(stringBuilder, testSuiteResult, executedTestCases))
-            return new PrintableTestSuiteResult(LogLevel.Error, testSuiteResult.Number, stringBuilder.ToString());
+        AppendHeader(stringBuilder, testSuiteResult, nonValidContextResults, executedTestCases);
 
         var printableTestCases = testSuiteResult.TestCases
             .Where(x => x.AssertStatus == AssertStatus.NotPassed || x.ValidationStatus != ValidationStatus.Valid)
@@ -42,43 +46,36 @@ internal sealed class DefaultTestSuiteReportBuilder<TOutput> : ITestSuiteReportB
             .Any(x => x.AssertStatus is not (AssertStatus.Passed or AssertStatus.Unknown));
         var someTestCasesNotValid = testSuiteResult.TestCases
             .Any(x => x.ValidationStatus != ValidationStatus.Valid);
-        var suiteContextNotValid = testSuiteResult.ContextValidationResults
-            .Any(x => !x.IsValid);
         
         LogLevel logLevel;
-        if (someTestCasesNotPassed || someTestCasesNotValid || suiteContextNotValid)
+        if (someTestCasesNotPassed || someTestCasesNotValid || nonValidContextResults.Count != 0)
             logLevel = LogLevel.Error;
         else
             logLevel = LogLevel.Information;
         return new PrintableTestSuiteResult(logLevel, testSuiteResult.Number, stringBuilder.ToString());
     }
 
-    private static bool TryAppendHeader(StringBuilder stringBuilder,
+    private static void AppendHeader(StringBuilder stringBuilder,
         TestSuiteResult<TOutput> testRunResult,
+        IList<ValidationResult> validationResults,
         IList<CompletedTestCase<TOutput>> testCasesToExecute)
     {
-        stringBuilder.AppendLine($"Executing tests for target method [{testRunResult.Operation.Value.Method}]");
+        stringBuilder.AppendLine($"Executing tests for target method [{testRunResult.Operation?.Method}]");
         stringBuilder.AppendLine($"Total tests: {testRunResult.TestCases.Count}");
         stringBuilder.AppendLine($"Tests to execute: {testCasesToExecute.Count}");
-
-        var nonValidContextResults = testRunResult.ContextValidationResults
-            .Where(x => !x.IsValid)
-            .ToList();
-        if (nonValidContextResults.Count != 0)
+        
+        if (validationResults.Count != 0)
         {
             stringBuilder.AppendLine("Test suite did not pass a validation");
-            foreach (var validationResult in nonValidContextResults)
+            foreach (var validationResult in validationResults)
                 AppendValidationResult(stringBuilder, validationResult);
-            return false;
         }
-
         stringBuilder.AppendLine();
-        return true;
     }
 
     private static void AppendValidationResult(StringBuilder stringBuilder, ValidationResult validationResult)
     {
-        stringBuilder.AppendLine("\t-Validation subject: " + validationResult.ValidationSubject);
+        stringBuilder.AppendLine("\t-Validation subject: " + validationResult.Subject);
         stringBuilder.AppendLine("\tError message: " + validationResult.Message);
     }
 

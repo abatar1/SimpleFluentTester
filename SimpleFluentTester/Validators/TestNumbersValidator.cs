@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
-using SimpleFluentTester.TestSuite;
+using SimpleFluentTester.TestSuite.Context;
 using SimpleFluentTester.Validators.Core;
 
 namespace SimpleFluentTester.Validators;

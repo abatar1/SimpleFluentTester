@@ -1,5 +1,5 @@
 using System;
-using SimpleFluentTester.TestSuite;
+using SimpleFluentTester.TestSuite.Context;
 using SimpleFluentTester.Validators.Core;
 
 namespace SimpleFluentTester.Validators;
@@ -10,10 +10,19 @@ internal sealed class ComparerValidator : BaseValidator
         ITestSuiteBuilderContext<TOutput> context, 
         IValidatedObject validatedObject)
     {
-        if (context.Comparer != null)
-            return ValidationResult.Ok(ValidationSubject.Comparer);
-        
-        if (!typeof(IEquatable<TOutput>).IsAssignableFrom(typeof(TOutput)))
+        Type? comparerType;
+        if (context.Comparer == null)
+        {
+            if (typeof(TOutput) == typeof(object))
+                comparerType = context.Operation?.Method.ReturnParameter?.ParameterType;
+            else
+                comparerType = typeof(TOutput);
+        }
+        else
+            comparerType = context.Comparer.Method.ReturnParameter?.ParameterType;
+
+        var interfaceType = typeof(IEquatable<>).MakeGenericType(comparerType);
+        if (!interfaceType.IsAssignableFrom(comparerType))
             return ValidationResult.Failed(ValidationSubject.Comparer, $"{nameof(TOutput)} type should be assignable from {nameof(IEquatable<TOutput>)} or comparer should be defined");
            
         return ValidationResult.Ok(ValidationSubject.Comparer);

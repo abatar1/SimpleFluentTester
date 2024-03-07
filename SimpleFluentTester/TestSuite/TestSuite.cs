@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using SimpleFluentTester.Helpers;
-using SimpleFluentTester.TestCase;
+﻿using SimpleFluentTester.TestSuite.Context;
 
 namespace SimpleFluentTester.TestSuite;
 
@@ -17,16 +14,8 @@ public static class TestSuite
         get
         {
             _testSuiteNumber += 1;
-            var context = new TestSuiteBuilderContext<object>(
-                _testSuiteNumber,
-                nameof(TestSuite),
-                new EntryAssemblyProvider(), 
-                new DefaultActivator(),
-                new List<TestCase<object>>(), 
-                new ValueWrapper<Delegate>(), 
-                null,
-                true);
-            return new TestSuiteBuilder<object>(context);
+            var defaultContext = TestSuiteBuilderContext<object>.Default(_testSuiteNumber);
+            return new TestSuiteBuilder<object>(defaultContext);
         }
     }
 }

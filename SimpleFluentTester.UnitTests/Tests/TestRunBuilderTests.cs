@@ -13,7 +13,7 @@ public class TestRunBuilderTests
     [Fact]
     public void AddTestCase_NoReturnTypeSpecifiedWithValidExpectedType_ShouldBePassed()
     {
-        // Arrange
+        // Assign
         var builder = TestSuite.TestSuite.Sequential
             .UseOperation(TestHelpers.Adder);
             
@@ -29,7 +29,7 @@ public class TestRunBuilderTests
     [Fact]
     public void AddTestCase_OperationWithNullableParameter_ShouldBePassed()
     {
-        // Arrange
+        // Assign
         var builder = TestSuite.TestSuite.Sequential
             .UseOperation((int? a, int b) => a + b);
             
@@ -45,7 +45,7 @@ public class TestRunBuilderTests
     [Fact]
     public void AddTestCase_OperationWithNullableParameterButActualValue_ShouldNotThrow()
     {
-        // Arrange
+        // Assign
         var builder = TestSuite.TestSuite.Sequential
             .UseOperation((int? a, int? b) => a + b);
             
@@ -63,7 +63,7 @@ public class TestRunBuilderTests
     [Fact]
     public void AddTestCase_ParametersValidTypesAndCount_ValidReturn()
     {
-        // Arrange
+        // Assign
         var builder = TestSuite.TestSuite.Sequential
             .UseOperation(TestHelpers.Adder);
             
@@ -83,7 +83,7 @@ public class TestRunBuilderTests
     [Fact]
     public void AddTestCase_TestingOperationIsBroken_TestCaseHasException()
     {
-        // Arrange
+        // Assign
         Func<int, int, int> comparer = (_, _) => throw new CustomException();
         var builder = TestSuite.TestSuite.Sequential
             .UseOperation(comparer);
@@ -107,7 +107,7 @@ public class TestRunBuilderTests
     [Fact]
     public void AddTestCase_TestingOperationNotSet_AdderWithAttributeShouldBeSelected()
     {
-        // Arrange
+        // Assign
         var entryAssemblyProviderMock = new Mock<IEntryAssemblyProvider>();
         entryAssemblyProviderMock
             .Setup(x => x.Get())
@@ -127,7 +127,7 @@ public class TestRunBuilderTests
     [Fact]
     public void AddTestCase_WithCustomEquatableObject_ValidReturn()
     {
-        // Arrange
+        // Assign
         var builder = TestSuite.TestSuite.Sequential
             .WithComparer<EquatableTestObject>((x, y) => x?.Value == y?.Value)
             .UseOperation((EquatableTestObject a, EquatableTestObject b) => new EquatableTestObject(a.Value + b.Value));
@@ -144,7 +144,7 @@ public class TestRunBuilderTests
     [Fact]
     public void UseOperation_WithCustomObjectAndComparer_ValidReturn()
     {
-        // Arrange
+        // Assign
         var comparer = (TestObject? a, TestObject? b) => a?.Value == b?.Value;
         var setup = TestSuite.TestSuite.Sequential
             .WithComparer(comparer);
@@ -162,7 +162,7 @@ public class TestRunBuilderTests
     [Fact]
     public void TestSuite_Ignored_TestCasesShouldBeIgnored()
     {
-        // Arrange
+        // Assign
         var builder = TestSuite.TestSuite.Sequential.Ignore
             .UseOperation(TestHelpers.Adder)
             .Expect(2).WithInput(1, 1, 1)
@@ -179,7 +179,7 @@ public class TestRunBuilderTests
     [Fact]
     public void TestSuite_WithDisplayName_ShouldBeCustomDisplayName()
     {
-        // Arrange
+        // Assign
         var displayName = "test";
         var builder = TestSuite.TestSuite.Sequential.WithDisplayName(displayName).UseOperation(TestHelpers.Adder);
             

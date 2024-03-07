@@ -1,4 +1,5 @@
 using SimpleFluentTester.TestSuite;
+using SimpleFluentTester.TestSuite.Context;
 using SimpleFluentTester.Validators;
 using SimpleFluentTester.Validators.Core;
 
@@ -15,9 +16,8 @@ internal sealed class TestCaseBuilder<TOutput>(
     {
         var testCase = new TestCase<TOutput>(inputs, expected, context.TestCases.Count + 1);
         
-        if (context.IsObjectOutput)
-            testCase.RegisterValidator(context, typeof(OperationValidator), new OperationValidatedObject(expected?.GetType()));
-        testCase.RegisterValidator(context, typeof(InputsValidator), new InputsValidatedObject(inputs));
+        testCase.RegisterValidator(typeof(OperationValidator), new OperationValidatedObject(expected?.GetType()));
+        testCase.RegisterValidator(typeof(InputsValidator), new InputsValidatedObject(inputs));
             
         context.TestCases.Add(testCase);
 

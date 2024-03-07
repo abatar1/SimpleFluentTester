@@ -4,7 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using SimpleFluentTester.Helpers;
-using SimpleFluentTester.TestSuite;
+using SimpleFluentTester.TestSuite.Context;
 using SimpleFluentTester.Validators.Core;
 
 namespace SimpleFluentTester.TestCase;
@@ -17,7 +17,7 @@ internal sealed class TestCaseExecutor<TOutput>(ITestSuiteBuilderContext<TOutput
             return CompletedTestCase<TOutput>.NotExecuted(testCase);
 
         var validationResults = testCase.Validators
-            .Select(x => x.Invoke())
+            .Select(x => x.Invoke(context))
             .ToList();
 
         var valid = validationResults.All(x => x.IsValid);
@@ -41,12 +41,16 @@ internal sealed class TestCaseExecutor<TOutput>(ITestSuiteBuilderContext<TOutput
         try
         {
             stopwatch.Start();
-            invokeResult = context.Operation.Value!.Method.Invoke(context.Operation.Value.Target, testCase.Inputs);
+            invokeResult = context.Operation!.Method.Invoke(context.Operation.Target, testCase.Inputs);
             stopwatch.Stop();
         }
         catch (TargetInvocationException e)
         {
             return new Assert<TOutput>(false, null, e.InnerException, stopwatch.Elapsed);
+        }
+        catch (Exception e)
+        {
+            return new Assert<TOutput>(false, null, e, stopwatch.Elapsed);
         }
 
         TOutput? output;

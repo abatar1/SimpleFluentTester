@@ -1,32 +1,30 @@
 using System;
 using System.Collections.Generic;
-using System.Reflection;
 using SimpleFluentTester.Helpers;
 using SimpleFluentTester.TestCase;
+using SimpleFluentTester.Validators.Core;
 
-namespace SimpleFluentTester.TestSuite;
+namespace SimpleFluentTester.TestSuite.Context;
 
 public interface ITestSuiteBuilderContext<TOutput>
 {
     int Number { get; }
     
-    string Name { get; set; }
+    string Name { get; }
     
-    bool ShouldBeExecuted { get; set; }
+    bool ShouldBeExecuted { get; }
     
     IEntryAssemblyProvider EntryAssemblyProvider { get; }
 
     IActivator Activator { get; }
 
     IList<TestCase<TOutput>> TestCases { get; }
+    
+    IDictionary<ValidationSubject, IList<ValidationResult>> Validations { get; }
 
-    ValueWrapper<Delegate> Operation { get; }
+    Delegate? Operation { get; }
     
     Func<TOutput?, TOutput?, bool>? Comparer { get; }
     
-    bool IsObjectOutput { get; }
-    
     Type? OutputUnderlyingType { get; }
-    
-    IReadOnlyCollection<ParameterInfo> OperationParameters { get; }
 }

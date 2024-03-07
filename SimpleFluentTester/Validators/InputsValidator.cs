@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using SimpleFluentTester.TestSuite;
+using SimpleFluentTester.TestSuite.Context;
 using SimpleFluentTester.Validators.Core;
 
 namespace SimpleFluentTester.Validators;
@@ -16,7 +16,10 @@ internal sealed class InputsValidator : BaseValidator
             throw new ValidationUnexpectedException("Was not able to cast validated object to it's type, seems like a bug.");
 
         var inputs = inputsValidatedObject.Inputs;
-        var operationParameterInfos = context.OperationParameters;
+        var operationParameterInfos = context.Operation?.Method.GetParameters().ToList();
+
+        if (operationParameterInfos == null)
+            return ValidationResult.Failed(ValidationSubject.Inputs, "Operation hasn't been specified before validation, seems like a bug.");
         
         if (inputs.Count != operationParameterInfos.Count)
             return ValidationResult.Failed(ValidationSubject.Inputs, $"Invalid inputs number, should be {operationParameterInfos.Count}, but was {inputs.Count}, inputs {string.Join(", ", inputs)}");

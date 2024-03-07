@@ -1,9 +1,8 @@
-using System;
-using SimpleFluentTester.TestSuite;
+using SimpleFluentTester.TestSuite.Context;
 
 namespace SimpleFluentTester.Validators.Core;
 
-public interface IValidator : IEquatable<IValidator>
+public interface IValidator
 {
     string Key { get; }
     

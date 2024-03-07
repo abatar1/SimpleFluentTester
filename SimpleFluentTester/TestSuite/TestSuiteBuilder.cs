@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using SimpleFluentTester.Reporter;
 using SimpleFluentTester.TestCase;
+using SimpleFluentTester.TestSuite.Context;
 using SimpleFluentTester.Validators;
 using SimpleFluentTester.Validators.Core;
 
@@ -30,17 +31,17 @@ internal sealed class TestSuiteBuilder<TOutput> : ITestSuiteBuilder<TOutput>
     /// </summary>
     public ITestSuiteBuilder<TOutput> UseOperation(Delegate operation)
     {
-        _context.Operation.Value = operation;
-        return this;
+        var newContext = _context.WithOperation(operation);
+        return new TestSuiteBuilder<TOutput>(newContext);
     }
     
     /// <summary>
-    /// Specifies the name of the test suite run that will be shown in output.
+    /// Specifies the name of the test suite run that will be shown in an output.
     /// </summary>
     public ITestSuiteBuilder<TOutput> WithDisplayName(string displayName)
     {
-        _context.Name = displayName;
-        return this;
+        var newContext = _context.WithDisplayName(displayName);
+        return new TestSuiteBuilder<TOutput>(newContext);
     }
     
     /// <summary>
@@ -49,24 +50,25 @@ internal sealed class TestSuiteBuilder<TOutput> : ITestSuiteBuilder<TOutput>
     /// </summary>
     public ITestSuiteBuilder<TNewOutput> WithComparer<TNewOutput>(Func<TNewOutput?, TNewOutput?, bool>? comparer = null)
     {
-        var castedTestCases = _context.TestCases
-            .Select(testCase =>
-            {
-                if (testCase.Expected is not TNewOutput castedExpected)
-                    throw new InvalidCastException("Expected type is not the same as operation type");
-                return new TestCase<TNewOutput>(testCase.Inputs, castedExpected, testCase.Number);
-            })
-            .ToList();
+        ITestSuiteBuilderContext<TNewOutput> newContext;
+        try
+        {
+            var castedTestCases = _context.TestCases
+                .Select(testCase =>
+                {
+                    if (testCase.Expected is not TNewOutput castedExpected)
+                        throw new InvalidCastException($"Expected type {testCase.Expected?.GetType()} is not the same as operation type {typeof(TNewOutput)}");
+                    return new TestCase<TNewOutput>(testCase.Inputs, castedExpected, testCase.Number);
+                })
+                .ToList();
+            newContext = _context.ConvertType(castedTestCases, comparer);
+        }
+        catch (Exception e)
+        {
+            newContext = _context.ConvertType(new List<TestCase<TNewOutput>>(), comparer);
+            newContext.AddValidation(ValidationResult.Failed(ValidationSubject.Comparer, e.Message));
+        }
         
-        var newContext = new TestSuiteBuilderContext<TNewOutput>(
-            _context.Number,
-            _context.Name,
-            _context.EntryAssemblyProvider,
-            _context.Activator,
-            castedTestCases,
-            _context.Operation,
-            comparer,
-            _context.ShouldBeExecuted);
         return new TestSuiteBuilder<TNewOutput>(newContext);
     }
     
@@ -78,8 +80,8 @@ internal sealed class TestSuiteBuilder<TOutput> : ITestSuiteBuilder<TOutput>
     {
         get
         {
-            _context.ShouldBeExecuted = false;
-            return this;
+            var newContext = _context.DoNotExecute();
+            return new TestSuiteBuilder<TOutput>(newContext);
         }
     }
 
@@ -91,22 +93,36 @@ internal sealed class TestSuiteBuilder<TOutput> : ITestSuiteBuilder<TOutput>
     {
         if (!_context.ShouldBeExecuted)
             return ReturnNotExecutedTestReporter(_context);
-        
+
+        var testSuiteResult = ProcessContextToResult(_context, testNumbers);
+        return new TestSuiteReporter<TOutput>(testSuiteResult);
+    }
+
+    private static TestSuiteResult<TOutput> ProcessContextToResult(
+        ITestSuiteBuilderContext<TOutput> context,
+        IEnumerable<int> testNumbers)
+    {
         var testNumbersHash = new SortedSet<int>(testNumbers);
         
-        var contextValidationResult = InvokeContextValidators(_context, testNumbersHash);
+        // Enrich section
+        var enrichedContext = context.TryToEnrichAttributeOperation();
+
+        // Validation section
+        enrichedContext.InvokeValidation(typeof(OperationValidator), new OperationValidatedObject(typeof(TOutput)));
+        enrichedContext.InvokeValidation(typeof(ComparerValidator), new EmptyValidatedObject());
+        enrichedContext.InvokeValidation(typeof(TestNumbersValidator), new TestNumbersValidatedObject(testNumbersHash));
         
-        var testCaseExecutor = new TestCaseExecutor<TOutput>(_context);
-        var completedTestCases = _context.TestCases
+        // Execute section
+        var testCaseExecutor = new TestCaseExecutor<TOutput>(enrichedContext);
+        var completedTestCases = enrichedContext.TestCases
             .Select(testCase => testCaseExecutor.TryCompeteTestCase(testCase, testNumbersHash))
             .ToList();
 
-        var testRunResult = new TestSuiteResult<TOutput>(completedTestCases, 
-            contextValidationResult,
-            _context.Operation,
-            _context.Name,
-            _context.Number);
-        return new TestSuiteReporter<TOutput>(testRunResult);
+        return new TestSuiteResult<TOutput>(completedTestCases, 
+            enrichedContext.Validations,
+            enrichedContext.Operation,
+            enrichedContext.Name,
+            enrichedContext.Number);
     }
 
     private static ITestSuiteReporter<TOutput> ReturnNotExecutedTestReporter(ITestSuiteBuilderContext<TOutput> context)
@@ -114,22 +130,12 @@ internal sealed class TestSuiteBuilder<TOutput> : ITestSuiteBuilder<TOutput>
         var testCases = context.TestCases
             .Select(CompletedTestCase<TOutput>.NotExecuted)
             .ToList();
-        var unknownTestRunResult = new TestSuiteResult<TOutput>(testCases, 
-            new List<ValidationResult>(),
+        var testSuiteResult = new TestSuiteResult<TOutput>(testCases, 
+            context.Validations,
             context.Operation, 
             context.Name,
             context.Number,
             true);
-        return new TestSuiteReporter<TOutput>(unknownTestRunResult);
+        return new TestSuiteReporter<TOutput>(testSuiteResult);
     }
-
-    private static IList<ValidationResult> InvokeContextValidators(ITestSuiteBuilderContext<TOutput> context, SortedSet<int> testNumbersHash)
-    {
-        var contextValidationResult = new List<ValidationResult>();
-        if (!context.IsObjectOutput)
-            contextValidationResult.Add(context.InvokeValidation(typeof(OperationValidator), new OperationValidatedObject(typeof(TOutput))));
-        contextValidationResult.Add(context.InvokeValidation(typeof(ComparerValidator), new EmptyValidatedObject()));
-        contextValidationResult.Add(context.InvokeValidation(typeof(TestNumbersValidator), new TestNumbersValidatedObject(testNumbersHash)));
-        return contextValidationResult;
-    } 
 }

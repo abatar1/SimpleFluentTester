@@ -1,4 +1,4 @@
-using SimpleFluentTester.TestSuite;
+using SimpleFluentTester.TestSuite.Context;
 
 namespace SimpleFluentTester.Validators.Core;
 
@@ -19,7 +19,7 @@ internal abstract class BaseValidator : IValidator
 
     public bool Equals(IValidator other)
     {
-        return _key == other.Key;
+        return Key == other.Key;
     }
 
     public override bool Equals(object? obj)
