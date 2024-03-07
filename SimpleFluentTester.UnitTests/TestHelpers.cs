@@ -30,7 +30,8 @@ public static class TestHelpers
         ValidationResult contextValidation,
         Delegate operation,
         TestCase<TOutput> testCase,
-        bool? ignored = false)
+        int testCaseToRun = 1,
+        bool ignored = false)
     {
         var validationResults = new Dictionary<ValidationSubject, IList<ValidationResult>>
         {
@@ -43,7 +44,7 @@ public static class TestHelpers
         var testCaseExecutor = new TestCaseExecutor<TOutput>(context);
         testCase.RegisterValidator(typeof(OperationValidator), new OperationValidatedObject(testCase.Expected?.GetType()));
         testCase.RegisterValidator(typeof(InputsValidator), new InputsValidatedObject(testCase.Inputs));
-        var completedTestCase = testCaseExecutor.TryCompeteTestCase(testCase, new SortedSet<int>([1]));
+        var completedTestCase = testCaseExecutor.TryCompeteTestCase(testCase, new SortedSet<int>([testCaseToRun]));
         return new TestSuiteResult<TOutput>(
             new List<CompletedTestCase<TOutput>> { completedTestCase },
             validationResults,

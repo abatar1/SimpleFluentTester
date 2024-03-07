@@ -84,12 +84,12 @@ internal sealed class TestCaseExecutor<TOutput>(ITestSuiteBuilderContext<TOutput
         return new Assert<TOutput>(passed, new ValueWrapper<TOutput>(output), null, stopwatch.Elapsed);
     }
 
-    private bool ShouldBeExecuted(TestCase<TOutput> testCase, SortedSet<int> testNumbersHash)
+    private static bool ShouldBeExecuted(TestCase<TOutput> testCase, SortedSet<int> testNumbersHash)
     {
         if (testNumbersHash.Count == 0)
             return true;
         if (testNumbersHash.Count != 0)
-            return testNumbersHash.Max > context.TestCases.Count || testNumbersHash.Contains(testCase.Number);
+            return testNumbersHash.Contains(testCase.Number);
 
         throw new Exception("This code shouldn't be reached.");
     }

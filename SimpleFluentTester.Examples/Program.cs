@@ -60,7 +60,7 @@ TestSuite.Sequential
     .Expect(null).WithInput(1, 1)
     .Expect(-3).WithInput(-1, -1, -1)
     .Expect("-3").WithInput("test", -1)
-    .Run(4)
+    .Run()
     .Report();
     
     

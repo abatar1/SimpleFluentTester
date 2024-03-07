@@ -160,7 +160,7 @@ public class DefaultTestSuiteReportBuilderTests
             new ValidationResult(ValidationStatus.Valid, ValidationSubject.Operation),
             (int x) => x,
             new TestCase<object>([1], 1, 1),
-            true);
+            ignored: true);
         var reporter = new DefaultTestSuiteReportBuilder<object>();
 
         // Act
@@ -168,5 +168,26 @@ public class DefaultTestSuiteReportBuilderTests
 
         // Assert
         Assert.Null(stringResult);
+    }
+    
+    [Fact]
+    public void TestSuiteResultToString_TestCaseIgnored_ShouldBeError()
+    {
+        // Assign
+        var testSuiteResult = TestHelpers.GetTestSuiteResult(
+            new ValidationResult(ValidationStatus.Valid, ValidationSubject.Operation),
+            (int x) => x,
+            new TestCase<object>([1], 1, 1),
+            testCaseToRun: 2);
+        var reporter = new DefaultTestSuiteReportBuilder<object>();
+
+        // Act
+        var stringResult = reporter.TestSuiteResultToString(testSuiteResult);
+
+        // Assert
+        Assert.NotNull(stringResult);
+        Assert.Equal(LogLevel.Error, stringResult.LogLevel);
+        Assert.NotNull(stringResult.Message);
+        Assert.Equal(testSuiteResult.Number, stringResult.EventId);
     }
 }
