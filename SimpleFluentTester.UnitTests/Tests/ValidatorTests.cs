@@ -65,6 +65,7 @@ public class ValidatorTests
         Assert.True(isEqual1);
         Assert.True(isEqual2);
         Assert.Single(hashset);
+        Assert.Equal(testValidator1.Key, testValidator2.Key);
     }
 
     private sealed class TestValidator(string key, ValidationSubject validationSubject) : BaseValidator

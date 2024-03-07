@@ -247,6 +247,23 @@ public sealed class TestSuiteBuilderTests
     }
     
     [Fact]
+    public void WithComparer_ExpectIntWithStringComparer_ShouldBeValid()
+    {
+        // Assign
+        var setup = TestSuite.TestSuite.Sequential
+            .UseOperation((int x) => x)
+            .Expect(1).WithInput(1);
+        
+        // Act
+        var reporter = setup
+            .WithComparer<string>((x, y) => x == y)
+            .Run();
+
+        // Assert
+        AssertInvalidContextValidation(reporter, ValidationSubject.Comparer);
+    }
+    
+    [Fact]
     public void Run_InvalidIterationNumber_ShouldBeInvalid()
     {
         // Assign
