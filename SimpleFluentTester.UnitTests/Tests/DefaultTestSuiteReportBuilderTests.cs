@@ -151,4 +151,22 @@ public class DefaultTestSuiteReportBuilderTests
         Assert.NotNull(stringResult.Message);
         Assert.Equal(testSuiteResult.Number, stringResult.EventId);
     }
+    
+    [Fact]
+    public void TestSuiteResultToString_IgnoredTestSuite_ShouldBeNull()
+    {
+        // Assign
+        var testSuiteResult = TestHelpers.GetTestSuiteResult(
+            new ValidationResult(ValidationStatus.Valid, ValidationSubject.Operation),
+            (int x) => x,
+            new TestCase<object>([1], 1, 1),
+            true);
+        var reporter = new DefaultTestSuiteReportBuilder<object>();
+
+        // Act
+        var stringResult = reporter.TestSuiteResultToString(testSuiteResult);
+
+        // Assert
+        Assert.Null(stringResult);
+    }
 }

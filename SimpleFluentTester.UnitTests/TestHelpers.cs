@@ -2,6 +2,7 @@ using SimpleFluentTester.Helpers;
 using SimpleFluentTester.TestCase;
 using SimpleFluentTester.TestSuite;
 using SimpleFluentTester.TestSuite.Context;
+using SimpleFluentTester.Validators;
 using SimpleFluentTester.Validators.Core;
 
 namespace SimpleFluentTester.UnitTests;
@@ -28,7 +29,8 @@ public static class TestHelpers
     public static TestSuiteResult<TOutput> GetTestSuiteResult<TOutput>(
         ValidationResult contextValidation,
         Delegate operation,
-        TestCase<TOutput> testCase)
+        TestCase<TOutput> testCase,
+        bool? ignored = false)
     {
         var validationResults = new Dictionary<ValidationSubject, IList<ValidationResult>>
         {
@@ -39,13 +41,16 @@ public static class TestHelpers
         };
         var context = CreateEmptyContext<TOutput>(operation: operation);
         var testCaseExecutor = new TestCaseExecutor<TOutput>(context);
+        testCase.RegisterValidator(typeof(OperationValidator), new OperationValidatedObject(testCase.Expected?.GetType()));
+        testCase.RegisterValidator(typeof(InputsValidator), new InputsValidatedObject(testCase.Inputs));
         var completedTestCase = testCaseExecutor.TryCompeteTestCase(testCase, new SortedSet<int>([1]));
         return new TestSuiteResult<TOutput>(
             new List<CompletedTestCase<TOutput>> { completedTestCase },
             validationResults,
             context.Operation,
             context.Name,
-            context.Number);
+            context.Number,
+            ignored);
     }
 
     internal static int Adder(int number1, int number2)
