@@ -57,7 +57,7 @@ jobs:
           version-fragment: 'feature'
         
       - name: Pack nuget
-        run: dotnet pack SimpleFluentTester.Core -c Release -o ${{ env.NuGetDirectory }} /p:Version=${{ steps.nuget-next-version.outputs.next-version }}
+        run: dotnet pack SimpleFluentTester -c Release -o ${{ env.NuGetDirectory }} /p:Version=${{ steps.nuget-next-version.outputs.next-version }}
 
       - name: Upload nuget artifact
         uses: actions/upload-artifact@v4
