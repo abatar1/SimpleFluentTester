@@ -13,10 +13,10 @@ env:
 
 jobs:
   unit_tests:
-    uses: ./.github/workflows/reusable/reusable_unit_tests.yml
+    uses: ./.github/workflows/reusable_unit_tests.yml
     
   deploy_main_nuget:
-    uses: ./.github/workflows/reusable/reusable_deploy_nuget.yml
+    uses: ./.github/workflows/reusable_deploy_nuget.yml
     with:
       project-name: SimpleFluentTester
       version-fragment: 'bug'
