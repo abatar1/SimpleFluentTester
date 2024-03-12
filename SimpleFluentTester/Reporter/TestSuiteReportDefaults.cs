@@ -176,6 +176,9 @@ public static class TestSuiteReportDefaults
 
     private static void AppendStatisticsString<TOutput>(StringBuilder stringBuilder, ICollection<CompletedTestCase<TOutput>> executedTestCases)
     {
+        if (executedTestCases.Count == 0)
+            return;
+        
         var totalElapsedMs = executedTestCases.Sum(x => x.Assert?.ElapsedTime.TotalMilliseconds);
         var avgElapsedMs = totalElapsedMs / executedTestCases.Count;
         var maxElapsedTest = executedTestCases.OrderByDescending(x => x.Assert?.ElapsedTime).First();
