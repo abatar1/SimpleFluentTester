@@ -35,10 +35,9 @@ jobs:
           url: https://api.nuget.org/v3/registration5-semver1/${{ inputs.nuget-name }}/index.json
           property_path: items.0.upper
           
-      - name: Set default value
+      - name: Set default value if failure
         if: failure()
-        id: nuget-latest-version
-        run: echo "outputs.value=0.0.1" >> "$GITHUB_OUTPUT"
+        run: echo "steps.nuget-latest-version.outputs.value=0.0.1" >> "$GITHUB_OUTPUT"
   
       - name: Increase latest nuget version
         id: nuget-next-version
