@@ -5,12 +5,6 @@ on:
     branches:
       - 'prerelease'
 
-env:
-  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
-  DOTNET_NOLOGO: true
-  NuGetDirectory: ${{ github.workspace }}/nuget
-  NuGetSource: https://api.nuget.org/v3/index.json
-
 jobs:
   unit_tests:
     uses: ./.github/workflows/unit_tests.yml
@@ -22,3 +16,5 @@ jobs:
       project-name: SimpleFluentTester
       version-fragment: 'bug'
       nuget-name: 'simplefluenttester'
+    secrets:
+      NUGET_TOKEN: ${{ secrets.NUGET_TOKEN }}
