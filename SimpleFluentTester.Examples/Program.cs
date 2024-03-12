@@ -8,7 +8,6 @@ TestSuite.Sequential
     .WithDisplayName("First example")
     .UseOperation(CustomMethods.Adder)  
     .Expect(2).WithInput(1, 1) // Number and type of input parameters should be the same as delegate's parameters, otherwise exception will be thrown.
-    .Expect(-2).WithInput(-1, -1)
     .Expect(-3).WithInput(-1, -1)
     .Run() // Could be used as .Run(1, 2) to run some specific test cases.
     .Report(); // Prints the test execution result using default reporter.
@@ -20,7 +19,6 @@ TestSuite.Sequential
     .WithDisplayName("Second example")
     .UseOperation(CustomMethods.Adder) 
     .Expect(2).WithInput(1, 1)
-    .Expect(-2).WithInput(-1, -1)
     .Expect(-3).WithInput(-1, -1)
     .Run()
     .Report((config, result) =>
@@ -34,7 +32,6 @@ TestSuite.Sequential
 TestSuite.Sequential
     .WithDisplayName("Third example")
     .Expect(2).WithInput(1, 1)
-    .Expect(-2).WithInput(-1, -1)
     .Expect(-3).WithInput(-1, -1)
     .Run()
     .Report();
@@ -46,7 +43,6 @@ TestSuite.Sequential
     .WithDisplayName("Fourth example")
     .UseOperation(CustomMethods.CustomAdder) 
     .Expect(CustomValue.FromInt(2)).WithInput(CustomValue.FromInt(1), CustomValue.FromInt(1))
-    .Expect(CustomValue.FromInt(-2)).WithInput(CustomValue.FromInt(-1), CustomValue.FromInt(-1))
     .Expect(CustomValue.FromInt(-3)).WithInput(CustomValue.FromInt(-1), CustomValue.FromInt(-1))
     .WithComparer<CustomValue>((x, y) => x?.Value == y?.Value)
     .Run()
@@ -62,5 +58,5 @@ TestSuite.Sequential
     .Expect("-3").WithInput("test", -1)
     .Run()
     .Report();
-    
+
     

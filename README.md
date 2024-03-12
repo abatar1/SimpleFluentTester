@@ -38,7 +38,7 @@ Let's start writing test cases for it!
 ```csharp
 TestSuite.Sequential
      // Here we could optionally specify how test suite result log entry will be shown in output.
-     .WithDisplayName("Example of TestSuite")
+    .WithDisplayName("Example of TestSuite")
      // Here we specify the method we want to test.
     .UseOperation(Adder) 
      // Then we add 2 valid tests and one invalid test.

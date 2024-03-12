@@ -97,9 +97,9 @@ public class TestRunBuilderTests
         var testCase = reporter.TestSuiteResult.TestCases
             .FirstOrDefault(x => x.Number == 1);
         Assert.NotNull(testCase);
-        Assert.Equal(AssertStatus.NotPassedWithException, testCase.AssertStatus);
-        Assert.Equal(ValidationStatus.Valid, testCase.ValidationStatus);
         Assert.NotNull(testCase.Assert);
+        Assert.Equal(AssertStatus.NotPassedWithException, testCase.Assert.Status);
+        Assert.Equal(ValidationStatus.Valid, testCase.ValidationStatus);
         Assert.NotNull(testCase.Assert.Exception);
         Assert.IsType<CustomException>(testCase.Assert.Exception);
     }
@@ -204,13 +204,13 @@ public class TestRunBuilderTests
             .FirstOrDefault(x => x.Number == testNumber);
         
         Assert.NotNull(testCase);
-        Assert.Equal(AssertStatus.Passed, testCase.AssertStatus);
+        Assert.NotNull(testCase.Assert);
+        Assert.Equal(AssertStatus.Passed, testCase.Assert.Status);
         Assert.Equal(ValidationStatus.Valid, testCase.ValidationStatus);
         Assert.NotEmpty(testCase.ValidationResults);
         foreach (var validationResult in testCase.ValidationResults)
             Assert.True(validationResult.IsValid);
         
-        Assert.NotNull(testCase.Assert);
         Assert.NotNull(testCase.Assert.Output);
         if (typeof(TOutput) == typeof(object) || typeof(IEquatable<TOutput>).IsAssignableFrom(typeof(TOutput)))
         {
@@ -242,13 +242,13 @@ public class TestRunBuilderTests
             .FirstOrDefault(x => x.Number == testNumber);
         
         Assert.NotNull(testCase);
-        Assert.Equal(AssertStatus.NotPassed, testCase.AssertStatus);
+        Assert.NotNull(testCase.Assert);
+        Assert.Equal(AssertStatus.NotPassed, testCase.Assert.Status);
         Assert.Equal(ValidationStatus.Valid, testCase.ValidationStatus);
         Assert.NotEmpty(testCase.ValidationResults);
         foreach (var validationResult in testCase.ValidationResults)
             Assert.True(validationResult.IsValid);
         
-        Assert.NotNull(testCase.Assert);
         Assert.Equal(expected, testCase.Expected);
         Assert.Equal(inputs, testCase.Inputs);
         Assert.False(testCase.Assert.Passed);
@@ -269,8 +269,9 @@ public class TestRunBuilderTests
             .FirstOrDefault(x => x.Number == testNumber);
         
         Assert.NotNull(testCase);
-        Assert.Equal(AssertStatus.Unknown, testCase.AssertStatus);
-        Assert.Equal(ValidationStatus.Unknown, testCase.ValidationStatus);
+        Assert.Null(testCase.Assert);
+        Assert.False(testCase.Executed);
+        Assert.Equal(ValidationStatus.Ignored, testCase.ValidationStatus);
         
         Assert.Null(testCase.Assert);
         Assert.Equal(expected, testCase.Expected);

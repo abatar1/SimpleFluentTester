@@ -17,24 +17,14 @@ public sealed class CompletedTestCase<TOutput>(
     
     public int Number { get; } = testCase.Number;
 
+    public bool Executed => Assert != null;
+
     public IList<ValidationResult> ValidationResults { get; } = validationResults;
 
     public ValidationStatus ValidationStatus { get; } = validationStatus;
 
-    public AssertStatus AssertStatus
-    {
-        get
-        {
-            if (Assert == null)
-                return AssertStatus.Unknown;
-            if (Assert is { Passed: false, Exception: not null })
-                return AssertStatus.NotPassedWithException;
-            return Assert.Passed ? AssertStatus.Passed : AssertStatus.NotPassed;
-        }
-    }
-
     public static CompletedTestCase<TOutput> NotExecuted(TestCase<TOutput> testCase)
     {
-        return new CompletedTestCase<TOutput>(null, ValidationStatus.Unknown, testCase, new List<ValidationResult>()); 
+        return new CompletedTestCase<TOutput>(null, ValidationStatus.Ignored, testCase, new List<ValidationResult>()); 
     }
 }

@@ -88,9 +88,7 @@ internal sealed class TestCaseExecutor<TOutput>(ITestSuiteBuilderContext<TOutput
     {
         if (testNumbersHash.Count == 0)
             return true;
-        if (testNumbersHash.Count != 0)
-            return testNumbersHash.Contains(testCase.Number);
-
-        throw new Exception("This code shouldn't be reached.");
+        
+        return testNumbersHash.Contains(testCase.Number);
     }
 }

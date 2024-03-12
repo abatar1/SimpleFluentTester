@@ -1,0 +1,28 @@
+on:
+  workflow_call:
+    
+env:
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
+  DOTNET_NOLOGO: true
+        
+jobs:
+  unit_tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+
+      - name: Run unit tests
+        run: dotnet test SimpleFluentTester.UnitTests -c Release
+          /p:CollectCoverage=true
+          /p:CoverletOutput=TestResults/
+          /p:CoverletOutputFormat=lcov
+
+      - name: Publish coverage report to coveralls.io
+        uses: coverallsapp/github-action@master
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path-to-lcov: SimpleFluentTester.UnitTests/TestResults/coverage.info
+          flag-name: release

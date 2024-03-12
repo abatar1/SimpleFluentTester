@@ -305,24 +305,23 @@ public sealed class TestSuiteBuilderTests
     private static void AssertValidContextValidation<TOutput>(ITestSuiteReporter<TOutput> reporter,
         ValidationSubject validationSubject)
     {
-        var validationResults = reporter.TestSuiteResult.ValidationResults
-            .Where(x => x.Key == validationSubject)
-            .SelectMany(x => x.Value)
+        var validationResults = reporter.TestSuiteResult.ContextValidation.Results
+            .Where(x => x.Subject == validationSubject)
             .ToList();
 
         foreach (var validationResult in validationResults)
         {
             Assert.True(validationResult.IsValid);
-            Assert.Null(validationResult.Message);
+            Assert.NotNull(validationResult.Message);
+            Assert.Empty(validationResult.Message);
         }
     }
     
     private static void AssertInvalidContextValidation<TOutput>(ITestSuiteReporter<TOutput> reporter, 
         ValidationSubject validationSubject)
     {
-        var isInvalid = reporter.TestSuiteResult.ValidationResults
-            .Where(x => x.Key == validationSubject)
-            .SelectMany(x => x.Value)
+        var isInvalid = reporter.TestSuiteResult.ContextValidation.Results
+            .Where(x => x.Subject == validationSubject)
             .Any(x => !x.IsValid && !string.IsNullOrWhiteSpace(x.Message));
         
         Assert.True(isInvalid);
