@@ -12,4 +12,14 @@ public sealed record Assert<TOutput>(bool Passed, ValueWrapper<TOutput>? Output,
     public Exception? Exception { get; } = Exception;
     
     public TimeSpan ElapsedTime { get; } = ElapsedTime;
+
+    public AssertStatus Status
+    {
+        get
+        {
+            if (Passed is false && Exception != null)
+                return AssertStatus.NotPassedWithException;
+            return Passed ? AssertStatus.Passed : AssertStatus.NotPassed;
+        }
+    }
 }

@@ -10,6 +10,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\SimpleFluentTester.NUnitRunner\SimpleFluentTester.NUnitRunner.csproj" />
       <ProjectReference Include="..\SimpleFluentTester\SimpleFluentTester.csproj" />
     </ItemGroup>
 

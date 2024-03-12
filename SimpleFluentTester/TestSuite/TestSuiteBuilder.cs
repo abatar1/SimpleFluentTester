@@ -117,12 +117,8 @@ internal sealed class TestSuiteBuilder<TOutput> : ITestSuiteBuilder<TOutput>
         var completedTestCases = enrichedContext.TestCases
             .Select(testCase => testCaseExecutor.TryCompeteTestCase(testCase, testNumbersHash))
             .ToList();
-
-        return new TestSuiteResult<TOutput>(completedTestCases, 
-            enrichedContext.Validations,
-            enrichedContext.Operation,
-            enrichedContext.Name,
-            enrichedContext.Number);
+        
+        return GetTestSuiteResult(enrichedContext, completedTestCases);
     }
 
     private static ITestSuiteReporter<TOutput> ReturnNotExecutedTestReporter(ITestSuiteBuilderContext<TOutput> context)
@@ -130,12 +126,43 @@ internal sealed class TestSuiteBuilder<TOutput> : ITestSuiteBuilder<TOutput>
         var testCases = context.TestCases
             .Select(CompletedTestCase<TOutput>.NotExecuted)
             .ToList();
-        var testSuiteResult = new TestSuiteResult<TOutput>(testCases, 
-            context.Validations,
-            context.Operation, 
+        var testSuiteResult = GetTestSuiteResult(context, testCases);
+        return new TestSuiteReporter<TOutput>(testSuiteResult);
+    }
+    
+    private static TestSuiteResult<TOutput> GetTestSuiteResult(
+        ITestSuiteBuilderContext<TOutput> context,
+        IList<CompletedTestCase<TOutput>> completedTestCases)
+    {
+        List<ValidationResult> validations;
+        var validationStatus = ValidationStatus.Valid;
+        if (!context.ShouldBeExecuted)
+        {
+            validations = [];
+            validationStatus = ValidationStatus.Ignored;
+        }
+        else
+        {
+            validations = context.Validations
+                .Select(x =>
+                {
+                    var message = string.Join("\n", x.Value
+                        .Where(y => !string.IsNullOrWhiteSpace(y.Message)));
+                    var valid = x.Value
+                        .All(y => y.IsValid);
+                    if (!valid)
+                        validationStatus = ValidationStatus.NonValid;
+                    
+                    return new ValidationResult(validationStatus, x.Key, message);
+                })
+                .ToList();
+        }
+      
+        return new TestSuiteResult<TOutput>(completedTestCases,
+            validations,
+            context.Operation,
             context.Name,
             context.Number,
-            true);
-        return new TestSuiteReporter<TOutput>(testSuiteResult);
+            validationStatus);
     }
 }

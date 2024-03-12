@@ -7,21 +7,28 @@ namespace SimpleFluentTester.TestSuite;
 
 public sealed class TestSuiteResult<TOutput>(
     IList<CompletedTestCase<TOutput>> validatedTestCases,
-    IDictionary<ValidationSubject, IList<ValidationResult>> validationResults,
+    IList<ValidationResult> validationResults,
     Delegate? operation,
     string? displayName,
     int number,
-    bool? ignored = null)
+    ValidationStatus validationStatus)
 {
     public IList<CompletedTestCase<TOutput>> TestCases { get; } = validatedTestCases;
 
-    public IDictionary<ValidationSubject, IList<ValidationResult>> ValidationResults { get; } = validationResults;
+    public ContextValidationResult ContextValidation { get; } = new(validationResults, validationStatus);
 
     public Delegate? Operation { get; } = operation;
-    
-    public bool Ignored { get; } = ignored ?? false;
 
     public string? DisplayName { get; } = displayName;
 
     public int Number { get; } = number;
+
+    public sealed class ContextValidationResult(
+        IList<ValidationResult> validationResults,
+        ValidationStatus validationStatus)
+    {
+        public IList<ValidationResult> Results { get; } = validationResults;
+    
+        public ValidationStatus Status { get; } = validationStatus;
+    }
 }

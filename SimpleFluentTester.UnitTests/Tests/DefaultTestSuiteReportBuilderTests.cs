@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using Moq;
 using SimpleFluentTester.Reporter;
 using SimpleFluentTester.TestCase;
 using SimpleFluentTester.TestSuite;
@@ -15,18 +16,21 @@ public class DefaultTestSuiteReportBuilderTests
         var context = TestHelpers.CreateEmptyContext<object>();
         var testSuiteResult = new TestSuiteResult<object>(
             new List<CompletedTestCase<object>>(),
-            new Dictionary<ValidationSubject, IList<ValidationResult>>(),
+            new List<ValidationResult>(),
             context.Operation,
             context.Name,
             context.Number,
-            true);
+            ValidationStatus.Ignored);
         var reporter = new DefaultTestSuiteReportBuilder<object>();
+        var shouldPrintPredicateMock = new Mock<Func<CompletedTestCase<object>, bool>>();
 
         // Act
-        var stringResult = reporter.TestSuiteResultToString(testSuiteResult);
+        var stringResult = reporter.TestSuiteResultToString(testSuiteResult, shouldPrintPredicateMock.Object);
 
         // Assert
         Assert.Null(stringResult);
+        shouldPrintPredicateMock
+            .Verify(x => x.Invoke(It.IsAny<CompletedTestCase<object>>()), Times.Never);
     }
 
     [Fact]
@@ -36,20 +40,25 @@ public class DefaultTestSuiteReportBuilderTests
         var context = TestHelpers.CreateEmptyContext<object>();
         var testSuiteResult = new TestSuiteResult<object>(
             new List<CompletedTestCase<object>>(),
-            new Dictionary<ValidationSubject, IList<ValidationResult>>(),
+            new List<ValidationResult>(),
             context.Operation,
             context.Name,
-            context.Number);
+            context.Number,
+            ValidationStatus.Valid);
         var reporter = new DefaultTestSuiteReportBuilder<object>();
+        var shouldPrintPredicateMock = new Mock<Func<CompletedTestCase<object>, bool>>();
 
         // Act
-        var stringResult = reporter.TestSuiteResultToString(testSuiteResult);
+        var stringResult = reporter.TestSuiteResultToString(testSuiteResult, shouldPrintPredicateMock.Object);
 
         // Assert
         Assert.NotNull(stringResult);
         Assert.Equal(LogLevel.Error, stringResult.LogLevel);
         Assert.NotNull(stringResult.Message);
+        Assert.Equal("No test cases were added", stringResult.Message);
         Assert.Equal(testSuiteResult.Number, stringResult.EventId);
+        shouldPrintPredicateMock
+            .Verify(x => x.Invoke(It.IsAny<CompletedTestCase<object>>()), Times.Never);
     }
 
     [Fact]
@@ -57,19 +66,21 @@ public class DefaultTestSuiteReportBuilderTests
     {
         // Assign
         var testSuiteResult = TestHelpers.GetTestSuiteResult(
-            new ValidationResult(ValidationStatus.NonValid, ValidationSubject.Operation),
-            (int x) => x,
-            new TestCase<object>([1], 1, 1));
-        var reporter = new DefaultTestSuiteReportBuilder<object>();
+            TestHelpers.ValidationResults.NonValid,
+            TestHelpers.TestCaseOperations.Passed);
+        var reporter = new DefaultTestSuiteReportBuilder<int>();
+        var shouldPrintPredicateMock = new Mock<Func<CompletedTestCase<int>, bool>>();
 
         // Act
-        var stringResult = reporter.TestSuiteResultToString(testSuiteResult);
+        var stringResult = reporter.TestSuiteResultToString(testSuiteResult, shouldPrintPredicateMock.Object);
 
         // Assert
         Assert.NotNull(stringResult);
         Assert.Equal(LogLevel.Error, stringResult.LogLevel);
         Assert.NotNull(stringResult.Message);
         Assert.Equal(testSuiteResult.Number, stringResult.EventId);
+        shouldPrintPredicateMock
+            .Verify(x => x.Invoke(It.IsAny<CompletedTestCase<int>>()), Times.Once);
     }
     
     [Fact]
@@ -77,19 +88,21 @@ public class DefaultTestSuiteReportBuilderTests
     {
         // Assign
         var testSuiteResult = TestHelpers.GetTestSuiteResult(
-            new ValidationResult(ValidationStatus.Valid, ValidationSubject.Operation),
-            (int x) => x,
-            new TestCase<object>([1], 1, 1));
-        var reporter = new DefaultTestSuiteReportBuilder<object>();
+            TestHelpers.ValidationResults.Valid,
+            TestHelpers.TestCaseOperations.Passed);
+        var reporter = new DefaultTestSuiteReportBuilder<int>();
+        var shouldPrintPredicateMock = new Mock<Func<CompletedTestCase<int>, bool>>();
 
         // Act
-        var stringResult = reporter.TestSuiteResultToString(testSuiteResult);
+        var stringResult = reporter.TestSuiteResultToString(testSuiteResult, shouldPrintPredicateMock.Object);
 
         // Assert
         Assert.NotNull(stringResult);
         Assert.Equal(LogLevel.Information, stringResult.LogLevel);
         Assert.NotNull(stringResult.Message);
         Assert.Equal(testSuiteResult.Number, stringResult.EventId);
+        shouldPrintPredicateMock
+            .Verify(x => x.Invoke(It.IsAny<CompletedTestCase<int>>()), Times.Once);
     }
 
     [Fact]
@@ -97,19 +110,21 @@ public class DefaultTestSuiteReportBuilderTests
     {
         // Assign
         var testSuiteResult = TestHelpers.GetTestSuiteResult(
-            new ValidationResult(ValidationStatus.Valid, ValidationSubject.Operation),
-            (int x) => x,
-            new TestCase<object>(["test"], 1, 1));
-        var reporter = new DefaultTestSuiteReportBuilder<object>();
+            TestHelpers.ValidationResults.Valid,
+            TestHelpers.TestCaseOperations.Invalid);
+        var reporter = new DefaultTestSuiteReportBuilder<int>();
+        var shouldPrintPredicateMock = new Mock<Func<CompletedTestCase<int>, bool>>();
 
         // Act
-        var stringResult = reporter.TestSuiteResultToString(testSuiteResult);
+        var stringResult = reporter.TestSuiteResultToString(testSuiteResult, shouldPrintPredicateMock.Object);
 
         // Assert
         Assert.NotNull(stringResult);
         Assert.Equal(LogLevel.Error, stringResult.LogLevel);
         Assert.NotNull(stringResult.Message);
         Assert.Equal(testSuiteResult.Number, stringResult.EventId);
+        shouldPrintPredicateMock
+            .Verify(x => x.Invoke(It.IsAny<CompletedTestCase<int>>()), Times.Once);
     }
 
     [Fact]
@@ -117,19 +132,21 @@ public class DefaultTestSuiteReportBuilderTests
     {
         // Assign
         var testSuiteResult = TestHelpers.GetTestSuiteResult(
-            new ValidationResult(ValidationStatus.Valid, ValidationSubject.Operation),
-            (int x) => x,
-            new TestCase<object>([1], 2, 1));
-        var reporter = new DefaultTestSuiteReportBuilder<object>();
+            TestHelpers.ValidationResults.Valid,
+            TestHelpers.TestCaseOperations.NotPassed);
+        var reporter = new DefaultTestSuiteReportBuilder<int>();
+        var shouldPrintPredicateMock = new Mock<Func<CompletedTestCase<int>, bool>>();
 
         // Act
-        var stringResult = reporter.TestSuiteResultToString(testSuiteResult);
+        var stringResult = reporter.TestSuiteResultToString(testSuiteResult, shouldPrintPredicateMock.Object);
 
         // Assert
         Assert.NotNull(stringResult);
         Assert.Equal(LogLevel.Error, stringResult.LogLevel);
         Assert.NotNull(stringResult.Message);
         Assert.Equal(testSuiteResult.Number, stringResult.EventId);
+        shouldPrintPredicateMock
+            .Verify(x => x.Invoke(It.IsAny<CompletedTestCase<int>>()), Times.Once);
     }
 
     [Fact]
@@ -137,19 +154,21 @@ public class DefaultTestSuiteReportBuilderTests
     {
         // Assign
         var testSuiteResult = TestHelpers.GetTestSuiteResult(
-            new ValidationResult(ValidationStatus.Valid, ValidationSubject.Operation),
-            (int x) => x,
-            new TestCase<object>([1], 1, 1));
-        var reporter = new DefaultTestSuiteReportBuilder<object>();
+            TestHelpers.ValidationResults.Valid,
+            TestHelpers.TestCaseOperations.Passed);
+        var reporter = new DefaultTestSuiteReportBuilder<int>();
+        var shouldPrintPredicateMock = new Mock<Func<CompletedTestCase<int>, bool>>();
 
         // Act
-        var stringResult = reporter.TestSuiteResultToString(testSuiteResult);
+        var stringResult = reporter.TestSuiteResultToString(testSuiteResult, shouldPrintPredicateMock.Object);
 
         // Assert
         Assert.NotNull(stringResult);
         Assert.Equal(LogLevel.Information, stringResult.LogLevel);
         Assert.NotNull(stringResult.Message);
         Assert.Equal(testSuiteResult.Number, stringResult.EventId);
+        shouldPrintPredicateMock
+            .Verify(x => x.Invoke(It.IsAny<CompletedTestCase<int>>()), Times.Once);
     }
     
     [Fact]
@@ -157,17 +176,19 @@ public class DefaultTestSuiteReportBuilderTests
     {
         // Assign
         var testSuiteResult = TestHelpers.GetTestSuiteResult(
-            new ValidationResult(ValidationStatus.Valid, ValidationSubject.Operation),
-            (int x) => x,
-            new TestCase<object>([1], 1, 1),
+            TestHelpers.ValidationResults.Valid,
+            TestHelpers.TestCaseOperations.Passed,
             ignored: true);
-        var reporter = new DefaultTestSuiteReportBuilder<object>();
+        var reporter = new DefaultTestSuiteReportBuilder<int>();
+        var shouldPrintPredicateMock = new Mock<Func<CompletedTestCase<int>, bool>>();
 
         // Act
-        var stringResult = reporter.TestSuiteResultToString(testSuiteResult);
+        var stringResult = reporter.TestSuiteResultToString(testSuiteResult, shouldPrintPredicateMock.Object);
 
         // Assert
         Assert.Null(stringResult);
+        shouldPrintPredicateMock
+            .Verify(x => x.Invoke(It.IsAny<CompletedTestCase<int>>()), Times.Never);
     }
     
     [Fact]
@@ -175,19 +196,21 @@ public class DefaultTestSuiteReportBuilderTests
     {
         // Assign
         var testSuiteResult = TestHelpers.GetTestSuiteResult(
-            new ValidationResult(ValidationStatus.Valid, ValidationSubject.Operation),
-            (int x) => x,
-            new TestCase<object>([1], 1, 1),
+            TestHelpers.ValidationResults.Valid,
+            TestHelpers.TestCaseOperations.Passed,
             testCaseToRun: 2);
-        var reporter = new DefaultTestSuiteReportBuilder<object>();
+        var reporter = new DefaultTestSuiteReportBuilder<int>();
+        var shouldPrintPredicateMock = new Mock<Func<CompletedTestCase<int>, bool>>();
 
         // Act
-        var stringResult = reporter.TestSuiteResultToString(testSuiteResult);
+        var stringResult = reporter.TestSuiteResultToString(testSuiteResult, shouldPrintPredicateMock.Object);
 
         // Assert
         Assert.NotNull(stringResult);
         Assert.Equal(LogLevel.Error, stringResult.LogLevel);
         Assert.NotNull(stringResult.Message);
         Assert.Equal(testSuiteResult.Number, stringResult.EventId);
+        shouldPrintPredicateMock
+            .Verify(x => x.Invoke(It.IsAny<CompletedTestCase<int>>()), Times.Once);
     }
 }
