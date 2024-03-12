@@ -6,6 +6,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleFluentTester.Examples
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleFluentTester.UnitTests", "SimpleFluentTester.UnitTests\SimpleFluentTester.UnitTests.csproj", "{FF0115F7-F109-43A7-AB0C-BAC4DE94ADFB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleFluentTester.NUnitRunner", "SimpleFluentTester.NUnitRunner\SimpleFluentTester.NUnitRunner.csproj", "{505F538F-A5DF-4A79-8F61-04892E7360B6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,5 +26,9 @@ Global
 		{FF0115F7-F109-43A7-AB0C-BAC4DE94ADFB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FF0115F7-F109-43A7-AB0C-BAC4DE94ADFB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FF0115F7-F109-43A7-AB0C-BAC4DE94ADFB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{505F538F-A5DF-4A79-8F61-04892E7360B6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{505F538F-A5DF-4A79-8F61-04892E7360B6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{505F538F-A5DF-4A79-8F61-04892E7360B6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{505F538F-A5DF-4A79-8F61-04892E7360B6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
