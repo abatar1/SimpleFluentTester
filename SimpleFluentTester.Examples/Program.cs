@@ -1,5 +1,4 @@
 ﻿using SimpleFluentTester.Examples;
-using SimpleFluentTester.NUnitRunner;
 using SimpleFluentTester.TestSuite;
 
 // 1 Example.
@@ -60,16 +59,4 @@ TestSuite.Sequential
     .Run()
     .Report();
 
-// 6 Example.
-// Report result using NUNit library extension method.
-TestSuite.Sequential
-    .WithDisplayName("Six example")
-    .Expect(2).WithInput(1, 1)
-    .Expect(3).WithInput(1, 1)
-    .Expect(null).WithInput(1, 1)
-    .Expect(-3).WithInput(-1, -1, -1)
-    .Expect("-3").WithInput("test", -1)
-    .Run()
-    .ReportNUnit(config => config.WriteResultToFile = false);
-    
     
