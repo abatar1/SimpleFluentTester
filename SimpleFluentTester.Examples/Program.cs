@@ -1,6 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
-using SimpleFluentTester.Examples;
+﻿using SimpleFluentTester.Examples;
 using SimpleFluentTester.TestSuite;
 using SimpleFluentTester.TestSuite.Case;
 
