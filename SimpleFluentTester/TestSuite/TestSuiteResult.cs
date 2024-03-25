@@ -1,34 +1,27 @@
 using System;
 using System.Collections.Generic;
-using SimpleFluentTester.TestCase;
+using SimpleFluentTester.TestSuite.Case;
 using SimpleFluentTester.Validators.Core;
 
 namespace SimpleFluentTester.TestSuite;
 
-public sealed class TestSuiteResult<TOutput>(
-    IList<CompletedTestCase<TOutput>> validatedTestCases,
-    IList<ValidationResult> validationResults,
+public sealed class TestSuiteResult(
+    IList<CompletedTestCase> validatedTestCases,
+    ValidationUnpacked validation,
     Delegate? operation,
     string? displayName,
     int number,
-    ValidationStatus validationStatus)
+    bool shouldBeExecuted = true)
 {
-    public IList<CompletedTestCase<TOutput>> TestCases { get; } = validatedTestCases;
+    public bool ShouldBeExecuted { get; } = shouldBeExecuted;
+    
+    public IList<CompletedTestCase> TestCases { get; } = validatedTestCases;
 
-    public ContextValidationResult ContextValidation { get; } = new(validationResults, validationStatus);
+    public ValidationUnpacked Validation { get; } = validation;
 
     public Delegate? Operation { get; } = operation;
 
     public string? DisplayName { get; } = displayName;
 
     public int Number { get; } = number;
-
-    public sealed class ContextValidationResult(
-        IList<ValidationResult> validationResults,
-        ValidationStatus validationStatus)
-    {
-        public IList<ValidationResult> Results { get; } = validationResults;
-    
-        public ValidationStatus Status { get; } = validationStatus;
-    }
 }

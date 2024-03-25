@@ -1,4 +1,5 @@
-using SimpleFluentTester.TestSuite.Context;
+using System;
+using System.Collections.Generic;
 
 namespace SimpleFluentTester.Validators.Core;
 
@@ -6,5 +7,9 @@ public interface IValidator
 {
     string Key { get; }
     
-    ValidationResult Validate<TOutput>(ITestSuiteBuilderContext<TOutput> context, IValidatedObject validatedObject);
+    ISet<Type> AllowedTypes { get; }
+    
+    ValidationSubject Subject { get; }
+    
+    ValidationResult Validate(IValidated validated, IValidatedObject validatedObject);
 }

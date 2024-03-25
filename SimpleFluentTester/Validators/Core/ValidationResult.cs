@@ -1,22 +1,42 @@
+using System;
+
 namespace SimpleFluentTester.Validators.Core;
 
-public sealed record ValidationResult(ValidationStatus Status, ValidationSubject Subject, string? Message = null)
+public sealed record ValidationResult
 {
-    public ValidationStatus Status { get; } = Status;
+    private ValidationResult(ValidationStatus status, ValidationSubject subject, string? message = null, Exception? exception = null)
+    {
+        Status = status;
+        Subject = subject;
+        Message = message;
+        Exception = exception;
+    }
 
-    public ValidationSubject Subject { get; } = Subject;
+    public ValidationStatus Status { get; }
 
-    public string? Message { get; } = Message;
+    public ValidationSubject Subject { get; }
 
-    public bool IsValid => Status is ValidationStatus.Valid;
+    public string? Message { get; }
 
-    public static ValidationResult Failed(ValidationSubject subject, string? message = null)
+    public Exception? Exception { get; }
+    
+    public static ValidationResult Failed(ValidationSubject subject, Exception exception, string message)
+    {
+        return new ValidationResult(ValidationStatus.Failed, subject, message, exception);
+    }
+
+    public static ValidationResult NonValid(ValidationSubject subject, string message)
     {
         return new ValidationResult(ValidationStatus.NonValid, subject, message);
     }
     
-    public static ValidationResult Ok(ValidationSubject subject)
+    public static ValidationResult Valid(ValidationSubject subject)
     {
         return new ValidationResult(ValidationStatus.Valid, subject);
+    }
+
+    public static ValidationResult FromStatus(ValidationStatus status, ValidationSubject subject, string? message = null, Exception? exception = null)
+    {
+        return new ValidationResult(status, subject, message, exception);
     }
 }

@@ -4,12 +4,6 @@ on:
   push:
     branches:
       - 'main'
-        
-env:
-  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
-  DOTNET_NOLOGO: true
-  NuGetDirectory: ${{ github.workspace }}/nuget
-  NuGetSource: https://api.nuget.org/v3/index.json
     
 jobs:       
   unit_tests:
@@ -22,3 +16,5 @@ jobs:
       project-name: SimpleFluentTester
       version-fragment: 'feature'
       nuget-name: 'simplefluenttester'
+    secrets:
+      NUGET_TOKEN: ${{ secrets.NUGET_TOKEN }}

@@ -1,49 +1,68 @@
 using System;
 using System.Collections.Generic;
-using SimpleFluentTester.TestCase;
-using SimpleFluentTester.TestSuite.Context;
 
 namespace SimpleFluentTester.Validators.Core;
 
 internal static class BuilderContextValidatorExtensions
 {
-    public static TestCase<TOutput> RegisterValidator<TOutput>(
-        this TestCase<TOutput> testCase,
-        Type validatorType,
-        IValidatedObject validatedObject)
-    {
-        var validatorInvoker = CreateValidationInvoker(validatorType, validatedObject);
-        testCase.Validators.Add(validatorInvoker);
-        return testCase;
-    }
-
-    public static ITestSuiteBuilderContext<TOutput> InvokeValidation<TOutput>(
-        this ITestSuiteBuilderContext<TOutput> context,
-        Type validatorType,
-        IValidatedObject validatedObject)
-    {
-        var validationInvoker = CreateValidationInvoker(validatorType, validatedObject);
-        var validationResult = validationInvoker.Invoke(context);
-        context.AddValidation(validationResult);
-        return context;
-    }
-
-    public static ITestSuiteBuilderContext<TOutput> AddValidation<TOutput>(
-        this ITestSuiteBuilderContext<TOutput> context,
+    public static IValidated AddValidation(
+        this IValidated validated,
         ValidationResult validationResult)
     {
-        if (context.Validations.ContainsKey(validationResult.Subject))
-            context.Validations[validationResult.Subject].Add(validationResult);
-        else
-            context.Validations[validationResult.Subject] = new List<ValidationResult> { validationResult };
-        return context;
+        return AddValidation(validated, validationResult.Subject, () => validationResult);
     }
 
-    private static IValidationInvoker CreateValidationInvoker(
-        Type validatorType,
-        IValidatedObject validatedObject)
+    public static IValidated RegisterValidation<TValidator>(
+        this IValidated validated,
+        Func<IValidatedObject>? validatedObjectFactory = null)
+        where TValidator : IValidator
     {
-        var validator = (IValidator)Activator.CreateInstance(validatorType);
-        return new ValidationInvoker(validator, validatedObject);
+        IValidator validator;
+        try
+        {
+            validator = (IValidator)Activator.CreateInstance(typeof(TValidator));
+        }
+        catch (Exception e)
+        {
+            var message = $"Couldn't register validator for a type {typeof(TValidator)}.";
+            throw new InvalidOperationException(message, e);
+        }
+
+        var validatedType = validated.GetType();
+        if (!validator.AllowedTypes.Contains(validatedType))
+        {
+            var message =
+                $"Could not register validator {validator.GetType()} for this {nameof(IValidated)} type {validatedType}, it is not allowed";
+            throw new InvalidOperationException(message);
+        }
+
+        AddValidation(validated, validator.Subject, () => RunValidation(validator, validated, validatedObjectFactory));
+        return validated;
+    }
+
+    private static ValidationResult RunValidation(IValidator validator, IValidated validated, Func<IValidatedObject>? validatedObjectFactory)
+    {
+        try
+        {
+            var validatedObject = validatedObjectFactory?.Invoke() ?? new EmptyValidatedObject();
+            return validator.Validate(validated, validatedObject);
+        }
+        catch (Exception e)
+        {
+            var message = $"Failed to validate {validated.GetType()} with {validator.GetType()} validator.";
+            return ValidationResult.Failed(validator.Subject, e, message);
+        }
+    }
+    
+    private static IValidated AddValidation(
+        IValidated validated,
+        ValidationSubject subject,
+        Func<ValidationResult> validationFactory)
+    {
+        if (validated.Validations.ContainsKey(subject))
+            validated.Validations[subject].Add(validationFactory);
+        else
+            validated.Validations[subject] = new List<Func<ValidationResult>> { validationFactory };
+        return validated;
     }
 }

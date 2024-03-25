@@ -1,14 +1,18 @@
 using System;
 using Microsoft.Extensions.Logging;
-using SimpleFluentTester.TestCase;
+using SimpleFluentTester.TestSuite.Case;
 
 namespace SimpleFluentTester.Reporter;
 
-internal sealed class TestSuiteReporterConfiguration<TOutput> : ITestSuiteReporterConfiguration<TOutput>
+/// <inheritdoc cref="ITestSuiteReporterConfiguration"/>
+internal sealed class TestSuiteReporterConfiguration : ITestSuiteReporterConfiguration
 {
-    public ITestSuiteReportBuilder<TOutput>? ReportBuilder { get; set; }
+    /// <inheritdoc cref="ITestSuiteReporterConfiguration.ReportBuilder"/>
+    public ITestSuiteReportBuilder? ReportBuilder { get; set; }
     
+    /// <inheritdoc cref="ITestSuiteReporterConfiguration.Logger"/>
     public ILogger? Logger { get; set; }
     
-    public Func<CompletedTestCase<TOutput>, bool>? ShouldPrintPredicate { get; set; }
+    /// <inheritdoc cref="ITestSuiteReporterConfiguration.ShouldPrintPredicate"/>
+    public Func<CompletedTestCase, bool>? ShouldPrintPredicate { get; set; }
 }

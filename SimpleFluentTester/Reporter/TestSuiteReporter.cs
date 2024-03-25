@@ -1,20 +1,19 @@
 ﻿using System;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Console;
-using SimpleFluentTester.TestCase;
 using SimpleFluentTester.TestSuite;
-using SimpleFluentTester.Validators.Core;
+using SimpleFluentTester.TestSuite.Case;
 
 namespace SimpleFluentTester.Reporter;
 
-internal sealed class TestSuiteReporter<TOutput>(TestSuiteResult<TOutput> testRunResult) : ITestSuiteReporter<TOutput>
+internal sealed class TestSuiteReporter(TestSuiteResult testRunResult) : ITestSuiteReporter
 {
-    public void Report(Action<ITestSuiteReporterConfiguration<TOutput>, TestSuiteResult<TOutput>>? configurationBuilder = null)
+    public void Report(Action<ITestSuiteReporterConfiguration, TestSuiteResult>? configurationBuilder = null)
     {
-        var configuration = new TestSuiteReporterConfiguration<TOutput>();
+        var configuration = new TestSuiteReporterConfiguration();
         configurationBuilder?.Invoke(configuration, TestSuiteResult);
 
-        var reportBuilder = configuration.ReportBuilder ?? new DefaultTestSuiteReportBuilder<TOutput>();
+        var reportBuilder = configuration.ReportBuilder ?? new DefaultTestSuiteReportBuilder();
         var logger = configuration.Logger ?? DefaultLogger;
         var shouldPrintPredicate = configuration.ShouldPrintPredicate ?? DefaultShouldPrintPredicate;
         try
@@ -26,12 +25,12 @@ internal sealed class TestSuiteReporter<TOutput>(TestSuiteResult<TOutput> testRu
         }
         catch (Exception e)
         {
-            logger.LogError(TestSuiteResult.Number, e, "Couldn't report a result of {number} TestSuite",
+            logger.LogError(new EventId(TestSuiteResult.Number), e, "Couldn't report a result of {number} TestSuite",
                 TestSuiteResult.Number);
         }
     }
 
-    public TestSuiteResult<TOutput> TestSuiteResult { get; } = testRunResult;
+    public TestSuiteResult TestSuiteResult { get; } = testRunResult;
 
     private ILogger DefaultLogger
     {
@@ -52,15 +51,15 @@ internal sealed class TestSuiteReporter<TOutput>(TestSuiteResult<TOutput> testRu
         }
     }
 
-    private static Func<CompletedTestCase<TOutput>, bool> DefaultShouldPrintPredicate
+    private static Func<CompletedTestCase, bool> DefaultShouldPrintPredicate
     {
         get
         {
             return testCase =>
             {
-                var notPassed = testCase.Assert?.Status == AssertStatus.NotPassed;
-                var notPassedWithException = testCase.Assert?.Status == AssertStatus.NotPassedWithException;
-                var notValid = testCase.ValidationStatus != ValidationStatus.Valid;
+                var notPassed = testCase.Assert.Status == AssertStatus.NotPassed;
+                var notPassedWithException = testCase.Assert.Status == AssertStatus.NotPassedWithException;
+                var notValid = !testCase.Validation.IsValid;
                 return notPassed || notPassedWithException || notValid;
             };
         }

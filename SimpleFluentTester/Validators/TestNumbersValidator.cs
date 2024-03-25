@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using SimpleFluentTester.TestSuite.Context;
@@ -5,20 +6,23 @@ using SimpleFluentTester.Validators.Core;
 
 namespace SimpleFluentTester.Validators;
 
-internal sealed class TestNumbersValidator : BaseValidator
+internal sealed class TestNumbersValidator : BaseValidator<TestNumbersValidatedObject>
 {
-    public override ValidationResult Validate<TOutput>(
-        ITestSuiteBuilderContext<TOutput> context, 
+    public override ISet<Type> AllowedTypes => new HashSet<Type>([ValidatedTypes.Context]);
+    public override ValidationSubject Subject => ValidationSubject.TestNumbers;
+    
+    public override ValidationResult Validate(
+        IValidated validated, 
         IValidatedObject validatedObject)
     {
-        if (validatedObject is not TestNumbersValidatedObject testCasesValidatedObject)
-            throw new ValidationUnexpectedException("Was not able to cast validated object to it's type, seems like a bug.");
+        var testCasesValidatedObject = CastValidatedObject(validatedObject);
+        var context = CastValidated<ITestSuiteContext>(validated);
         
         var testNumbersHash = testCasesValidatedObject.TestNumbers;
         if (testNumbersHash.Count != 0 && (testNumbersHash.Count > context.TestCases.Count || testNumbersHash.Max() > context.TestCases.Count))
-            return ValidationResult.Failed(ValidationSubject.TestNumbers, "Invalid test case numbers were given as input");
+            return NonValid("Invalid test case numbers were given as input");
         
-        return ValidationResult.Ok(ValidationSubject.TestNumbers);
+        return Ok();
     }
 }
 
