@@ -105,7 +105,7 @@ public class ExpectTests
         entryAssemblyProviderMock
             .Setup(x => x.Get())
             .Returns(Assembly.GetAssembly(typeof(ExpectTests)));
-        var container = TestSuiteHelper.CreateEmptyContextContainer(entryAssemblyProviderMock.Object);
+        var container = TestSuiteFactory.CreateEmptyContextContainer(entryAssemblyProviderMock.Object);
         var builder = new TestSuite.TestSuiteBuilder(container);
         
         // Act
@@ -129,7 +129,7 @@ public class ExpectTests
         entryAssemblyProviderMock
             .Setup(x => x.Get())
             .Returns(assemblyMock.Object);
-        var container = TestSuiteHelper.CreateEmptyContextContainer(entryAssemblyProviderMock.Object);
+        var container = TestSuiteFactory.CreateEmptyContextContainer(entryAssemblyProviderMock.Object);
         var builder = new TestSuite.TestSuiteBuilder(container);
         
         // Act

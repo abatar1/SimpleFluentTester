@@ -56,7 +56,7 @@ public sealed class OperationValidatorTests
     {
         // Assign
         var validator = new OperationValidator();
-        var testCase = TestSuiteHelper.CreateTestCase([1], new Exception());
+        var testCase = TestSuiteFactory.CreateTestCase([1], new Exception());
         var validatedObject = new OperationValidatedObject(() => true);
 
         // Act
@@ -71,7 +71,7 @@ public sealed class OperationValidatorTests
     {
         // Assign
         var validator = new OperationValidator();
-        var testCase = TestSuiteHelper.CreateTestCase([1], null);
+        var testCase = TestSuiteFactory.CreateTestCase([1], null);
         var validatedObject = new OperationValidatedObject((int? x) => x);
 
         // Act
@@ -86,7 +86,7 @@ public sealed class OperationValidatorTests
     {
         // Assign
         var validator = new OperationValidator();
-        var testCase = TestSuiteHelper.CreateTestCase([1], 1);
+        var testCase = TestSuiteFactory.CreateTestCase([1], 1);
         var validatedObject = new OperationValidatedObject((int? x) => x);
 
         // Act
@@ -101,7 +101,7 @@ public sealed class OperationValidatorTests
     {
         // Assign
         var validator = new OperationValidator();
-        var testCase = TestSuiteHelper.CreateTestCase([1], "test");
+        var testCase = TestSuiteFactory.CreateTestCase([1], "test");
         var validatedObject = new OperationValidatedObject((int? x) => x);
 
         // Act
@@ -116,7 +116,7 @@ public sealed class OperationValidatorTests
     {
         // Assign
         var validator = new OperationValidator();
-        var testCase = TestSuiteHelper.CreateTestCase([1], "test");
+        var testCase = TestSuiteFactory.CreateTestCase([1], "test");
         var validatedObject = new OperationValidatedObject((int x) => x);
 
         // Act
@@ -131,7 +131,7 @@ public sealed class OperationValidatorTests
     {
         // Assign
         var validator = new OperationValidator();
-        var testCase = TestSuiteHelper.CreateTestCase([1], 1);
+        var testCase = TestSuiteFactory.CreateTestCase([1], 1);
         var validatedObject = new OperationValidatedObject((int x) => x);
 
         // Act

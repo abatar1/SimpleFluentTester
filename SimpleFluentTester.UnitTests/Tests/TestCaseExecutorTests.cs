@@ -17,7 +17,7 @@ public sealed class TestCaseExecutorTests
         const int expectedResult = 3;
         var input = new[] { 1, 2 }.Cast<object?>().ToArray();
         
-        var container = TestSuiteHelper.CreateEmptyContextContainer(operation: (int x, int y) => x + y);
+        var container = TestSuiteFactory.CreateEmptyContextContainer(operation: (int x, int y) => x + y);
         
         var comparedObjectFactory = new ComparedObjectFactory();
         var comparedObjectFactoryMock = new Mock<IComparedObjectFactory>();
@@ -26,7 +26,7 @@ public sealed class TestCaseExecutorTests
             .Returns(comparedObjectFactory.Wrap(expectedResult));
         var testCaseExecutor = new TestCaseExecutor(container.Context, comparedObjectFactoryMock.Object);
 
-        var testCase = TestSuiteHelper.CreateTestCase(input, expectedResult);
+        var testCase = TestSuiteFactory.CreateTestCase(input, expectedResult);
         var sw = new Stopwatch();
         
         // Act
@@ -44,7 +44,7 @@ public sealed class TestCaseExecutorTests
     {
         // Assign
         var exception = new CustomWithMessageException("Message");
-        var container = TestSuiteHelper.CreateEmptyContextContainer(operation: (int _, int _) =>
+        var container = TestSuiteFactory.CreateEmptyContextContainer(operation: (int _, int _) =>
         {
             throw exception;
         });
@@ -56,7 +56,7 @@ public sealed class TestCaseExecutorTests
             .Returns(comparedObjectFactory.Wrap(exception));
         var testCaseExecutor = new TestCaseExecutor(container.Context, comparedObjectFactoryMock.Object);
 
-        var testCase = TestSuiteHelper.CreateTestCase([1, 2], 3);
+        var testCase = TestSuiteFactory.CreateTestCase([1, 2], 3);
         var sw = new Stopwatch();
         
         // Act
@@ -76,7 +76,7 @@ public sealed class TestCaseExecutorTests
         var exception = new CustomWithMessageException("Message");
         var input = new[] { 1, 2, 3 }.Cast<object?>().ToArray();
         
-        var container = TestSuiteHelper.CreateEmptyContextContainer(operation: (int x, int y) => x + y);
+        var container = TestSuiteFactory.CreateEmptyContextContainer(operation: (int x, int y) => x + y);
         
         var comparedObjectFactory = new ComparedObjectFactory();
         var comparedObjectFactoryMock = new Mock<IComparedObjectFactory>();
@@ -85,7 +85,7 @@ public sealed class TestCaseExecutorTests
             .Returns(comparedObjectFactory.Wrap(exception));
         var testCaseExecutor = new TestCaseExecutor(container.Context, comparedObjectFactoryMock.Object);
 
-        var testCase = TestSuiteHelper.CreateTestCase(input, 6);
+        var testCase = TestSuiteFactory.CreateTestCase(input, 6);
         var sw = new Stopwatch();
         
         // Act
@@ -104,12 +104,12 @@ public sealed class TestCaseExecutorTests
         // Assign
         var input = new[] { 1, 2, 3 }.Cast<object?>().ToArray();
         
-        var container = TestSuiteHelper.CreateEmptyContextContainer();
+        var container = TestSuiteFactory.CreateEmptyContextContainer();
         
         var comparedObjectFactory = new ComparedObjectFactory();
         var testCaseExecutor = new TestCaseExecutor(container.Context, comparedObjectFactory);
 
-        var testCase = TestSuiteHelper.CreateTestCase(input, 6);
+        var testCase = TestSuiteFactory.CreateTestCase(input, 6);
         var sw = new Stopwatch();
         
         // Act

@@ -27,7 +27,7 @@ public sealed class ComparerValidatorTests
     {
         // Assign
         var validator = new ComparerValidator();
-        var container = TestSuiteHelper.CreateEmptyContextContainer();
+        var container = TestSuiteFactory.CreateEmptyContextContainer();
         
         // Act
         var validationResult = validator.Validate(container.Context, new EmptyValidatedObject());
@@ -41,12 +41,12 @@ public sealed class ComparerValidatorTests
     {
         // Assign
         var validator = new ComparerValidator();
-        var container = TestSuiteHelper.CreateEmptyContextContainer();
+        var container = TestSuiteFactory.CreateEmptyContextContainer();
 
-        var testCase1 = TestSuiteHelper.CreateTestCase([1], "test");
+        var testCase1 = TestSuiteFactory.CreateTestCase([1], "test");
         container.Context.TestCases.Add(testCase1);
         
-        var testCase2 = TestSuiteHelper.CreateTestCase([1], 13);
+        var testCase2 = TestSuiteFactory.CreateTestCase([1], 13);
         container.Context.TestCases.Add(testCase2);
         
         // Act
@@ -61,9 +61,9 @@ public sealed class ComparerValidatorTests
     {
         // Assign
         var validator = new ComparerValidator();
-        var container = TestSuiteHelper.CreateEmptyContextContainer();
+        var container = TestSuiteFactory.CreateEmptyContextContainer();
         
-        var testCase = TestSuiteHelper.CreateTestCase([1], new EquatableTestObject(1));
+        var testCase = TestSuiteFactory.CreateTestCase([1], new EquatableTestObject(1));
         container.Context.TestCases.Add(testCase);
         
         // Act
@@ -78,9 +78,9 @@ public sealed class ComparerValidatorTests
     {
         // Assign
         var validator = new ComparerValidator();
-        var container = TestSuiteHelper.CreateEmptyContextContainer();
+        var container = TestSuiteFactory.CreateEmptyContextContainer();
         
-        var testCase = TestSuiteHelper.CreateTestCase([1], new NotEquatableTestObject(1));
+        var testCase = TestSuiteFactory.CreateTestCase([1], new NotEquatableTestObject(1));
         container.Context.TestCases.Add(testCase);
         
         // Act
@@ -95,9 +95,9 @@ public sealed class ComparerValidatorTests
     {
         // Assign
         var validator = new ComparerValidator();
-        var container = TestSuiteHelper.CreateEmptyContextContainer();
+        var container = TestSuiteFactory.CreateEmptyContextContainer();
 
-        var testCase = TestSuiteHelper.CreateTestCase([1], 1);
+        var testCase = TestSuiteFactory.CreateTestCase([1], 1);
         container.Context.TestCases.Add(testCase);
 
         container.WithComparer((int x, int y) => x == y);
@@ -114,9 +114,9 @@ public sealed class ComparerValidatorTests
     {
         // Assign
         var validator = new ComparerValidator();
-        var container = TestSuiteHelper.CreateEmptyContextContainer();
+        var container = TestSuiteFactory.CreateEmptyContextContainer();
 
-        var testCase = TestSuiteHelper.CreateTestCase([1], 1);
+        var testCase = TestSuiteFactory.CreateTestCase([1], 1);
         container.Context.TestCases.Add(testCase);
 
         container.WithComparer((int x, int y) => x + y);
@@ -133,9 +133,9 @@ public sealed class ComparerValidatorTests
     {
         // Assign
         var validator = new ComparerValidator();
-        var container = TestSuiteHelper.CreateEmptyContextContainer();
+        var container = TestSuiteFactory.CreateEmptyContextContainer();
 
-        var testCase = TestSuiteHelper.CreateTestCase([1], 1);
+        var testCase = TestSuiteFactory.CreateTestCase([1], 1);
         container.Context.TestCases.Add(testCase);
 
         container.WithComparer((int _, int _, int _) => true);
@@ -152,9 +152,9 @@ public sealed class ComparerValidatorTests
     {
         // Assign
         var validator = new ComparerValidator();
-        var container = TestSuiteHelper.CreateEmptyContextContainer();
+        var container = TestSuiteFactory.CreateEmptyContextContainer();
 
-        var testCase = TestSuiteHelper.CreateTestCase([1], 1);
+        var testCase = TestSuiteFactory.CreateTestCase([1], 1);
         container.Context.TestCases.Add(testCase);
 
         container.WithComparer((int _, string _) => true);
@@ -171,9 +171,9 @@ public sealed class ComparerValidatorTests
     {
         // Assign
         var validator = new ComparerValidator();
-        var container = TestSuiteHelper.CreateEmptyContextContainer();
+        var container = TestSuiteFactory.CreateEmptyContextContainer();
 
-        var testCase = TestSuiteHelper.CreateTestCase([1], new NotEquatableTestObject(1));
+        var testCase = TestSuiteFactory.CreateTestCase([1], new NotEquatableTestObject(1));
         container.Context.TestCases.Add(testCase);
 
         container.WithComparer((int x, int y) => x == y);

@@ -29,7 +29,7 @@ public class BuilderContextValidatorExtensionsTests
         var validated = new CustomValidated(new Dictionary<ValidationSubject, IList<Func<ValidationResult>>>());
         
         // Act
-        validated.AddValidation(ValidationResults.Valid);
+        validated.AddValidation(ValidationTestResults.Valid);
 
         // Assert
         Assert.Single(validated.Validations);
@@ -43,8 +43,8 @@ public class BuilderContextValidatorExtensionsTests
         var validated = new CustomValidated(new Dictionary<ValidationSubject, IList<Func<ValidationResult>>>());
         
         // Act
-        validated.AddValidation(ValidationResults.Valid);
-        validated.AddValidation(ValidationResults.Valid);
+        validated.AddValidation(ValidationTestResults.Valid);
+        validated.AddValidation(ValidationTestResults.Valid);
 
         // Assert
         Assert.Single(validated.Validations);
@@ -81,7 +81,7 @@ public class BuilderContextValidatorExtensionsTests
     public void RegisterValidation_ValidRegistrationFailedValidator_ShouldBeInvalid()
     {
         // Assign
-        var validated = TestSuiteHelper.CreateTestCase([1], 1);
+        var validated = TestSuiteFactory.CreateTestCase([1], 1);
         var unpacker = new ValidationUnpacker();
         
         // Act
@@ -96,7 +96,7 @@ public class BuilderContextValidatorExtensionsTests
     public void RegisterValidation_ValidRegistration_ShouldBeValid()
     {
         // Assign
-        var validated = TestSuiteHelper.CreateTestCase([1], 1);
+        var validated = TestSuiteFactory.CreateTestCase([1], 1);
         var unpacker = new ValidationUnpacker();
         
         // Act

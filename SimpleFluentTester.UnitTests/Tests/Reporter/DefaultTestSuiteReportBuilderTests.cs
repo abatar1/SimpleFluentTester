@@ -12,7 +12,7 @@ public sealed class DefaultTestSuiteReportBuilderTests
     public void TestSuiteResultToString_IgnoredResult_ReturnNull()
     {
         // Assign
-        var testSuiteResult = TestSuiteHelper.CreateTestSuiteResult(shouldBeExecuted: false);
+        var testSuiteResult = TestSuiteFactory.CreateTestSuiteResult(shouldBeExecuted: false);
         var reporter = new DefaultTestSuiteReportBuilder();
         var shouldPrintPredicateMock = new Mock<Func<CompletedTestCase, bool>>();
 
@@ -29,7 +29,7 @@ public sealed class DefaultTestSuiteReportBuilderTests
     public void TestSuiteResultToString_NoTestCases_ReturnError()
     {
         // Assign
-        var testSuiteResult = TestSuiteHelper.CreateTestSuiteResult();
+        var testSuiteResult = TestSuiteFactory.CreateTestSuiteResult();
         var reporter = new DefaultTestSuiteReportBuilder();
         var shouldPrintPredicateMock = new Mock<Func<CompletedTestCase, bool>>();
 
@@ -50,8 +50,8 @@ public sealed class DefaultTestSuiteReportBuilderTests
     public void TestSuiteResultToString_NonValidContext_ReturnError()
     {
         // Assign
-        var testSuiteResult = TestSuiteHelper.CreateTestSuiteResult(
-            ValidationResults.NonValid,
+        var testSuiteResult = TestSuiteFactory.CreateTestSuiteResult(
+            ValidationTestResults.NonValid,
             TestCaseOperations.Passed);
         var reporter = new DefaultTestSuiteReportBuilder();
         var shouldPrintPredicateMock = new Mock<Func<CompletedTestCase, bool>>();
@@ -72,8 +72,8 @@ public sealed class DefaultTestSuiteReportBuilderTests
     public void TestSuiteResultToString_ValidContext_ReturnInformation()
     {
         // Assign
-        var testSuiteResult = TestSuiteHelper.CreateTestSuiteResult(
-            ValidationResults.Valid,
+        var testSuiteResult = TestSuiteFactory.CreateTestSuiteResult(
+            ValidationTestResults.Valid,
             TestCaseOperations.Passed);
         var reporter = new DefaultTestSuiteReportBuilder();
         var shouldPrintPredicateMock = new Mock<Func<CompletedTestCase, bool>>();
@@ -94,8 +94,8 @@ public sealed class DefaultTestSuiteReportBuilderTests
     public void TestSuiteResultToString_TestCaseNotPassedWithException_ReturnError()
     {
         // Assign
-        var testSuiteResult = TestSuiteHelper.CreateTestSuiteResult(
-            ValidationResults.Valid,
+        var testSuiteResult = TestSuiteFactory.CreateTestSuiteResult(
+            ValidationTestResults.Valid,
             TestCaseOperations.Invalid);
         var reporter = new DefaultTestSuiteReportBuilder();
         var shouldPrintPredicateMock = new Mock<Func<CompletedTestCase, bool>>();
@@ -116,8 +116,8 @@ public sealed class DefaultTestSuiteReportBuilderTests
     public void TestSuiteResultToString_TestCaseNotPassed_ReturnError()
     {
         // Assign
-        var testSuiteResult = TestSuiteHelper.CreateTestSuiteResult(
-            ValidationResults.Valid,
+        var testSuiteResult = TestSuiteFactory.CreateTestSuiteResult(
+            ValidationTestResults.Valid,
             TestCaseOperations.NotPassed);
         var reporter = new DefaultTestSuiteReportBuilder();
         var shouldPrintPredicateMock = new Mock<Func<CompletedTestCase, bool>>();
@@ -138,8 +138,8 @@ public sealed class DefaultTestSuiteReportBuilderTests
     public void TestSuiteResultToString_TestCasePassed_ReturnInformation()
     {
         // Assign
-        var testSuiteResult = TestSuiteHelper.CreateTestSuiteResult(
-            ValidationResults.Valid,
+        var testSuiteResult = TestSuiteFactory.CreateTestSuiteResult(
+            ValidationTestResults.Valid,
             TestCaseOperations.Passed);
         var reporter = new DefaultTestSuiteReportBuilder();
         var shouldPrintPredicateMock = new Mock<Func<CompletedTestCase, bool>>();
@@ -160,8 +160,8 @@ public sealed class DefaultTestSuiteReportBuilderTests
     public void TestSuiteResultToString_TestCaseIgnored_ShouldBeError()
     {
         // Assign
-        var testSuiteResult = TestSuiteHelper.CreateTestSuiteResult(
-            ValidationResults.Valid,
+        var testSuiteResult = TestSuiteFactory.CreateTestSuiteResult(
+            ValidationTestResults.Valid,
             TestCaseOperations.Passed,
             testCaseToRun: 2);
         var reporter = new DefaultTestSuiteReportBuilder();

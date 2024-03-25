@@ -79,14 +79,19 @@ TestSuite.Sequential
     .Run(3) 
     .Report();
  ```
-Also, you can write your custom reporter that will generate a report in the format you need:
+Also, you can write your custom reporter that will generate a report in the format you need, as well as define the rule which test cases
+should be printed or define your own logger:
 ```csharp
 TestSuite.Sequential
-    .UseOperation<int>(CustomMethods.Adder) 
-    .WithCustomReporterFactory<CustomReporterFactory>() 
+    .UseOperation<int>(CustomMethods.Adder)
     .Expect(2).WithInput(1, 1) 
     .Run()
-    .Report();
+    .Report((config, testResult) =>
+    {
+        config.ReportBuilder = new CustomTestSuiteReportBuilder(result);
+        config.ShouldPrintPredicate = testCase => testCase.Assert.Status == AssertStatus.NotPassed;
+        config.Logger = NullLogger.Instance;
+    };
 ```
 
 If your project contains multiple test suites simultaneously, and you wish to debug only one of them, 

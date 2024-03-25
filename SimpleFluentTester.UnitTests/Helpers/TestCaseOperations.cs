@@ -15,7 +15,7 @@ public static class TestCaseOperations
 
     public static ITestSuiteBuilder UseAdderOperation(this ITestSuiteBuilder builder)
     {
-        return builder.UseOperation(Adder);
+        return builder.UseOperation((int x, int y) => x + y);
     }
         
     public static TestCaseOperation Passed
@@ -61,11 +61,6 @@ public static class TestCaseOperations
     [TestSuiteDelegate]
     // ReSharper disable once UnusedMember.Local
     public static int AdderWithAttribute(int number1, int number2)
-    {
-        return number1 + number2;
-    }
-    
-    internal static int Adder(int number1, int number2)
     {
         return number1 + number2;
     }
