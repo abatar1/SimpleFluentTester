@@ -9,7 +9,7 @@ using SimpleFluentTester.Validators.Core;
 
 namespace SimpleFluentTester.UnitTests.Helpers;
 
-public static class TestSuiteTestFactory
+public static class TestSuiteFactory
 {
     private static readonly ComparedObjectFactory ComparedObjectFactory = new();
 

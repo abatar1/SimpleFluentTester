@@ -12,7 +12,7 @@ public sealed class InputsValidatorTests
     {
         // Assign
         var validator = new InputsValidator();
-        var container = TestSuiteTestFactory.CreateEmptyContextContainer();
+        var container = TestSuiteFactory.CreateEmptyContextContainer();
         
         // Act
         var func = () => validator.Validate(container.Context, new EmptyValidatedObject());
@@ -41,7 +41,7 @@ public sealed class InputsValidatorTests
     {
         // Assign
         var validator = new InputsValidator();
-        var testCase = TestSuiteTestFactory.CreateTestCase([1], "test");
+        var testCase = TestSuiteFactory.CreateTestCase([1], "test");
         var validatedObject = new InputsValidatedObject(() => true);
         
         // Act
@@ -56,7 +56,7 @@ public sealed class InputsValidatorTests
     {
         // Assign
         var validator = new InputsValidator();
-        var testCase = TestSuiteTestFactory.CreateTestCase(["test"], "test");
+        var testCase = TestSuiteFactory.CreateTestCase(["test"], "test");
         var validatedObject = new InputsValidatedObject((int _) => true);
         
         // Act
@@ -71,7 +71,7 @@ public sealed class InputsValidatorTests
     {
         // Assign
         var validator = new InputsValidator();
-        var testCase = TestSuiteTestFactory.CreateTestCase(["test"], "test");
+        var testCase = TestSuiteFactory.CreateTestCase(["test"], "test");
         var validatedObject = new InputsValidatedObject((int? _) => true);
         
         // Act
@@ -86,7 +86,7 @@ public sealed class InputsValidatorTests
     {
         // Assign
         var validator = new InputsValidator();
-        var testCase = TestSuiteTestFactory.CreateTestCase([null], "test");
+        var testCase = TestSuiteFactory.CreateTestCase([null], "test");
         var validatedObject = new InputsValidatedObject((int? _) => true);
         
         // Act
@@ -101,7 +101,7 @@ public sealed class InputsValidatorTests
     {
         // Assign
         var validator = new InputsValidator();
-        var testCase = TestSuiteTestFactory.CreateTestCase([1], "test");
+        var testCase = TestSuiteFactory.CreateTestCase([1], "test");
         var validatedObject = new InputsValidatedObject((int _) => true);
         
         // Act
@@ -116,7 +116,7 @@ public sealed class InputsValidatorTests
     {
         // Assign
         var validator = new InputsValidator();
-        var testCase = TestSuiteTestFactory.CreateTestCase([1], "test");
+        var testCase = TestSuiteFactory.CreateTestCase([1], "test");
         var validatedObject = new InputsValidatedObject((int? _) => true);
         
         // Act

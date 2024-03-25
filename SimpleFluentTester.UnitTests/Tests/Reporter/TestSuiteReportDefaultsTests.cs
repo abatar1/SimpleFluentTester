@@ -11,7 +11,7 @@ public sealed class TestSuiteReportDefaultsTests
     public void DetermineLogLevel_InvalidContext_ShouldBeError()
     {
         // Assign
-        var testSuiteResult = TestSuiteTestFactory.CreateTestSuiteResult(
+        var testSuiteResult = TestSuiteFactory.CreateTestSuiteResult(
             ValidationTestResults.NonValid,
             TestCaseOperations.Passed);
         
@@ -26,7 +26,7 @@ public sealed class TestSuiteReportDefaultsTests
     public void DetermineLogLevel_InvalidTestCase_ShouldBeError()
     {
         // Assign
-        var testSuiteResult = TestSuiteTestFactory.CreateTestSuiteResult(
+        var testSuiteResult = TestSuiteFactory.CreateTestSuiteResult(
             ValidationTestResults.Valid,
             TestCaseOperations.Invalid);
         
@@ -41,7 +41,7 @@ public sealed class TestSuiteReportDefaultsTests
     public void DetermineLogLevel_NotPassedTestCase_ShouldBeError()
     {
         // Assign
-        var testSuiteResult = TestSuiteTestFactory.CreateTestSuiteResult(
+        var testSuiteResult = TestSuiteFactory.CreateTestSuiteResult(
             ValidationTestResults.Valid,
             TestCaseOperations.NotPassed);
         
@@ -56,7 +56,7 @@ public sealed class TestSuiteReportDefaultsTests
     public void DetermineLogLevel_PassedTestCase_ShouldBeInformation()
     {
         // Assign
-        var testSuiteResult = TestSuiteTestFactory.CreateTestSuiteResult(
+        var testSuiteResult = TestSuiteFactory.CreateTestSuiteResult(
             ValidationTestResults.Valid,
             TestCaseOperations.Passed);
         
@@ -71,7 +71,7 @@ public sealed class TestSuiteReportDefaultsTests
     public void ToHeaderString_ValidContext_NoValidationStrings()
     {
         // Assign
-        var testSuiteResult = TestSuiteTestFactory.CreateTestSuiteResult(
+        var testSuiteResult = TestSuiteFactory.CreateTestSuiteResult(
             ValidationTestResults.Valid,
             TestCaseOperations.Passed);
         
@@ -86,7 +86,7 @@ public sealed class TestSuiteReportDefaultsTests
     public void ToHeaderString_NonValidContext_WithValidationStrings()
     {
         // Assign
-        var testSuiteResult = TestSuiteTestFactory.CreateTestSuiteResult(
+        var testSuiteResult = TestSuiteFactory.CreateTestSuiteResult(
             ValidationTestResults.NonValid,
             TestCaseOperations.Passed);
         
@@ -101,7 +101,7 @@ public sealed class TestSuiteReportDefaultsTests
     public void ToFooterString_ValidTestCase_NoValidationStrings()
     {
         // Assign
-        var testSuiteResult = TestSuiteTestFactory.CreateTestSuiteResult(
+        var testSuiteResult = TestSuiteFactory.CreateTestSuiteResult(
             ValidationTestResults.Valid,
             TestCaseOperations.Passed);
         
@@ -118,7 +118,7 @@ public sealed class TestSuiteReportDefaultsTests
     public void ToFooterString_InvalidTestCase_WithValidationStrings()
     {
         // Assign
-        var testSuiteResult = TestSuiteTestFactory.CreateTestSuiteResult(
+        var testSuiteResult = TestSuiteFactory.CreateTestSuiteResult(
             ValidationTestResults.Valid,
             TestCaseOperations.Invalid);
         
@@ -136,7 +136,7 @@ public sealed class TestSuiteReportDefaultsTests
     public void ToFooterString_NotPassedTestCase_WithValidationStrings()
     {
         // Assign
-        var testSuiteResult = TestSuiteTestFactory.CreateTestSuiteResult(
+        var testSuiteResult = TestSuiteFactory.CreateTestSuiteResult(
             ValidationTestResults.Valid,
             TestCaseOperations.NotPassed);
         
@@ -154,7 +154,7 @@ public sealed class TestSuiteReportDefaultsTests
     public void ToFooterString_NotPassedWithException_WithValidationStrings()
     {
         // Assign
-        var testSuiteResult = TestSuiteTestFactory.CreateTestSuiteResult(
+        var testSuiteResult = TestSuiteFactory.CreateTestSuiteResult(
             ValidationTestResults.Valid,
             TestCaseOperations.NotPassedWithException);
         
@@ -172,7 +172,7 @@ public sealed class TestSuiteReportDefaultsTests
     public void ToFormattedString_PassedTestCase_ShouldReturnPassedString()
     {
         // Assign
-        var container = TestSuiteTestFactory.CreateEmptyContextContainer();
+        var container = TestSuiteFactory.CreateEmptyContextContainer();
         var completedTestCase = container.CompleteTestCase(TestCaseOperations.Passed);
         
         // Act
@@ -192,7 +192,7 @@ public sealed class TestSuiteReportDefaultsTests
     public void ToFormattedString_NotPassedTestCase_ShouldReturnNotPassedString()
     {
         // Assign
-        var container = TestSuiteTestFactory.CreateEmptyContextContainer();
+        var container = TestSuiteFactory.CreateEmptyContextContainer();
         var completedTestCase = container.CompleteTestCase(TestCaseOperations.NotPassed);
         
         // Act
@@ -212,7 +212,7 @@ public sealed class TestSuiteReportDefaultsTests
     public void ToFormattedString_NotPassedWithExceptionTestCase_ShouldReturnNotPassedStringWithException()
     {
         // Assign
-        var container = TestSuiteTestFactory.CreateEmptyContextContainer();
+        var container = TestSuiteFactory.CreateEmptyContextContainer();
         var completedTestCase = container.CompleteTestCase(TestCaseOperations.NotPassedWithException);
         
         // Act
@@ -232,7 +232,7 @@ public sealed class TestSuiteReportDefaultsTests
     public void ToFormattedString_NotValidTestCase_ShouldReturnValidationStrings()
     {
         // Assign
-        var container = TestSuiteTestFactory.CreateEmptyContextContainer();
+        var container = TestSuiteFactory.CreateEmptyContextContainer();
         var completedTestCase = container.CompleteTestCase(TestCaseOperations.Invalid);
         
         // Act

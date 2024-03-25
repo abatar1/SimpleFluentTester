@@ -12,7 +12,7 @@ public sealed class TestNumbersValidatorTests
     {
         // Assign
         var validator = new TestNumbersValidator();
-        var container = TestSuiteTestFactory.CreateEmptyContextContainer();
+        var container = TestSuiteFactory.CreateEmptyContextContainer();
         
         // Act
         var func = () => validator.Validate(container.Context, new EmptyValidatedObject());
@@ -41,7 +41,7 @@ public sealed class TestNumbersValidatorTests
     {
         // Assign
         var validator = new TestNumbersValidator();
-        var container = TestSuiteTestFactory.CreateEmptyContextContainer();
+        var container = TestSuiteFactory.CreateEmptyContextContainer();
         var validatedObject = new TestNumbersValidatedObject(new HashSet<int>());
         
         // Act
@@ -56,10 +56,10 @@ public sealed class TestNumbersValidatorTests
     {
         // Assign
         var validator = new TestNumbersValidator();
-        var container = TestSuiteTestFactory.CreateEmptyContextContainer();
+        var container = TestSuiteFactory.CreateEmptyContextContainer();
         var validatedObject = new TestNumbersValidatedObject(new HashSet<int>([1]));
         
-        var testCase1 = TestSuiteTestFactory.CreateTestCase([1], "test");
+        var testCase1 = TestSuiteFactory.CreateTestCase([1], "test");
         container.Context.TestCases.Add(testCase1);
         
         // Act
@@ -74,10 +74,10 @@ public sealed class TestNumbersValidatorTests
     {
         // Assign
         var validator = new TestNumbersValidator();
-        var container = TestSuiteTestFactory.CreateEmptyContextContainer();
+        var container = TestSuiteFactory.CreateEmptyContextContainer();
         var validatedObject = new TestNumbersValidatedObject(new HashSet<int>([2]));
         
-        var testCase1 = TestSuiteTestFactory.CreateTestCase([1], "test");
+        var testCase1 = TestSuiteFactory.CreateTestCase([1], "test");
         container.Context.TestCases.Add(testCase1);
         
         // Act
@@ -92,10 +92,10 @@ public sealed class TestNumbersValidatorTests
     {
         // Assign
         var validator = new TestNumbersValidator();
-        var container = TestSuiteTestFactory.CreateEmptyContextContainer();
+        var container = TestSuiteFactory.CreateEmptyContextContainer();
         var validatedObject = new TestNumbersValidatedObject(new HashSet<int>([1, 2]));
         
-        var testCase1 = TestSuiteTestFactory.CreateTestCase([1], "test");
+        var testCase1 = TestSuiteFactory.CreateTestCase([1], "test");
         container.Context.TestCases.Add(testCase1);
         
         // Act

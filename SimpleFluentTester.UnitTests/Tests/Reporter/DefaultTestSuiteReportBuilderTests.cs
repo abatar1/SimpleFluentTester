@@ -12,7 +12,7 @@ public sealed class DefaultTestSuiteReportBuilderTests
     public void TestSuiteResultToString_IgnoredResult_ReturnNull()
     {
         // Assign
-        var testSuiteResult = TestSuiteTestFactory.CreateTestSuiteResult(shouldBeExecuted: false);
+        var testSuiteResult = TestSuiteFactory.CreateTestSuiteResult(shouldBeExecuted: false);
         var reporter = new DefaultTestSuiteReportBuilder();
         var shouldPrintPredicateMock = new Mock<Func<CompletedTestCase, bool>>();
 
@@ -29,7 +29,7 @@ public sealed class DefaultTestSuiteReportBuilderTests
     public void TestSuiteResultToString_NoTestCases_ReturnError()
     {
         // Assign
-        var testSuiteResult = TestSuiteTestFactory.CreateTestSuiteResult();
+        var testSuiteResult = TestSuiteFactory.CreateTestSuiteResult();
         var reporter = new DefaultTestSuiteReportBuilder();
         var shouldPrintPredicateMock = new Mock<Func<CompletedTestCase, bool>>();
 
@@ -50,7 +50,7 @@ public sealed class DefaultTestSuiteReportBuilderTests
     public void TestSuiteResultToString_NonValidContext_ReturnError()
     {
         // Assign
-        var testSuiteResult = TestSuiteTestFactory.CreateTestSuiteResult(
+        var testSuiteResult = TestSuiteFactory.CreateTestSuiteResult(
             ValidationTestResults.NonValid,
             TestCaseOperations.Passed);
         var reporter = new DefaultTestSuiteReportBuilder();
@@ -72,7 +72,7 @@ public sealed class DefaultTestSuiteReportBuilderTests
     public void TestSuiteResultToString_ValidContext_ReturnInformation()
     {
         // Assign
-        var testSuiteResult = TestSuiteTestFactory.CreateTestSuiteResult(
+        var testSuiteResult = TestSuiteFactory.CreateTestSuiteResult(
             ValidationTestResults.Valid,
             TestCaseOperations.Passed);
         var reporter = new DefaultTestSuiteReportBuilder();
@@ -94,7 +94,7 @@ public sealed class DefaultTestSuiteReportBuilderTests
     public void TestSuiteResultToString_TestCaseNotPassedWithException_ReturnError()
     {
         // Assign
-        var testSuiteResult = TestSuiteTestFactory.CreateTestSuiteResult(
+        var testSuiteResult = TestSuiteFactory.CreateTestSuiteResult(
             ValidationTestResults.Valid,
             TestCaseOperations.Invalid);
         var reporter = new DefaultTestSuiteReportBuilder();
@@ -116,7 +116,7 @@ public sealed class DefaultTestSuiteReportBuilderTests
     public void TestSuiteResultToString_TestCaseNotPassed_ReturnError()
     {
         // Assign
-        var testSuiteResult = TestSuiteTestFactory.CreateTestSuiteResult(
+        var testSuiteResult = TestSuiteFactory.CreateTestSuiteResult(
             ValidationTestResults.Valid,
             TestCaseOperations.NotPassed);
         var reporter = new DefaultTestSuiteReportBuilder();
@@ -138,7 +138,7 @@ public sealed class DefaultTestSuiteReportBuilderTests
     public void TestSuiteResultToString_TestCasePassed_ReturnInformation()
     {
         // Assign
-        var testSuiteResult = TestSuiteTestFactory.CreateTestSuiteResult(
+        var testSuiteResult = TestSuiteFactory.CreateTestSuiteResult(
             ValidationTestResults.Valid,
             TestCaseOperations.Passed);
         var reporter = new DefaultTestSuiteReportBuilder();
@@ -160,7 +160,7 @@ public sealed class DefaultTestSuiteReportBuilderTests
     public void TestSuiteResultToString_TestCaseIgnored_ShouldBeError()
     {
         // Assign
-        var testSuiteResult = TestSuiteTestFactory.CreateTestSuiteResult(
+        var testSuiteResult = TestSuiteFactory.CreateTestSuiteResult(
             ValidationTestResults.Valid,
             TestCaseOperations.Passed,
             testCaseToRun: 2);
