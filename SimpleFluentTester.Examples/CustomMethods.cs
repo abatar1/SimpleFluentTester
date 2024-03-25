@@ -1,4 +1,6 @@
-﻿namespace SimpleFluentTester.Examples;
+﻿using SimpleFluentTester.TestSuite;
+
+namespace SimpleFluentTester.Examples;
 
 internal static class CustomMethods
 {

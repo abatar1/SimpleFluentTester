@@ -3,5 +3,7 @@ obj/
 .idea/
 packages/
 *.DotSettings.user
+*.DotSettings
 *.nupkg
 *.info
+SimpleFluentTester.UnitTests/TestResults/

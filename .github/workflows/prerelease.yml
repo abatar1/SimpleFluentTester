@@ -1,0 +1,20 @@
+name: Prerelease
+
+on:
+  push:
+    branches:
+      - 'prerelease'
+
+jobs:
+  unit_tests:
+    uses: ./.github/workflows/unit_tests.yml
+    
+  deploy_main_nuget:
+    uses: ./.github/workflows/deploy_nuget.yml
+    needs: [ unit_tests ]
+    with:
+      project-name: SimpleFluentTester
+      version-fragment: 'bug'
+      nuget-name: 'simplefluenttester'
+    secrets:
+      NUGET_TOKEN: ${{ secrets.NUGET_TOKEN }}

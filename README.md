@@ -37,11 +37,12 @@ Let's start writing test cases for it!
 
 ```csharp
 TestSuite.Sequential
+     // Here we could optionally specify how test suite result log entry will be shown in output.
+    .WithDisplayName("Example of TestSuite")
      // Here we specify the method we want to test.
     .UseOperation(Adder) 
-     // Then we add 2 valid tests and one invalid test.
+     // Then we add one valid test and one invalid test.
     .Expect(2).WithInput(1, 1) 
-    .Expect(-2).WithInput(-1, -1)
     .Expect(-3).WithInput(-1, -1)
     .Run() 
     .Report();
@@ -50,20 +51,21 @@ TestSuite.Sequential
 And the output of this code will indicate that one out of the three test cases has not passed: 
    
 ```
-05:10:31.455 fail: SimpleFluentTester.Reporter.DefaultTestRunReporter[0]
+21:49:17.681 fail: Example of TestSuite[1]
       Executing tests for target method [Int32 Adder(Int32, Int32)]
-      Total tests: 3
-      Tests to execute: 3
+      Total tests: 2
+      Tests to execute: 2
       
-      Test case [3] not passed
+      Test case [2] not passed
         Inputs: '-1', '-1'
         Expected: '-3'
         Output: '-2'
-        Elapsed: 0,00050ms
+        Elapsed: 0,12530ms
       
-      1/3 tests haven't passed!
-      Failed test cases: 3
-      Elapsed total: 0,16400ms; Avg: 0,05467ms; Max: 0,11000ms [Number 2]
+      1/2 test cases have been passed, 1 test case failed
+      Not passed test cases numbers: 2
+      Elapsed total: 0,1823ms; Avg: 0,0911ms; Max: 0,1253ms [Number 2]; Min: 0,0570ms [Number 1];
+
 ```
 
 Furthermore, for debugging purposes, for the next run it would be most convenient to select only the unsuccessful test cases:
@@ -77,31 +79,35 @@ TestSuite.Sequential
     .Run(3) 
     .Report();
  ```
-Also, you can write your custom reporter that will generate a report in the format you need:
+Also, you can write your custom reporter that will generate a report in the format you need, as well as define the rule which test cases
+should be printed or define your own logger:
 ```csharp
 TestSuite.Sequential
-    .UseOperation<int>(CustomMethods.Adder) 
-    .WithCustomReporterFactory<CustomReporterFactory>() 
+    .UseOperation(Adder)
     .Expect(2).WithInput(1, 1) 
     .Run()
-    .Report();
+    .Report((config, testResult) =>
+    {
+        config.ReportBuilder = new CustomTestSuiteReportBuilder(result);
+        config.ShouldPrintPredicate = testCase => testCase.Assert.Status == AssertStatus.NotPassed;
+        config.Logger = NullLogger.Instance;
+    };
 ```
 
 If your project contains multiple test suites simultaneously, and you wish to debug only one of them, 
 you don't need to comment out the code; simply follow these steps:
 ```csharp
 TestSuite.Sequential.Ignore // <- add Ignore here and this test run will be fully ignored.
-    .UseOperation<int>(CustomMethods.Adder) 
+    .UseOperation(Adder) 
     .Expect(2).WithInput(1, 1) 
     .Run()
     .Report();
 ```
 
-If you use non-standard object types in your function, you can define how the TestSuite should compare them yourself.
+If you use non-standard object type in your function which is not assignable from IEquatable, you can define how the TestSuite should compare them yourself.
 ```csharp
 TestSuite.Sequential
-    // Return type of your testable method could be specified with a provided comparer.
-    .WithExpectedReturnType<CustomValue>((x, y) => x.Value == y.Value)
+    .WithComparer<CustomValue>((x, y) => x.Value == y.Value)
     .UseOperation((CustomValue a, CustomValue b) => a.Value + b.Value)
     .Expect(CustomValue.FromInt(2)).WithInput(CustomValue.FromInt(1), CustomValue.FromInt(1))
     .Run()
@@ -110,6 +116,19 @@ TestSuite.Sequential
 
 If you have any questions, you can find all these examples in [this project](/SimpleFluentTester.Examples) 
 or ask me directly via [email](mailto:evgenyhalzov@gmail.com?Subject=SimpleFluentTester)!
+
+## Contribution
+
+Would you like to contribute? I am always completely open to ideas or bug reports, and I also have a couple of open issues. 
+Please, follow the instructions below:
+
+Each modification of code should be introduced through a PR originating from the cloned repository. 
+
+`prerelease` branch should be selected as the target branch for a PR.
+
+Every PR undergoes checks to ensure that tests are passed and cover all the changes. 
+Test coverage must not decrease, and comprehensive unit tests should accompany any new implemented functionality. 
+In the case of substantial features, comprehensive documentation should also be included if needed.
 
 ## License
 

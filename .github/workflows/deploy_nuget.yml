@@ -1,0 +1,56 @@
+on:
+  workflow_call:
+    inputs:
+      project-name:
+        required: true
+        type: string
+      version-fragment:
+        required: true
+        type: string
+      nuget-name:
+        required: true
+        type: string
+    secrets:
+      NUGET_TOKEN:
+        required: true
+
+env:
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
+  DOTNET_NOLOGO: true
+  NuGetDirectory: ${{ github.workspace }}/nuget
+  NuGetSource: https://api.nuget.org/v3/index.json
+
+jobs:
+  deploy_nuget:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+  
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+  
+      - name: Get latest nuget version
+        continue-on-error: true
+        uses: senmu/download-json-property-action@v1.4.0
+        id: nuget-latest-version
+        with:
+          url: https://api.nuget.org/v3/registration5-semver1/${{ inputs.nuget-name }}/index.json
+          property_path: items.0.upper
+          
+      - name: Set default value if failure
+        if: failure()
+        run: echo "steps.nuget-latest-version.outputs.value=0.0.1" >> "$GITHUB_OUTPUT"
+  
+      - name: Increase latest nuget version
+        id: nuget-next-version
+        uses: christian-draeger/increment-semantic-version@1.1.0
+        with:
+          current-version: ${{ steps.nuget-latest-version.outputs.value }}
+          version-fragment: ${{ inputs.version-fragment }}
+  
+      - name: Pack nuget
+        run: dotnet pack ${{ inputs.project-name }} -c Release -o ${{ env.NuGetDirectory }} /p:Version=${{ steps.nuget-next-version.outputs.next-version }}
+          
+      - name: Publish NuGet package
+        run: |
+          dotnet nuget push ${{ env.NuGetDirectory }}/${{ inputs.project-name }}.${{ steps.nuget-next-version.outputs.next-version }}.nupkg -k "${{ secrets.NUGET_TOKEN }}" -s ${{ env.NuGetSource }} --skip-duplicate
