@@ -79,7 +79,7 @@ public sealed class TestSuiteReportDefaultsTests
         var headerString = testSuiteResult.ToHeaderString();
         
         // Assert
-        Assert.Equal(3, CountNonEmptyLines(headerString));
+        Assert.Equal(2, CountNonEmptyLines(headerString));
     }
     
     [Fact]
@@ -94,7 +94,7 @@ public sealed class TestSuiteReportDefaultsTests
         var headerString = testSuiteResult.ToHeaderString();
         
         // Assert
-        Assert.Equal(3 + 1 + 2, CountNonEmptyLines(headerString));
+        Assert.Equal(2 + 1 + 2, CountNonEmptyLines(headerString));
     }
     
     [Fact]

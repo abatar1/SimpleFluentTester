@@ -28,10 +28,10 @@ public static class TestSuiteReportDefaults
     {
         var stringBuilder = new StringBuilder();
         stringBuilder.AppendLine($"Executing tests for target method [{testSuiteResult.Operation?.Method}]");
-        stringBuilder.AppendLine($"Total tests: {testSuiteResult.TestCases.Count}");
+        stringBuilder.Append($"Total tests: {testSuiteResult.TestCases.Count};");
         var executedTestCaseCount = testSuiteResult.TestCases
             .Count(x => x.Assert.Status != AssertStatus.Ignored);
-        stringBuilder.AppendLine($"Tests to execute: {executedTestCaseCount}");
+        stringBuilder.AppendLine($" Tests to execute: {executedTestCaseCount}");
 
         if (!testSuiteResult.Validation.IsValid)
         {
@@ -197,9 +197,18 @@ public static class TestSuiteReportDefaults
         
         var totalElapsedMs = executedTestCases.Sum(x => x.ElapsedTime.TotalMilliseconds);
         var avgElapsedMs = totalElapsedMs / executedTestCases.Count;
-        var maxElapsedTest = executedTestCases.OrderByDescending(x => x.ElapsedTime).First();
-        var statistics = $"Elapsed total: {totalElapsedMs:F5}ms; Avg: {avgElapsedMs:F5}ms; Max: {maxElapsedTest.ElapsedTime.TotalMilliseconds:F5}ms [Number {maxElapsedTest.Number}]";
-        stringBuilder.Append(statistics);
+        var orderedByElapsedTime = executedTestCases
+            .OrderByDescending(x => x.ElapsedTime)
+            .ToList();
+        var maxElapsedTest = orderedByElapsedTime.First();
+        var minElapsedTest = orderedByElapsedTime.Last();
+
+        var statisticsBuilder = new StringBuilder();
+        statisticsBuilder.Append($"Elapsed total: {totalElapsedMs:F4}ms;");
+        statisticsBuilder.Append($" Avg: {avgElapsedMs:F4}ms;");
+        statisticsBuilder.Append($" Max: {maxElapsedTest.ElapsedTime.TotalMilliseconds:F4}ms [Number {maxElapsedTest.Number}];");
+        statisticsBuilder.Append($" Min: {minElapsedTest.ElapsedTime.TotalMilliseconds:F4}ms [Number {minElapsedTest.Number}];");
+        stringBuilder.Append(statisticsBuilder);
     }
 
     private static void AppendInput(CompletedTestCase testCase, StringBuilder stringBuilder)
