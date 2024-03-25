@@ -87,7 +87,7 @@ public sealed class ComparerValidatorTests
         var validationResult = validator.Validate(container.Context, new EmptyValidatedObject());
 
         // Assert
-        validationResult.AssertInvalid(ValidationSubject.Comparer, "SimpleFluentTester.UnitTests.Helpers.NotEquatableTestObject type should be assignable from IEquatable`1 or comparer should be defined");
+        validationResult.AssertInvalid(ValidationSubject.Comparer, $"{typeof(NotEquatableTestObject).FullName} type should be assignable from IEquatable`1 or comparer should be defined");
     }
     
     [Fact]
@@ -182,6 +182,6 @@ public sealed class ComparerValidatorTests
         var validationResult = validator.Validate(container.Context, new EmptyValidatedObject());
 
         // Assert
-        validationResult.AssertInvalid(ValidationSubject.Comparer, "Test case type was SimpleFluentTester.UnitTests.Helpers.NotEquatableTestObject, but comparer type is System.Int32");
+        validationResult.AssertInvalid(ValidationSubject.Comparer, $"Test case type was {typeof(NotEquatableTestObject).FullName}, but comparer type is System.Int32");
     }
 }

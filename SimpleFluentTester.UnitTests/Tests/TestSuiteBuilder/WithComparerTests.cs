@@ -20,7 +20,7 @@ public class WithComparerTests
             .Run();
 
         // Assert
-        var message = "SimpleFluentTester.UnitTests.Helpers.NotEquatableTestObject type should be assignable from IEquatable`1 or comparer should be defined";
+        var message = $"{typeof(NotEquatableTestObject).FullName} type should be assignable from {typeof(IEquatable<>).Name} or comparer should be defined";
         reporter.TestSuiteResult.Validation.AssertInvalid(ValidationSubject.Comparer, message);
     }
     
