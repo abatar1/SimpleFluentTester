@@ -2,19 +2,18 @@
 using System.Linq;
 using System.Text;
 using Microsoft.Extensions.Logging;
-using SimpleFluentTester.TestCase;
 using SimpleFluentTester.TestSuite;
-using SimpleFluentTester.Validators.Core;
+using SimpleFluentTester.TestSuite.Case;
 
 namespace SimpleFluentTester.Reporter;
 
-internal sealed class DefaultTestSuiteReportBuilder<TOutput> : ITestSuiteReportBuilder<TOutput>
+internal sealed class DefaultTestSuiteReportBuilder : ITestSuiteReportBuilder
 {
     public PrintableTestSuiteResult? TestSuiteResultToString(
-        TestSuiteResult<TOutput> testSuiteResult,
-        Func<CompletedTestCase<TOutput>, bool> shouldPrintPredicate)
+        TestSuiteResult testSuiteResult,
+        Func<CompletedTestCase, bool> shouldPrintPredicate)
     {
-        if (testSuiteResult.ContextValidation.Status == ValidationStatus.Ignored)
+        if (!testSuiteResult.ShouldBeExecuted)
             return null;
 
         if (!testSuiteResult.TestCases.Any())

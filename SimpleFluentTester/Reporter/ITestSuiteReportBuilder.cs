@@ -1,12 +1,12 @@
 using System;
-using SimpleFluentTester.TestCase;
 using SimpleFluentTester.TestSuite;
+using SimpleFluentTester.TestSuite.Case;
 
 namespace SimpleFluentTester.Reporter;
 
-public interface ITestSuiteReportBuilder<TOutput>
+public interface ITestSuiteReportBuilder
 {
     PrintableTestSuiteResult? TestSuiteResultToString(
-        TestSuiteResult<TOutput> testSuiteResult,
-        Func<CompletedTestCase<TOutput>, bool> shouldPrintPredicate);
+        TestSuiteResult testSuiteResult,
+        Func<CompletedTestCase, bool> shouldPrintPredicate);
 }

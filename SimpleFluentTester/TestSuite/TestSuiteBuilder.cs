@@ -2,86 +2,91 @@
 using System.Collections.Generic;
 using System.Linq;
 using SimpleFluentTester.Reporter;
-using SimpleFluentTester.TestCase;
+using SimpleFluentTester.TestSuite.Case;
+using SimpleFluentTester.TestSuite.ComparedObject;
 using SimpleFluentTester.TestSuite.Context;
 using SimpleFluentTester.Validators;
 using SimpleFluentTester.Validators.Core;
 
 namespace SimpleFluentTester.TestSuite;
 
-internal sealed class TestSuiteBuilder<TOutput> : ITestSuiteBuilder<TOutput>
+internal sealed class TestSuiteBuilder : ITestSuiteBuilder
 {
-    private readonly ITestSuiteBuilderContext<TOutput> _context;
+    private readonly ITestSuiteContextContainer _contextContainer;
+    private readonly IComparedObjectFactory _comparedObjectFactory;
+    private readonly IValidationUnpacker _validationUnpacker;
     
-    internal TestSuiteBuilder(ITestSuiteBuilderContext<TOutput> context)
+    internal TestSuiteBuilder(ITestSuiteContextContainer contextContainer)
     {
-        _context = context;
+        _contextContainer = contextContainer;
+        _comparedObjectFactory = new ComparedObjectFactory();
+        _validationUnpacker = new ValidationUnpacker();
+    }
+
+    private TestSuiteBuilder(TestSuiteBuilder builder)
+    {
+        _contextContainer = builder._contextContainer;
+        _comparedObjectFactory = builder._comparedObjectFactory;
+        _validationUnpacker = builder._validationUnpacker;
     }
 
     /// <summary>
     /// Specifies the expected value resulting from the execution of this test case.
     /// </summary>
-    public ITestCaseBuilder<TOutput> Expect(TOutput? expected)
+    public ITestCaseBuilder Expect(object? expected)
     {
-        return new TestCaseBuilder<TOutput>(_context, expected);
+        var comparedObj = _comparedObjectFactory.Wrap(expected);
+        return new TestCaseBuilder(_contextContainer, comparedObj);
+    }
+    
+    /// <summary>
+    /// Specifies the expected Exception thrown from the execution of this test case.
+    /// </summary>
+    public ITestCaseBuilder ExpectException<TException>(string? message = null)
+        where TException : Exception
+    {
+        var validatedException = ExpectExceptionFactory.Create(_contextContainer, _comparedObjectFactory, typeof(TException), message);
+        return new TestCaseBuilder(_contextContainer, validatedException.Exception, validatedException.ValidationResult);
     }
     
     /// <summary>
     /// Specifies the method that needs to be tested.
     /// </summary>
-    public ITestSuiteBuilder<TOutput> UseOperation(Delegate operation)
+    public ITestSuiteBuilder UseOperation(Delegate operation)
     {
-        var newContext = _context.WithOperation(operation);
-        return new TestSuiteBuilder<TOutput>(newContext);
+        _contextContainer.WithOperation(operation);
+        return new TestSuiteBuilder(this);
     }
     
     /// <summary>
     /// Specifies the name of the test suite run that will be shown in an output.
     /// </summary>
-    public ITestSuiteBuilder<TOutput> WithDisplayName(string displayName)
+    public ITestSuiteBuilder WithDisplayName(string displayName)
     {
-        var newContext = _context.WithDisplayName(displayName);
-        return new TestSuiteBuilder<TOutput>(newContext);
+        _contextContainer.WithDisplayName(displayName);
+        return new TestSuiteBuilder(this);
     }
-    
+
     /// <summary>
     /// Defines the return type of the function that we plan to test.
     /// The type should implement IEquatable interface or comparer should be provided. 
     /// </summary>
-    public ITestSuiteBuilder<TNewOutput> WithComparer<TNewOutput>(Func<TNewOutput?, TNewOutput?, bool>? comparer = null)
+    public ITestSuiteBuilder WithComparer<TExpected>(Func<TExpected?, TExpected?, bool> comparer)
     {
-        ITestSuiteBuilderContext<TNewOutput> newContext;
-        try
-        {
-            var castedTestCases = _context.TestCases
-                .Select(testCase =>
-                {
-                    if (testCase.Expected is not TNewOutput castedExpected)
-                        throw new InvalidCastException($"Expected type {testCase.Expected?.GetType()} is not the same as operation type {typeof(TNewOutput)}");
-                    return new TestCase<TNewOutput>(testCase.Inputs, castedExpected, testCase.Number);
-                })
-                .ToList();
-            newContext = _context.ConvertType(castedTestCases, comparer);
-        }
-        catch (Exception e)
-        {
-            newContext = _context.ConvertType(new List<TestCase<TNewOutput>>(), comparer);
-            newContext.AddValidation(ValidationResult.Failed(ValidationSubject.Comparer, e.Message));
-        }
-        
-        return new TestSuiteBuilder<TNewOutput>(newContext);
+        _contextContainer.WithComparer(comparer);
+        return new TestSuiteBuilder(this);
     }
     
     /// <summary>
     /// Add this call if you want your test suite to be ignored instead of commenting it, useful when you have multiple
     /// test cases in a single project.
     /// </summary>
-    public ITestSuiteBuilder<TOutput> Ignore
+    public ITestSuiteBuilder Ignore
     {
         get
         {
-            var newContext = _context.DoNotExecute();
-            return new TestSuiteBuilder<TOutput>(newContext);
+            _contextContainer.DoNotExecute();
+            return new TestSuiteBuilder(this);
         }
     }
 
@@ -89,80 +94,53 @@ internal sealed class TestSuiteBuilder<TOutput> : ITestSuiteBuilder<TOutput>
     /// Initiates the execution of test cases defined earlier using <see cref="Expect"/>.
     /// For debugging failed test cases, it also allows selecting the test case numbers that should be executed, all others will be skipped.
     /// </summary>
-    public ITestSuiteReporter<TOutput> Run(params int[] testNumbers)
+    public ITestSuiteReporter Run(params int[] testNumbers)
     {
-        if (!_context.ShouldBeExecuted)
-            return ReturnNotExecutedTestReporter(_context);
-
-        var testSuiteResult = ProcessContextToResult(_context, testNumbers);
-        return new TestSuiteReporter<TOutput>(testSuiteResult);
+        if (!_contextContainer.Context.ShouldBeExecuted)
+            return ReturnNotExecutedTestReporter(_contextContainer.Context);
+        return new TestSuiteReporter(ProcessContextToResult(testNumbers));
     }
 
-    private static TestSuiteResult<TOutput> ProcessContextToResult(
-        ITestSuiteBuilderContext<TOutput> context,
-        IEnumerable<int> testNumbers)
+    private TestSuiteResult ProcessContextToResult(IEnumerable<int> testNumbers)
     {
         var testNumbersHash = new SortedSet<int>(testNumbers);
         
         // Enrich section
-        var enrichedContext = context.TryToEnrichAttributeOperation();
+        OperationEnricher.TryToEnrichAttributeOperation(_contextContainer);
 
         // Validation section
-        enrichedContext.InvokeValidation(typeof(OperationValidator), new OperationValidatedObject(typeof(TOutput)));
-        enrichedContext.InvokeValidation(typeof(ComparerValidator), new EmptyValidatedObject());
-        enrichedContext.InvokeValidation(typeof(TestNumbersValidator), new TestNumbersValidatedObject(testNumbersHash));
+        _contextContainer.Context.RegisterValidation<ComparerValidator>();
+        _contextContainer.Context.RegisterValidation<TestNumbersValidator>(() => new TestNumbersValidatedObject(testNumbersHash));
+        var contextValidationResults = _validationUnpacker.Unpack(_contextContainer.Context);
         
         // Execute section
-        var testCaseExecutor = new TestCaseExecutor<TOutput>(enrichedContext);
-        var completedTestCases = enrichedContext.TestCases
-            .Select(testCase => testCaseExecutor.TryCompeteTestCase(testCase, testNumbersHash))
+        var testCasePipeline = new TestCasePipeline(_contextContainer.Context, _comparedObjectFactory,
+            _validationUnpacker, testNumbersHash);
+        var completedTestCases = _contextContainer.Context.TestCases
+            .Select(testCase => testCasePipeline.ToCompleted(testCase))
             .ToList();
-        
-        return GetTestSuiteResult(enrichedContext, completedTestCases);
+        return GetTestSuiteResult(_contextContainer.Context, completedTestCases, contextValidationResults);
     }
 
-    private static ITestSuiteReporter<TOutput> ReturnNotExecutedTestReporter(ITestSuiteBuilderContext<TOutput> context)
+    private static ITestSuiteReporter ReturnNotExecutedTestReporter(ITestSuiteContext context)
     {
         var testCases = context.TestCases
-            .Select(CompletedTestCase<TOutput>.NotExecuted)
+            .Select(CompletedTestCase.NotExecuted)
             .ToList();
-        var testSuiteResult = GetTestSuiteResult(context, testCases);
-        return new TestSuiteReporter<TOutput>(testSuiteResult);
+        var testSuiteResult = GetTestSuiteResult(context, testCases, ValidationUnpacked.Empty);
+        return new TestSuiteReporter(testSuiteResult);
     }
     
-    private static TestSuiteResult<TOutput> GetTestSuiteResult(
-        ITestSuiteBuilderContext<TOutput> context,
-        IList<CompletedTestCase<TOutput>> completedTestCases)
+    private static TestSuiteResult GetTestSuiteResult(
+        ITestSuiteContext context,
+        IList<CompletedTestCase> completedTestCases,
+        ValidationUnpacked validationUnpacked)
     {
-        List<ValidationResult> validations;
-        var validationStatus = ValidationStatus.Valid;
-        if (!context.ShouldBeExecuted)
-        {
-            validations = [];
-            validationStatus = ValidationStatus.Ignored;
-        }
-        else
-        {
-            validations = context.Validations
-                .Select(x =>
-                {
-                    var message = string.Join("\n", x.Value
-                        .Where(y => !string.IsNullOrWhiteSpace(y.Message)));
-                    var valid = x.Value
-                        .All(y => y.IsValid);
-                    if (!valid)
-                        validationStatus = ValidationStatus.NonValid;
-                    
-                    return new ValidationResult(validationStatus, x.Key, message);
-                })
-                .ToList();
-        }
-      
-        return new TestSuiteResult<TOutput>(completedTestCases,
-            validations,
+        return new TestSuiteResult(completedTestCases,
+            validationUnpacked,
             context.Operation,
             context.Name,
             context.Number,
-            validationStatus);
+            context.ShouldBeExecuted);
     }
 }

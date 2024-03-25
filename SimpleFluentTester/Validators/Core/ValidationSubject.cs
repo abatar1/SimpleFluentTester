@@ -5,5 +5,6 @@ public enum ValidationSubject
     Comparer,
     Inputs,
     Operation,
-    TestNumbers
+    TestNumbers,
+    Expect
 }

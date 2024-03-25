@@ -9,21 +9,20 @@ namespace SimpleFluentTester.TestSuite.Context;
 
 public static class OperationEnricher
 {
-    public static ITestSuiteBuilderContext<TOutput> TryToEnrichAttributeOperation<TOutput>(this ITestSuiteBuilderContext<TOutput> context)
+    public static void TryToEnrichAttributeOperation(ITestSuiteContextContainer container)
     {
-        if (context.Operation != null)
-            return context;
+        if (container.Context.Operation != null)
+            return;
 
         try
         {
-            var operation = GetDelegateFromAttributedMethod(context.EntryAssemblyProvider, context.Activator);
-            context.AddValidation(ValidationResult.Ok(ValidationSubject.Operation));
-            return context.WithOperation(operation);
+            var operation = GetDelegateFromAttributedMethod(container.Context.EntryAssemblyProvider, container.Context.Activator);
+            container.Context.AddValidation(ValidationResult.Valid(ValidationSubject.Operation));
+            container.WithOperation(operation);
         }
         catch (Exception e)
         {
-            context.AddValidation(ValidationResult.Failed(ValidationSubject.Operation, e.Message));
-            return context;
+            container.Context.AddValidation(ValidationResult.NonValid(ValidationSubject.Operation, e.Message));
         }
     }
 
@@ -43,7 +42,7 @@ public static class OperationEnricher
 
         if (operationMembers.Count == 0)
             throw new InvalidOperationException(
-                $"You should specify an operation first with an {nameof(TestSuiteDelegateAttribute)} attribute or using {nameof(TestSuiteBuilder<object>.UseOperation)} method.");
+                $"You should specify an operation first with an {nameof(TestSuiteDelegateAttribute)} attribute or using {nameof(TestSuiteBuilder.UseOperation)} method.");
         if (operationMembers.Count > 1)
             throw new InvalidOperationException(
                 $"You defined more than one method with {nameof(TestSuiteDelegateAttribute)}.");

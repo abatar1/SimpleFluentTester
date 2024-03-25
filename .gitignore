@@ -6,3 +6,4 @@ packages/
 *.DotSettings
 *.nupkg
 *.info
+SimpleFluentTester.UnitTests/TestResults/

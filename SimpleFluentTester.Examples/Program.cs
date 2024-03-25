@@ -23,7 +23,7 @@ TestSuite.Sequential
     .Run()
     .Report((config, result) =>
     {
-        config.ReportBuilder = new CustomTestSuiteReportBuilder<object>(result);
+        config.ReportBuilder = new CustomTestSuiteReportBuilder(result);
     });
     
 // 3 Example.

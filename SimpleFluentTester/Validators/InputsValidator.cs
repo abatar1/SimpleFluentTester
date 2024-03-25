@@ -1,36 +1,36 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using SimpleFluentTester.TestSuite.Context;
+using SimpleFluentTester.TestSuite.Case;
 using SimpleFluentTester.Validators.Core;
 
 namespace SimpleFluentTester.Validators;
 
-internal sealed class InputsValidator : BaseValidator
+internal sealed class InputsValidator : BaseValidator<InputsValidatedObject>
 {
-    public override ValidationResult Validate<TOutput>(
-        ITestSuiteBuilderContext<TOutput> context, 
+    public override ISet<Type> AllowedTypes => new HashSet<Type>([ValidatedTypes.TestCase]);
+    public override ValidationSubject Subject => ValidationSubject.Inputs;
+
+    public override ValidationResult Validate(
+        IValidated validated, 
         IValidatedObject validatedObject)
     {
-        if (validatedObject is not InputsValidatedObject inputsValidatedObject)
-            throw new ValidationUnexpectedException("Was not able to cast validated object to it's type, seems like a bug.");
-
-        var inputs = inputsValidatedObject.Inputs;
-        var operationParameterInfos = context.Operation?.Method.GetParameters().ToList();
-
-        if (operationParameterInfos == null)
-            return ValidationResult.Failed(ValidationSubject.Inputs, "Operation hasn't been specified before validation, seems like a bug.");
+        var inputsValidatedObject = CastValidatedObject(validatedObject);
+        var testCase = CastValidated<TestCase>(validated);
         
-        if (inputs.Count != operationParameterInfos.Count)
-            return ValidationResult.Failed(ValidationSubject.Inputs, $"Invalid inputs number, should be {operationParameterInfos.Count}, but was {inputs.Count}, inputs {string.Join(", ", inputs)}");
+        var inputs = testCase.Inputs;
+        var operationParameterInfos = inputsValidatedObject.Operation?.Method.GetParameters().ToList();
+        
+        if (inputs.Length != operationParameterInfos?.Count)
+            return NonValid($"Invalid inputs number, should be {operationParameterInfos?.Count}, but was {inputs.Length}, inputs {string.Join(", ", inputs)}");
 
         var parametersTypesAreValid = inputs
             .Zip(operationParameterInfos, (input, parameter) => (input, parameter))
             .All(x => ValidateInputType(x.input, x.parameter.ParameterType));
         if (!parametersTypesAreValid)
-            return ValidationResult.Failed(ValidationSubject.Inputs, "Passed parameters and expected operation parameters are not equal");
+            return NonValid("Passed parameters and expected operation parameters are not equal");
         
-        return ValidationResult.Ok(ValidationSubject.Inputs);
+        return Ok();
     }
     
     private static bool ValidateInputType(object? input, Type parameterType)
@@ -46,8 +46,8 @@ internal sealed class InputsValidator : BaseValidator
     }
 }
 
-public sealed class InputsValidatedObject(IReadOnlyCollection<object?> inputs)
+public sealed class InputsValidatedObject(Delegate? operation)
     : IValidatedObject
 {
-    public IReadOnlyCollection<object?> Inputs { get; } = inputs;
+    public Delegate? Operation { get; } = operation;
 }

@@ -9,13 +9,13 @@ public static class TestSuite
 {
     private static int _testSuiteNumber;
         
-    public static ITestSuiteBuilder<object> Sequential
+    public static ITestSuiteBuilder Sequential
     {
         get
         {
             _testSuiteNumber += 1;
-            var defaultContext = TestSuiteBuilderContext<object>.Default(_testSuiteNumber);
-            return new TestSuiteBuilder<object>(defaultContext);
+            var container = TestSuiteContextContainer.Default(_testSuiteNumber);
+            return new TestSuiteBuilder(container);
         }
     }
 }

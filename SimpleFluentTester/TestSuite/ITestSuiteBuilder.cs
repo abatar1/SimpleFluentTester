@@ -1,20 +1,31 @@
 using System;
 using SimpleFluentTester.Reporter;
-using SimpleFluentTester.TestCase;
+using SimpleFluentTester.TestSuite.Case;
 
 namespace SimpleFluentTester.TestSuite;
 
-public interface ITestSuiteBuilder<TOutput>
+/// <inheritdoc cref="TestSuiteBuilder"/>
+public interface ITestSuiteBuilder
 {
-    ITestCaseBuilder<TOutput> Expect(TOutput? expected);
+    /// <inheritdoc cref="TestSuiteBuilder.Expect"/>
+    ITestCaseBuilder Expect(object? expected);
 
-    ITestSuiteBuilder<TOutput> UseOperation(Delegate operation);
+    /// <inheritdoc cref="TestSuiteBuilder.ExpectException{TException}"/>
+    ITestCaseBuilder ExpectException<TException>(string? message = null)
+        where TException : Exception;
 
-    ITestSuiteBuilder<TOutput> WithDisplayName(string displayName);
+    /// <inheritdoc cref="TestSuiteBuilder.UseOperation"/>
+    ITestSuiteBuilder UseOperation(Delegate operation);
 
-    ITestSuiteBuilder<TNewOutput> WithComparer<TNewOutput>(Func<TNewOutput?, TNewOutput?, bool> comparer);
+    /// <inheritdoc cref="TestSuiteBuilder.WithDisplayName"/>
+    ITestSuiteBuilder WithDisplayName(string displayName);
 
-    ITestSuiteBuilder<TOutput> Ignore { get; }
+    /// <inheritdoc cref="TestSuiteBuilder.WithComparer{TExpected}"/>
+    ITestSuiteBuilder WithComparer<TExpected>(Func<TExpected?, TExpected?, bool> comparer);
 
-    ITestSuiteReporter<TOutput> Run(params int[] testNumbers);
+    /// <inheritdoc cref="TestSuiteBuilder.Ignore"/>
+    ITestSuiteBuilder Ignore { get; }
+
+    /// <inheritdoc cref="TestSuiteBuilder.Run"/>
+    ITestSuiteReporter Run(params int[] testNumbers);
 }

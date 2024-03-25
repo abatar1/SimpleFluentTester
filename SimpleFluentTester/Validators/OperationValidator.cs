@@ -1,49 +1,53 @@
 using System;
-using SimpleFluentTester.TestSuite.Context;
+using System.Collections.Generic;
+using SimpleFluentTester.TestSuite.Case;
+using SimpleFluentTester.TestSuite.ComparedObject;
 using SimpleFluentTester.Validators.Core;
 
 namespace SimpleFluentTester.Validators;
 
-internal sealed class OperationValidator : BaseValidator
+internal sealed class OperationValidator : BaseValidator<OperationValidatedObject>
 {
-    public override ValidationResult Validate<TOutput>(
-        ITestSuiteBuilderContext<TOutput> context, 
+    public override ISet<Type> AllowedTypes => new HashSet<Type>([ValidatedTypes.TestCase]);
+    public override ValidationSubject Subject => ValidationSubject.Operation;
+
+    public override ValidationResult Validate(
+        IValidated validated, 
         IValidatedObject validatedObject)
     {
-        if (validatedObject is not OperationValidatedObject nonTypedOperationValidatedObject)
-            throw new ValidationUnexpectedException("Was not able to cast validated object to it's type, seems like a bug.");
-
-        if (context.Operation == null)
-            return ValidationResult.Failed(ValidationSubject.Operation, "Operation not specified");
+        var operation = CastValidatedObject(validatedObject).Operation;
         
-        if (nonTypedOperationValidatedObject.ActualOperationType == typeof(object))
-            return ValidationResult.Ok(ValidationSubject.Operation);
+        if (operation == null)
+            return NonValid("Operation not specified");
         
-        if (context.Operation.Method.ReturnParameter!.ParameterType == typeof(void))
-            return ValidationResult.Failed(ValidationSubject.Operation, "Operation must have return type to be testable");
-
-        Type? returnParameterType;
-        var actualOperationType = nonTypedOperationValidatedObject.ActualOperationType;
-
-        if (context.OutputUnderlyingType != null)
+        var returnParameterType = operation.Method.ReturnParameter!.ParameterType;
+        
+        if (returnParameterType == typeof(void))
+            return NonValid("Operation must have return type to be testable");
+        
+        var testCase = CastValidated<TestCase>(validated);
+        if (testCase.Expected.Variety == ComparedObjectVariety.Exception)
+            return Ok();
+        
+        var returnUnderlyingType = Nullable.GetUnderlyingType(returnParameterType);
+        var isNullable = false;
+        if (returnUnderlyingType != null)
         {
-            if (actualOperationType == null)
-                return ValidationResult.Ok(ValidationSubject.Operation);
-            returnParameterType = context.OutputUnderlyingType;
-        }
-        else
-        {
-            returnParameterType = context.Operation.Method.ReturnParameter.ParameterType;
+            returnParameterType = returnUnderlyingType;
+            isNullable = true;
         }
 
-        if (returnParameterType != actualOperationType)
-            return ValidationResult.Failed(ValidationSubject.Operation, "Operation return type is not the same as used generic type.");
+        if (isNullable && testCase.Expected.Variety == ComparedObjectVariety.Null)
+            return Ok();
         
-        return ValidationResult.Ok(ValidationSubject.Operation);
+        if (returnParameterType != testCase.Expected.Type)
+            return ValidationResult.NonValid(ValidationSubject.Operation, "Operation return type is not the same as used generic type.");
+        
+        return Ok();
     }
 }
 
-public sealed class OperationValidatedObject(Type? actualOperationType) : IValidatedObject
+public sealed class OperationValidatedObject(Delegate? operation) : IValidatedObject
 {
-    public Type? ActualOperationType { get; } = actualOperationType;
+    public Delegate? Operation { get; } = operation;
 }

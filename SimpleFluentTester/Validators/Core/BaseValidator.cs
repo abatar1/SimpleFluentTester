@@ -1,37 +1,46 @@
-using SimpleFluentTester.TestSuite.Context;
+using System;
+using System.Collections.Generic;
 
 namespace SimpleFluentTester.Validators.Core;
 
-internal abstract class BaseValidator : IValidator
+internal abstract class BaseValidator<TValidatedObject> : IValidator
+    where TValidatedObject : IValidatedObject
 {
-    private readonly string _key;
-
     protected BaseValidator()
     {
-        _key = GetType().Name;
+        Key = GetType().Name;
     }
 
-    public virtual string Key => _key;
+    public virtual string Key { get; }
 
-    public abstract ValidationResult Validate<TOutput>(
-        ITestSuiteBuilderContext<TOutput> context,
-        IValidatedObject validatedObject);
+    public abstract ISet<Type> AllowedTypes { get; }
+    
+    public abstract ValidationSubject Subject { get; }
 
-    public bool Equals(IValidator other)
+    public abstract ValidationResult Validate(IValidated validated, IValidatedObject validatedObject);
+
+    protected ValidationResult Ok()
     {
-        return Key == other.Key;
+        return ValidationResult.Valid(Subject);
     }
-
-    public override bool Equals(object? obj)
+    
+    protected ValidationResult NonValid(string message)
     {
-        if (ReferenceEquals(null, obj)) return false;
-        if (ReferenceEquals(this, obj)) return true;
-        if (obj.GetType() != GetType()) return false;
-        return Equals((BaseValidator)obj);
+        return ValidationResult.NonValid(Subject, message);
     }
-
-    public override int GetHashCode()
+    
+    protected TValidated CastValidated<TValidated>(IValidated validated)
+        where TValidated : IValidated
     {
-        return _key.GetHashCode();
+        if (validated is not TValidated castedValidated)
+            throw new ValidationUnexpectedException("Was not able to cast validated to it's type, seems like a bug.");
+        return castedValidated;
+    }
+    
+    protected TValidatedObject CastValidatedObject(IValidatedObject validated)
+    {
+        if (validated is not TValidatedObject castedValidated)
+            throw new ValidationUnexpectedException("Was not able to cast validated object to it's type, seems like a bug.");
+        return castedValidated;
     }
 }

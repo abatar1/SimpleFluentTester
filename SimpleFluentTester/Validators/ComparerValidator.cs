@@ -1,30 +1,63 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using SimpleFluentTester.TestSuite.ComparedObject;
 using SimpleFluentTester.TestSuite.Context;
 using SimpleFluentTester.Validators.Core;
 
 namespace SimpleFluentTester.Validators;
 
-internal sealed class ComparerValidator : BaseValidator
+internal sealed class ComparerValidator : BaseValidator<EmptyValidatedObject>
 {
-    public override ValidationResult Validate<TOutput>(
-        ITestSuiteBuilderContext<TOutput> context, 
+    public override ISet<Type> AllowedTypes => new HashSet<Type>([ValidatedTypes.Context]);
+    public override ValidationSubject Subject => ValidationSubject.Comparer;
+
+    public override ValidationResult Validate(
+        IValidated validated, 
         IValidatedObject validatedObject)
     {
-        Type? comparerType;
-        if (context.Comparer == null)
+        var context = CastValidated<ITestSuiteContext>(validated);
+
+        var testCaseExpectedObjects = context.TestCases
+            .Where(x => x.Expected.Type != null)
+            .Select(x => x.Expected)
+            .Where(x => x.Variety == ComparedObjectVariety.Value)
+            .ToLookup(x => x.Type);
+
+        if (testCaseExpectedObjects.Count == 0)
+            return Ok();
+        
+        if (testCaseExpectedObjects.Count > 1)
+            return NonValid("Expected types more than one in TestCase collection");
+            
+        var testCaseExpectedObject = (ValueObject) testCaseExpectedObjects.First().First();
+
+        if (context.Comparer != null)
         {
-            if (typeof(TOutput) == typeof(object))
-                comparerType = context.Operation?.Method.ReturnParameter?.ParameterType;
-            else
-                comparerType = typeof(TOutput);
+            if (context.Comparer?.Method.ReturnParameter?.ParameterType != typeof(bool))
+                return NonValid(
+                    $"Return type of the custom comparer is not bool but {context.Comparer?.Method.ReturnParameter?.ParameterType}, something went wrong during initialization");
+
+            var parameters = context.Comparer.Method.GetParameters();
+            if (parameters.Length != 2)
+                return NonValid(
+                    $"Custom comparer has {parameters.Length} parameters, but should has 2, something went wrong during initialization");
+
+            var paramType = parameters[0].ParameterType;
+
+            if (paramType != parameters[1].ParameterType)
+                return NonValid("Comparer has not the same input parameter type, something went wrong during initialization");
+            
+            if (testCaseExpectedObject != null && paramType != testCaseExpectedObject.Type)
+                return NonValid($"Test case type was {testCaseExpectedObject.Type}, but comparer type is {paramType}");
         }
         else
-            comparerType = context.Comparer.Method.ReturnParameter?.ParameterType;
-
-        var interfaceType = typeof(IEquatable<>).MakeGenericType(comparerType);
-        if (!interfaceType.IsAssignableFrom(comparerType))
-            return ValidationResult.Failed(ValidationSubject.Comparer, $"{nameof(TOutput)} type should be assignable from {nameof(IEquatable<TOutput>)} or comparer should be defined");
+        {
+            var interfaceType = typeof(IEquatable<>).MakeGenericType(testCaseExpectedObject.Type);
+            if (!interfaceType.IsAssignableFrom(testCaseExpectedObject.Type))
+                return NonValid($"{testCaseExpectedObject.Type} type should be assignable from {typeof(IEquatable<>).Name} or comparer should be defined");
+        }
            
-        return ValidationResult.Ok(ValidationSubject.Comparer);
+        return Ok();
     }
 }
