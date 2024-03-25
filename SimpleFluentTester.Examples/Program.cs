@@ -1,5 +1,8 @@
-﻿using SimpleFluentTester.Examples;
+﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
+using SimpleFluentTester.Examples;
 using SimpleFluentTester.TestSuite;
+using SimpleFluentTester.TestSuite.Case;
 
 // 1 Example.
 // Setup test suite with default reporter (default output format).
@@ -24,6 +27,7 @@ TestSuite.Sequential
     .Report((config, result) =>
     {
         config.ReportBuilder = new CustomTestSuiteReportBuilder(result);
+        config.ShouldPrintPredicate = testCase => testCase.Assert.Status == AssertStatus.NotPassed;
     });
     
 // 3 Example.

@@ -65,6 +65,21 @@ public static class CompletedTestCaseExtensions
 
         testCase.AssertOutput(expected, inputs, false, comparer);
     }
+    
+    public static void AssertSkippedTestResult(
+        this CompletedTestCase testCase,
+        object? expected,
+        object?[] inputs)
+    {
+        testCase.Validation.AssertValid();
+
+        Assert.Equal(AssertStatus.Ignored, testCase.Assert.Status);
+        
+        testCase.AssertNullOutput();
+        
+        Assert.Equal(expected, testCase.Expected.Value);
+        Assert.Equal(inputs, testCase.Inputs);
+    }
 
     private static void AssertOutput<TExpected>(
         this CompletedTestCase testCase,
@@ -103,21 +118,6 @@ public static class CompletedTestCaseExtensions
 
         Assert.Equal(shouldBeEqual, comparer.Invoke((TExpected?)testCase.Assert.Output.Value, (TExpected?)testCase.Expected.Value));
         Assert.Equal(shouldBeEqual, comparer.Invoke(expected, (TExpected?)testCase.Assert.Output.Value));
-    }
-
-    public static void AssertSkippedTestResult(
-        this CompletedTestCase testCase,
-        object? expected,
-        object?[] inputs)
-    {
-        testCase.Validation.AssertValid();
-
-        Assert.Equal(AssertStatus.Ignored, testCase.Assert.Status);
-        
-        testCase.AssertNullOutput();
-        
-        Assert.Equal(expected, testCase.Expected.Value);
-        Assert.Equal(inputs, testCase.Inputs);
     }
     
     private static void AssertNullOutput(this CompletedTestCase testCase)

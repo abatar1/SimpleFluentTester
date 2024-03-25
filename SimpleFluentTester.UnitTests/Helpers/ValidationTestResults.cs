@@ -2,7 +2,7 @@ using SimpleFluentTester.Validators.Core;
 
 namespace SimpleFluentTester.UnitTests.Helpers;
 
-public static class ValidationResults
+public static class ValidationTestResults
 {
     public static ValidationResult Valid => ValidationResult.Valid(ValidationSubject.Operation);
         

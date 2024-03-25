@@ -13,8 +13,8 @@ public sealed class TestSuiteReportTests
     public void Report_DefaultLogger_ShouldNotThrow()
     {
         // Assign
-        var testSuiteResult = TestSuiteHelper.CreateTestSuiteResult(
-            ValidationResults.Valid,
+        var testSuiteResult = TestSuiteTestFactory.CreateTestSuiteResult(
+            ValidationTestResults.Valid,
             TestCaseOperations.Passed);
         var testSuiteReporter = new TestSuiteReporter(testSuiteResult);
         
@@ -29,8 +29,8 @@ public sealed class TestSuiteReportTests
     {
         // Assign
         var loggerMock = new Mock<ILogger>();
-        var testSuiteResult = TestSuiteHelper.CreateTestSuiteResult(
-            ValidationResults.Valid,
+        var testSuiteResult = TestSuiteTestFactory.CreateTestSuiteResult(
+            ValidationTestResults.Valid,
             TestCaseOperations.Passed);
         var testSuiteReporter = new TestSuiteReporter(testSuiteResult);
         
@@ -54,8 +54,8 @@ public sealed class TestSuiteReportTests
     {
         // Assign
         var loggerMock = new Mock<ILogger>();
-        var testSuiteResult = TestSuiteHelper.CreateTestSuiteResult(
-            ValidationResults.NonValid,
+        var testSuiteResult = TestSuiteTestFactory.CreateTestSuiteResult(
+            ValidationTestResults.NonValid,
             TestCaseOperations.Passed);
         var testSuiteReporter = new TestSuiteReporter(testSuiteResult);
         
@@ -79,8 +79,8 @@ public sealed class TestSuiteReportTests
     {
         // Assign
         var loggerMock = new Mock<ILogger>();
-        var testSuiteResult = TestSuiteHelper.CreateTestSuiteResult(
-            ValidationResults.Valid,
+        var testSuiteResult = TestSuiteTestFactory.CreateTestSuiteResult(
+            ValidationTestResults.Valid,
             TestCaseOperations.Passed);
         var testSuiteReporter = new TestSuiteReporter(testSuiteResult);
         var reportBuilder = new Mock<ITestSuiteReportBuilder>();
@@ -111,8 +111,8 @@ public sealed class TestSuiteReportTests
     {
         // Assign
         var loggerMock = new Mock<ILogger>();
-        var testSuiteResult = TestSuiteHelper.CreateTestSuiteResult(
-            ValidationResults.Valid,
+        var testSuiteResult = TestSuiteTestFactory.CreateTestSuiteResult(
+            ValidationTestResults.Valid,
             TestCaseOperations.Passed);
         var testSuiteReporter = new TestSuiteReporter(testSuiteResult);
         var reportBuilder = new Mock<ITestSuiteReportBuilder>();
@@ -142,8 +142,8 @@ public sealed class TestSuiteReportTests
     {
         // Assign
         var loggerMock = new Mock<ILogger>();
-        var testSuiteResult = TestSuiteHelper.CreateTestSuiteResult(
-            ValidationResults.Valid,
+        var testSuiteResult = TestSuiteTestFactory.CreateTestSuiteResult(
+            ValidationTestResults.Valid,
             TestCaseOperations.Passed);
         var testSuiteReporter = new TestSuiteReporter(testSuiteResult);
         var reportBuilder = new Mock<ITestSuiteReportBuilder>();
@@ -174,8 +174,8 @@ public sealed class TestSuiteReportTests
     {
         // Assign
         var loggerMock = new Mock<ILogger>();
-        var testSuiteResult = TestSuiteHelper.CreateTestSuiteResult(
-            ValidationResults.Valid,
+        var testSuiteResult = TestSuiteTestFactory.CreateTestSuiteResult(
+            ValidationTestResults.Valid,
             TestCaseOperations.Passed);
         var testSuiteReporter = new TestSuiteReporter(testSuiteResult);
         var reportBuilder = new Mock<ITestSuiteReportBuilder>();

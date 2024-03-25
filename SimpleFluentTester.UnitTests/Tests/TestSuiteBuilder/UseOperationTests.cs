@@ -81,7 +81,7 @@ public class UseOperationTests
     public void UseOperation_InvalidDelegateReturnType_ShouldBeInvalid()
     {
         // Assign
-        var container = TestSuiteHelper.CreateEmptyContextContainer();
+        var container = TestSuiteTestFactory.CreateEmptyContextContainer();
         var builder = new TestSuite.TestSuiteBuilder(container);
         
         // Act
