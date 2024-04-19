@@ -78,13 +78,13 @@ public static class CompletedTestCaseExtensions
         testCase.AssertNullOutput();
         
         Assert.Equal(expected, testCase.Expected.Value);
-        Assert.Equal(inputs, testCase.Inputs);
+        Assert.Equal(inputs, testCase.Inputs.Select(x => x.Value));
     }
 
     private static void AssertOutput<TExpected>(
         this CompletedTestCase testCase,
-        TExpected? expected,
-        object?[] inputs,
+        TExpected? expectedResult,
+        IEnumerable<object?> expectedInputs,
         bool shouldBeEqual,
         Func<TExpected?, TExpected?, bool>? comparer)
     {
@@ -110,14 +110,14 @@ public static class CompletedTestCaseExtensions
         
         if (comparer == null)
         {
-            Assert.Equal(shouldBeEqual, expected?.Equals(testCase.Assert.Output.Value));
+            Assert.Equal(shouldBeEqual, expectedResult?.Equals(testCase.Assert.Output.Value));
             Assert.Equal(shouldBeEqual, testCase.Expected.Value?.Equals(testCase.Assert.Output.Value));
-            Assert.Equal(inputs, testCase.Inputs);
+            Assert.Equal(expectedInputs, testCase.Inputs.Select(x => x.Value));
             return;
         }
 
         Assert.Equal(shouldBeEqual, comparer.Invoke((TExpected?)testCase.Assert.Output.Value, (TExpected?)testCase.Expected.Value));
-        Assert.Equal(shouldBeEqual, comparer.Invoke(expected, (TExpected?)testCase.Assert.Output.Value));
+        Assert.Equal(shouldBeEqual, comparer.Invoke(expectedResult, (TExpected?)testCase.Assert.Output.Value));
     }
     
     private static void AssertNullOutput(this CompletedTestCase testCase)

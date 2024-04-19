@@ -15,7 +15,7 @@ public static class TestSuiteFactory
 
     public static TestCase CreateTestCase(object?[] inputs, object? expected)
     {
-        return new TestCase(inputs, ComparedObjectFactory.Wrap(expected), 1);
+        return new TestCase(ComparedObjectFactory.WrapMany(inputs), ComparedObjectFactory.Wrap(expected), 1);
     }
 
     public static ITestSuiteContextContainer CreateEmptyContextContainer(

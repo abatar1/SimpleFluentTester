@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.Linq;
 using System.Reflection;
 using SimpleFluentTester.TestSuite.ComparedObject;
 using SimpleFluentTester.TestSuite.Context;
@@ -21,7 +22,7 @@ internal sealed class TestCaseExecutor(ITestSuiteContext context, IComparedObjec
         try
         {
             stopwatch.Start();
-            result = context.Operation.Method.Invoke(context.Operation.Target, testCase.Inputs);
+            result = context.Operation.Method.Invoke(context.Operation.Target, testCase.Inputs.Select(x => x.Value).ToArray());
             stopwatch.Stop();
         }
         catch (TargetInvocationException e)

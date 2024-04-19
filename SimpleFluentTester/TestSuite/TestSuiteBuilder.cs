@@ -36,7 +36,7 @@ internal sealed class TestSuiteBuilder : ITestSuiteBuilder
     public ITestCaseBuilder Expect(object? expected)
     {
         var comparedObj = _comparedObjectFactory.Wrap(expected);
-        return new TestCaseBuilder(_contextContainer, comparedObj);
+        return new TestCaseBuilder(_contextContainer, _comparedObjectFactory, comparedObj);
     }
     
     /// <summary>
@@ -46,7 +46,7 @@ internal sealed class TestSuiteBuilder : ITestSuiteBuilder
         where TException : Exception
     {
         var validatedException = ExpectExceptionFactory.Create(_contextContainer, _comparedObjectFactory, typeof(TException), message);
-        return new TestCaseBuilder(_contextContainer, validatedException.Exception, validatedException.ValidationResult);
+        return new TestCaseBuilder(_contextContainer, _comparedObjectFactory, validatedException.Object, validatedException.ValidationResult);
     }
     
     /// <summary>
@@ -98,37 +98,50 @@ internal sealed class TestSuiteBuilder : ITestSuiteBuilder
     {
         if (!_contextContainer.Context.ShouldBeExecuted)
             return ReturnNotExecutedTestReporter(_contextContainer.Context);
-        return new TestSuiteReporter(ProcessContextToResult(testNumbers));
+
+        var testSuiteResult = ProcessContextToResult(testNumbers);
+        
+        return new TestSuiteReporter(testSuiteResult);
+    }
+    
+    private static ITestSuiteReporter ReturnNotExecutedTestReporter(ITestSuiteContext context)
+    {
+        var testCases = context.TestCases
+            .Select(CompletedTestCase.NotExecuted)
+            .ToList();
+        
+        var testSuiteResult = GetTestSuiteResult(context, testCases, ValidationUnpacked.Empty);
+        
+        return new TestSuiteReporter(testSuiteResult);
     }
 
     private TestSuiteResult ProcessContextToResult(IEnumerable<int> testNumbers)
     {
         var testNumbersHash = new SortedSet<int>(testNumbers);
         
-        // Enrich section
-        OperationEnricher.TryToEnrichAttributeOperation(_contextContainer);
-
-        // Validation section
-        _contextContainer.Context.RegisterValidation<ComparerValidator>();
-        _contextContainer.Context.RegisterValidation<TestNumbersValidator>(() => new TestNumbersValidatedObject(testNumbersHash));
-        var contextValidationResults = _validationUnpacker.Unpack(_contextContainer.Context);
+        _contextContainer.TryToEnrichAttributeOperation();
         
-        // Execute section
-        var testCasePipeline = new TestCasePipeline(_contextContainer.Context, _comparedObjectFactory,
-            _validationUnpacker, testNumbersHash);
-        var completedTestCases = _contextContainer.Context.TestCases
-            .Select(testCase => testCasePipeline.ToCompleted(testCase))
-            .ToList();
+        var contextValidationResults = ValidateContext(testNumbersHash);
+        
+        var completedTestCases = ExecuteTestCases(testNumbersHash);
+        
         return GetTestSuiteResult(_contextContainer.Context, completedTestCases, contextValidationResults);
     }
 
-    private static ITestSuiteReporter ReturnNotExecutedTestReporter(ITestSuiteContext context)
+    private ValidationUnpacked ValidateContext(ISet<int> testNumbersHash)
     {
-        var testCases = context.TestCases
-            .Select(CompletedTestCase.NotExecuted)
+        _contextContainer.Context.RegisterValidation<ComparerValidator>();
+        _contextContainer.Context.RegisterValidation<TestNumbersValidator>(() => new TestNumbersValidatedObject(testNumbersHash));
+        return _validationUnpacker.Unpack(_contextContainer.Context);
+    }
+
+    private IList<CompletedTestCase> ExecuteTestCases(ISet<int> testNumbersHash)
+    {
+        var testCasePipeline = new TestCasePipeline(_contextContainer.Context, _comparedObjectFactory,
+            _validationUnpacker, testNumbersHash);
+        return _contextContainer.Context.TestCases
+            .Select(testCase => testCasePipeline.ToCompleted(testCase))
             .ToList();
-        var testSuiteResult = GetTestSuiteResult(context, testCases, ValidationUnpacked.Empty);
-        return new TestSuiteReporter(testSuiteResult);
     }
     
     private static TestSuiteResult GetTestSuiteResult(

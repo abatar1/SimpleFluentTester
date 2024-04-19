@@ -5,9 +5,9 @@ using SimpleFluentTester.Validators.Core;
 
 namespace SimpleFluentTester.TestSuite.Case;
 
-public sealed class TestCase(object?[] inputs, IComparedObject expected, int number) : IValidated
+public sealed class TestCase(IComparedObject[] inputs, IComparedObject expected, int number) : IValidated
 {
-    public object?[] Inputs { get; } = inputs;
+    public IComparedObject[] Inputs { get; } = inputs;
     
     public IComparedObject Expected { get; } = expected;
     

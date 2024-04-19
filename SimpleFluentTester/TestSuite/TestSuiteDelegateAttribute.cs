@@ -7,4 +7,4 @@ namespace SimpleFluentTester.TestSuite;
 /// There cannot be more than one in the project. Should be used on a static method, or the class defining a non-static method must have an empty constructor.
 /// </summary>
 [AttributeUsage(AttributeTargets.Method)]
-public class TestSuiteDelegateAttribute : Attribute;
+public sealed class TestSuiteDelegateAttribute : Attribute;
