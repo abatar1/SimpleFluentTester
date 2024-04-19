@@ -11,7 +11,7 @@ public static class ExpectExceptionFactory
 {
     private static readonly IDictionary<Type, List<ParameterInfo[]>> ParameterInfoMap = new Dictionary<Type, List<ParameterInfo[]>>();
     
-    public static ValidatedException Create(
+    public static ValidatedObject Create(
         ITestSuiteContextContainer container,
         IComparedObjectFactory comparedObjectFactory,
         Type exceptionType,
@@ -29,17 +29,17 @@ public static class ExpectExceptionFactory
         if (!string.IsNullOrWhiteSpace(message))
         {
             if (!HasStringCtor(publicConstructorParams))
-                return ValidationFailed($"{exceptionType} do not have public ctor with string parameter");
+                return ValidationFailed($"{exceptionType} do not have public .ctor() with string parameter");
             return TryCreateException(container, comparedObjectFactory, exceptionType, message);
         }
         
         return TryCreateException(container, comparedObjectFactory, exceptionType);
     }
 
-    private static ValidatedException ValidationFailed(string message)
+    private static ValidatedObject ValidationFailed(string message)
     {
         var validationResults = new List<ValidationResult> { ValidationResult.NonValid(ValidationSubject.Expect, message) };
-        return new ValidatedException(new NullObject(), validationResults);
+        return new ValidatedObject(new NullObject(), validationResults);
     }
 
     private static bool HasStringCtor(IEnumerable<ParameterInfo[]> publicConstructorParams)
@@ -52,25 +52,21 @@ public static class ExpectExceptionFactory
             });
     }
 
-    private static ValidatedException TryCreateException(
+    private static ValidatedObject TryCreateException(
         ITestSuiteContextContainer container,
         IComparedObjectFactory comparedObjectFactory,
         Type exceptionType,
         string? message = null)
     {
         object exception;
+
         if (string.IsNullOrWhiteSpace(message))
             exception = container.Context.Activator.CreateInstance(exceptionType);
         else
             exception = container.Context.Activator.CreateInstance(exceptionType, message);
-        var wrappedException = comparedObjectFactory.Wrap(exception);
-        return new ValidatedException(wrappedException);
-    }
-
-    public record ValidatedException(IComparedObject Exception, List<ValidationResult>? ValidationResult = null)
-    {
-        public IComparedObject Exception { get; } = Exception;
         
-        public List<ValidationResult> ValidationResult { get; } = ValidationResult ?? [];
+        var wrappedException = comparedObjectFactory.Wrap(exception);
+        
+        return new ValidatedObject(wrappedException);
     }
 }

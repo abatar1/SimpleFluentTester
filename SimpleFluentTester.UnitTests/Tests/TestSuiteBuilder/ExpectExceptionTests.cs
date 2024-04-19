@@ -49,7 +49,7 @@ public class ExpectExceptionTests
             .Run();
         
         // Assert
-        var message = $"{typeof(CustomException).FullName} do not have public ctor with string parameter";
+        var message = $"{typeof(CustomException).FullName} do not have public .ctor() with string parameter";
         reporter.AssertTestCaseExists(1).Validation.AssertInvalid(ValidationSubject.Expect, message);
     }
     

@@ -23,7 +23,7 @@ public static class TestCaseOperations
         get
         {
             var expected = ComparedObjectFactory.Wrap(3);
-            var testCase = new TestCase([1, 2], expected, 1);
+            var testCase = new TestCase(ComparedObjectFactory.WrapMany([1, 2]), expected, 1);
             return new TestCaseOperation(Operation, testCase);
         }
     }
@@ -33,7 +33,7 @@ public static class TestCaseOperations
         get
         {
             var expected = ComparedObjectFactory.Wrap(4);
-            var testCase = new TestCase([1, 2], expected, 1);
+            var testCase = new TestCase(ComparedObjectFactory.WrapMany([1, 2]), expected, 1);
             return new TestCaseOperation(Operation, testCase);
         }
     }
@@ -43,7 +43,7 @@ public static class TestCaseOperations
         get
         {
             var expected = ComparedObjectFactory.Wrap(3);
-            var testCase = new TestCase([1, 2], expected, 1);
+            var testCase = new TestCase(ComparedObjectFactory.WrapMany([1, 2]), expected, 1);
             return new TestCaseOperation(ThrowOperation, testCase);
         }
     }
@@ -53,7 +53,7 @@ public static class TestCaseOperations
         get
         {
             var expected = ComparedObjectFactory.Wrap(4);
-            var testCase = new TestCase(["test", 2], expected, 1);
+            var testCase = new TestCase(ComparedObjectFactory.WrapMany(["test", 2]), expected, 1);
             return new TestCaseOperation(Operation, testCase);
         }
     }

@@ -40,7 +40,10 @@ internal static class BuilderContextValidatorExtensions
         return validated;
     }
 
-    private static ValidationResult RunValidation(IValidator validator, IValidated validated, Func<IValidatedObject>? validatedObjectFactory)
+    private static ValidationResult RunValidation(
+        IValidator validator, 
+        IValidated validated, 
+        Func<IValidatedObject>? validatedObjectFactory)
     {
         try
         {

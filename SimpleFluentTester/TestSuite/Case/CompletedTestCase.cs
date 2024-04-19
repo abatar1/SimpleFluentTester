@@ -25,7 +25,7 @@ public sealed class CompletedTestCase
     
     public TimeSpan ElapsedTime { get; }
     
-    public object?[] Inputs { get; }
+    public IComparedObject[] Inputs { get; }
 
     public IComparedObject Expected { get; }
 

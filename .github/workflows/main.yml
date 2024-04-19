@@ -18,3 +18,12 @@ jobs:
       nuget-name: 'simplefluenttester'
     secrets:
       NUGET_TOKEN: ${{ secrets.NUGET_TOKEN }}
+      
+  sync-branch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Sync Prerelease Branch with Main
+        uses: remarkablemark/sync-branch@v1
+        with:
+          base: prerelease
+          token: ${{ secrets.GITHUB_TOKEN }}
