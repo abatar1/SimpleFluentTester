@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using SimpleFluentTester.TestSuite.Case;
+using SimpleFluentTester.TestSuite.ComparedObject;
 using SimpleFluentTester.Validators.Core;
 
 namespace SimpleFluentTester.Validators;
@@ -20,9 +21,12 @@ internal sealed class InputsValidator : BaseValidator<InputsValidatedObject>
         
         var inputs = testCase.Inputs;
         var operationParameterInfos = inputsValidatedObject.Operation?.Method.GetParameters().ToList();
-        
+
         if (inputs.Length != operationParameterInfos?.Count)
-            return NonValid($"Invalid inputs number, should be {operationParameterInfos?.Count}, but was {inputs.Length}, inputs {string.Join(", ", inputs)}");
+        {
+            var formattedInputs = string.Join(", ", inputs.Select(x => x.ToString()));
+            return NonValid($"Invalid inputs number, should be {operationParameterInfos?.Count}, but was {inputs.Length}, inputs {formattedInputs}");
+        }
 
         var parametersTypesAreValid = inputs
             .Zip(operationParameterInfos, (input, parameter) => (input, parameter))
@@ -33,16 +37,16 @@ internal sealed class InputsValidator : BaseValidator<InputsValidatedObject>
         return Ok();
     }
     
-    private static bool ValidateInputType(object? input, Type parameterType)
+    private static bool ValidateInputType(IComparedObject input, Type parameterType)
     {
         var underlyingReturnParameterType = Nullable.GetUnderlyingType(parameterType);
         if (underlyingReturnParameterType == null) 
-            return input != null && input.GetType() == parameterType;
+            return input.Variety != ComparedObjectVariety.Null && input.Type == parameterType;
         
-        if (input == null)
+        if (input.Variety == ComparedObjectVariety.Null)
             return true;
 
-        return input.GetType() == underlyingReturnParameterType;
+        return input.Type == underlyingReturnParameterType;
     }
 }
 

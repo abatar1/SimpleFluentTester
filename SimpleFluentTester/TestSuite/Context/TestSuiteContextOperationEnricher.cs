@@ -9,7 +9,7 @@ namespace SimpleFluentTester.TestSuite.Context;
 
 public static class OperationEnricher
 {
-    public static void TryToEnrichAttributeOperation(ITestSuiteContextContainer container)
+    public static void TryToEnrichAttributeOperation(this ITestSuiteContextContainer container)
     {
         if (container.Context.Operation != null)
             return;

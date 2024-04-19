@@ -124,7 +124,7 @@ public class ExpectTests
         var assemblyMock = new Mock<Assembly>();
         assemblyMock
             .Setup(x => x.GetTypes())
-            .Returns(Array.Empty<Type>());
+            .Returns([]);
         var entryAssemblyProviderMock = new Mock<IEntryAssemblyProvider>();
         entryAssemblyProviderMock
             .Setup(x => x.Get())

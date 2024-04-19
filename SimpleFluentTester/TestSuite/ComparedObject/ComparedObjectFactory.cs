@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 
 namespace SimpleFluentTester.TestSuite.ComparedObject;
 
@@ -19,5 +20,10 @@ public sealed class ComparedObjectFactory : IComparedObjectFactory
             return new ExceptionObject(exception, objType);
 
         return new ValueObject(obj, objType);
+    }
+
+    public IComparedObject[] WrapMany(object?[] objects)
+    {
+        return objects.Select(Wrap).ToArray();
     }
 }
