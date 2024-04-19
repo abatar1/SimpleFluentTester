@@ -59,7 +59,7 @@ public static class ExpectExceptionFactory
         string? message = null)
     {
         object exception;
-        
+
         if (string.IsNullOrWhiteSpace(message))
             exception = container.Context.Activator.CreateInstance(exceptionType);
         else
