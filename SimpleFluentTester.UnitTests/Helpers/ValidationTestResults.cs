@@ -8,5 +8,6 @@ public static class ValidationTestResults
         
     public static ValidationResult NonValid => ValidationResult.NonValid(ValidationSubject.Operation, "Non Valid");
     
+    // ReSharper disable once UnusedMember.Global
     public static ValidationResult Failed => ValidationResult.Failed(ValidationSubject.Operation, new Exception(), "Failed");
 }

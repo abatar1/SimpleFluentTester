@@ -59,7 +59,7 @@ public static class TestCaseOperations
     }
     
     [TestSuiteDelegate]
-    // ReSharper disable once UnusedMember.Local
+    // ReSharper disable once UnusedMember.Global
     public static int AdderWithAttribute(int number1, int number2)
     {
         return number1 + number2;

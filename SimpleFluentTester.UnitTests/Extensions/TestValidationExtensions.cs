@@ -58,6 +58,8 @@ public static class TestValidationExtensions
         Assert.Equal(message, validation.Message);
     }
     
+    // ReSharper disable once MemberCanBePrivate.Global
+    // ReSharper disable all ParameterOnlyUsedForPreconditionCheck.Global
     public static void AssertFailed<TException>(this ValidationResult validation, ValidationSubject validationSubject, string message)
     {
         Assert.NotNull(validation);
@@ -67,6 +69,7 @@ public static class TestValidationExtensions
         var aggregatedException = Assert.IsType<AggregateException>(validation.Exception);
         Assert.Contains(aggregatedException.InnerExceptions, x => x.GetType() == typeof(TException));
     }
+    // ReSharper restore all ParameterOnlyUsedForPreconditionCheck.Global
     
     public static void AssertValid(this ValidationResult validation)
     {

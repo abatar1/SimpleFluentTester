@@ -59,6 +59,7 @@ public static class OperationEnricher
             return assemblyMethodOfTestSuite.CreateDelegate(delegateType);
 
         var methodClassType = assemblyMethodOfTestSuite.DeclaringType;
+        // ReSharper disable once NullableWarningSuppressionIsUsed
         var methodClassCtor = methodClassType!.GetConstructors(BindingFlags.Public | BindingFlags.Instance);
         var assemblyMethodClassCtorOfTestSuite = methodClassCtor
             .FirstOrDefault(x => x.GetParameters().Length == 0);

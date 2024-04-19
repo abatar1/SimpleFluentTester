@@ -15,6 +15,7 @@ public static class ComparedObjectExtensions
         Assert.Equal(comparedObject.Value.ToString(), comparedObject.ToString());
     }
     
+    // ReSharper disable once ParameterOnlyUsedForPreconditionCheck.Global
     public static void AssertException<TException>(this IComparedObject comparedObject, TException exception)
         where TException : Exception
     {

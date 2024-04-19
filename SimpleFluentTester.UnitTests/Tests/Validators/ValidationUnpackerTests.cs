@@ -94,7 +94,7 @@ public sealed class ValidationUnpackerTests
         var validationResults = new List<Func<ValidationResult>>
             { 
                 () => ValidationResult.NonValid(subject, message1), 
-                () => ValidationResult.Failed(subject, exception, message2),
+                () => ValidationResult.Failed(subject, exception, message2)
             };
         var validations = new Dictionary<ValidationSubject, IList<Func<ValidationResult>>> { { subject, validationResults } };
         var validated = new CustomValidated(validations);

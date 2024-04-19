@@ -46,6 +46,7 @@ public sealed class TestCaseExecutorTests
         var exception = new CustomWithMessageException("Message");
         var container = TestSuiteFactory.CreateEmptyContextContainer(operation: (int _, int _) =>
         {
+            // ReSharper disable once ConvertToLambdaExpression
             throw exception;
         });
         

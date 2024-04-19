@@ -5,6 +5,7 @@ namespace SimpleFluentTester.Validators.Core;
 
 internal static class BuilderContextValidatorExtensions
 {
+    // ReSharper disable once UnusedMethodReturnValue.Global
     public static IValidated AddValidation(
         this IValidated validated,
         ValidationResult validationResult)

@@ -32,5 +32,7 @@ public sealed class DefaultActivatorTests
 
     private class CustomClass;
     
-    private class CustomClassWithParams(object parameter);
+#pragma warning disable CS9113 // Parameter is unread.
+    private class CustomClassWithParams(object _);
+#pragma warning restore CS9113 // Parameter is unread.
 }

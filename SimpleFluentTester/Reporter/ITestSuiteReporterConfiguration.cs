@@ -15,7 +15,7 @@ public interface ITestSuiteReporterConfiguration
     ITestSuiteReportBuilder? ReportBuilder { get; set; }
     
     /// <summary>
-    /// Allows to setup custom logger for reporter; otherwise default console logger will be used.
+    /// Allows to set up custom logger for reporter; otherwise default console logger will be used.
     /// </summary>
     ILogger? Logger { get; set; }
     

@@ -10,7 +10,7 @@ public class ExpectExceptionTests
     public void ExpectException_CustomExceptionWithoutMessage_ShouldBeValid()
     {
         // Assign
-        Delegate operation = new Func<int, int, int>((int x, int y) =>
+        Delegate operation = new Func<int, int, int>((x, y) =>
         {
             if (x + y == 2)
                 throw new CustomException();
@@ -33,7 +33,7 @@ public class ExpectExceptionTests
     public void ExpectException_CustomExceptionWithoutStringCtorWithMessage_ShouldBeInvalid()
     {
         // Assign
-        Delegate operation = new Func<int, int, int>((int x, int y) =>
+        Delegate operation = new Func<int, int, int>((x, y) =>
         {
             if (x + y == 2)
                 throw new CustomException();
@@ -58,7 +58,7 @@ public class ExpectExceptionTests
     {
         // Assign
         var exceptionMessage = "Test";
-        Delegate operation = new Func<int, int, int>((int x, int y) =>
+        Delegate operation = new Func<int, int, int>((x, y) =>
         {
             if (x + y == 2)
                 throw new CustomWithMessageException(exceptionMessage);

@@ -167,7 +167,7 @@ public class ExpectTests
         var exceptionMessage = "Exception";
         var exception = new CustomWithMessageException(exceptionMessage);
         var builder = TestSuite.TestSuite.Sequential
-            .WithComparer<EquatableTestObject>((x, y) => throw exception)
+            .WithComparer<EquatableTestObject>((_, _) => throw exception)
             .UseOperation((EquatableTestObject a, EquatableTestObject b) => new EquatableTestObject(a.Value + b.Value));
         
         // Act

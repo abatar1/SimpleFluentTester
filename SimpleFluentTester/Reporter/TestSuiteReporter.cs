@@ -10,7 +10,7 @@ internal sealed class TestSuiteReporter(TestSuiteResult testRunResult) : ITestSu
 {
     public void Report(Action<ITestSuiteReporterConfiguration, TestSuiteResult>? configurationBuilder = null)
     {
-        var configuration = new TestSuiteReporterConfiguration();
+        ITestSuiteReporterConfiguration configuration = new TestSuiteReporterConfiguration();
         configurationBuilder?.Invoke(configuration, TestSuiteResult);
 
         var reportBuilder = configuration.ReportBuilder ?? new DefaultTestSuiteReportBuilder();

@@ -20,6 +20,7 @@ internal sealed class OperationValidator : BaseValidator<OperationValidatedObjec
         if (operation == null)
             return NonValid("Operation not specified");
         
+        // ReSharper disable once NullableWarningSuppressionIsUsed
         var returnParameterType = operation.Method.ReturnParameter!.ParameterType;
         
         if (returnParameterType == typeof(void))

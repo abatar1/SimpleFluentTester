@@ -14,7 +14,7 @@ public class BuilderContextValidatorExtensionsTests
         var subject = ValidationSubject.Operation;
         
         // Act
-        var validator = new CustomValidator(subject);
+        IValidator validator = new CustomValidator(subject);
 
         // Assert
         Assert.Equal(nameof(CustomValidator), validator.Key);
