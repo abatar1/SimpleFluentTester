@@ -22,7 +22,7 @@ jobs:
   sync-branch:
     runs-on: ubuntu-latest
     steps:
-      - name: Sync Branch
+      - name: Sync Prerelease Branch with Main
         uses: remarkablemark/sync-branch@v1
         with:
           base: prerelease
