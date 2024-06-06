@@ -9,6 +9,34 @@ namespace SimpleFluentTester.UnitTests.Tests.Reporter;
 public sealed class TestSuiteReporterConfigurationBuilderTests
 {
     [Fact]
+    public void Build_Default_AllShouldBeNotNull()
+    {
+        // Assign
+        var builder = new TestSuiteReporterConfigurationBuilder();
+        var container = TestSuiteFactory.CreateEmptyContextContainer();
+        var completedTestCase1 = TestCaseOperations.NotPassed.CompleteTestCase(container);
+        var completedTestCase2 = TestCaseOperations.Invalid.CompleteTestCase(container);
+        var completedTestCase3 = TestCaseOperations.NotPassedWithOperationException.CompleteTestCase(container);
+        var completedTestCase4 = TestCaseOperations.NotPassedWithComparerException.CompleteTestCase(container);
+        var completedTestCase5 = TestCaseOperations.Passed.CompleteTestCase(container);
+
+        // Act
+        var configuration = builder.Build();
+
+        // Assert
+        Assert.NotNull(configuration);
+        Assert.NotNull(configuration.ReportBuilder);
+        Assert.NotNull(configuration.LoggingBuilder);
+        Assert.NotNull(configuration.PrintablePredicate);
+        
+        Assert.True(configuration.PrintablePredicate.Invoke(completedTestCase1));
+        Assert.True(configuration.PrintablePredicate.Invoke(completedTestCase2));
+        Assert.True(configuration.PrintablePredicate.Invoke(completedTestCase3));
+        Assert.True(configuration.PrintablePredicate.Invoke(completedTestCase4));
+        Assert.False(configuration.PrintablePredicate.Invoke(completedTestCase5));
+    }
+    
+    [Fact]
     public void Build_WithReportBuilder_AllShouldBeNotNull()
     {
         // Assign
