@@ -6,18 +6,18 @@ using SimpleFluentTester.TestSuite.Case;
 
 namespace SimpleFluentTester.Examples;
 
-internal sealed class CustomTestSuiteReportBuilder(TestSuiteResult testRunResult) : ITestSuiteReportBuilder
+internal sealed class CustomTestSuiteReportBuilder : ITestSuiteReportBuilder
 {
-    public PrintableTestSuiteResult? TestSuiteResultToString(TestSuiteResult testSuiteResult, 
-        Func<CompletedTestCase, bool> shouldPrintPredicate)
+    public PrintableTestSuiteResult? TestSuiteResultToString(TestSuiteRunResult testSuiteRunResult, 
+        Func<CompletedTestCase, bool>? shouldPrintPredicate)
     {
-        if (!testSuiteResult.ShouldBeExecuted)
+        if (!testSuiteRunResult.ShouldBeExecuted)
             return null;
         var stringBuilder = new StringBuilder();
         stringBuilder.AppendLine("Custom console test reporter example");
-        stringBuilder.AppendLine($"Executing tests for target method [{testRunResult.Operation?.Method}]");
-        stringBuilder.AppendLine($"Total tests: {testRunResult.TestCases.Count}");
-        stringBuilder.AppendLine($"Passed tests: {testRunResult.TestCases.Count(x => x.Assert.Status == AssertStatus.Passed)}");
-        return new PrintableTestSuiteResult(LogLevel.Information, testSuiteResult.Number, stringBuilder.ToString());
+        stringBuilder.AppendLine($"Executing tests for target method [{testSuiteRunResult.Operation?.Method}]");
+        stringBuilder.AppendLine($"Total tests: {testSuiteRunResult.TestCases.Count}");
+        stringBuilder.AppendLine($"Passed tests: {testSuiteRunResult.TestCases.Count(x => x.Assert.Status == AssertStatus.Passed)}");
+        return new PrintableTestSuiteResult(LogLevel.Information, testSuiteRunResult.Number, stringBuilder.ToString());
     }
 }

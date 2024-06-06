@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Microsoft.Extensions.Logging;
@@ -10,29 +11,30 @@ namespace SimpleFluentTester.Reporter;
 internal sealed class DefaultTestSuiteReportBuilder : ITestSuiteReportBuilder
 {
     public PrintableTestSuiteResult? TestSuiteResultToString(
-        TestSuiteResult testSuiteResult,
-        Func<CompletedTestCase, bool> shouldPrintPredicate)
+        TestSuiteRunResult testSuiteRunResult,
+        Func<CompletedTestCase, bool>? shouldPrintPredicate)
     {
-        if (!testSuiteResult.ShouldBeExecuted)
+        if (!testSuiteRunResult.ShouldBeExecuted)
             return null;
 
-        if (!testSuiteResult.TestCases.Any())
-            return new PrintableTestSuiteResult(LogLevel.Error, testSuiteResult.Number, "No test cases were added");
+        if (!testSuiteRunResult.TestCases.Any())
+            return new PrintableTestSuiteResult(LogLevel.Error, testSuiteRunResult.Number, "No test cases were added");
         
         var stringBuilder = new StringBuilder();
 
-        stringBuilder.AppendLine(testSuiteResult.ToHeaderString());
+        stringBuilder.AppendLine(testSuiteRunResult.ToHeaderString());
 
-        var printableTestCases = testSuiteResult.TestCases
-            .Where(shouldPrintPredicate)
-            .ToList();
+        IEnumerable<CompletedTestCase> testCaseEnumerable = testSuiteRunResult.TestCases;
+        if (shouldPrintPredicate != null)
+            testCaseEnumerable = testCaseEnumerable.Where(shouldPrintPredicate);
+        var printableTestCases = testCaseEnumerable.ToList();
 
         foreach (var printableTestCase in printableTestCases)
             stringBuilder.AppendLine(printableTestCase.ToFormattedString());
 
-        stringBuilder.AppendLine(testSuiteResult.ToFooterString());
+        stringBuilder.AppendLine(testSuiteRunResult.ToFooterString());
 
-        var logLevel = testSuiteResult.DetermineLogLevel();
-        return new PrintableTestSuiteResult(logLevel, testSuiteResult.Number, stringBuilder.ToString());
+        var logLevel = testSuiteRunResult.DetermineLogLevel();
+        return new PrintableTestSuiteResult(logLevel, testSuiteRunResult.Number, stringBuilder.ToString());
     }
 }

@@ -1,31 +1,28 @@
 using System;
-using System.Collections.Generic;
 using SimpleFluentTester.TestSuite.Case;
 using SimpleFluentTester.TestSuite.ComparedObject;
 using SimpleFluentTester.Validators.Core;
 
 namespace SimpleFluentTester.Validators;
 
-internal sealed class OperationValidator : BaseValidator<OperationValidatedObject>
+internal sealed class OperationValidator : BaseValidator<OperationValidationContext, TestCase>
 {
-    public override ISet<Type> AllowedTypes => new HashSet<Type>([ValidatedTypes.TestCase]);
+    public override Type AllowedType => ValidatedTypes.TestCase;
+    
     public override ValidationSubject Subject => ValidationSubject.Operation;
 
-    public override ValidationResult Validate(
-        IValidated validated, 
-        IValidatedObject validatedObject)
+    protected override ValidationResult ValidateCore(
+        TestCase testCase, 
+        OperationValidationContext validationContext)
     {
-        var operation = CastValidatedObject(validatedObject).Operation;
-        
-        if (operation == null)
+        if ( validationContext.Operation == null)
             return NonValid("Operation not specified");
         
-        var returnParameterType = operation.Method.ReturnParameter!.ParameterType;
+        var returnParameterType =  validationContext.Operation.Method.ReturnParameter?.ParameterType;
         
-        if (returnParameterType == typeof(void))
+        if (returnParameterType == typeof(void) || returnParameterType == null)
             return NonValid("Operation must have return type to be testable");
         
-        var testCase = CastValidated<TestCase>(validated);
         if (testCase.Expected.Variety == ComparedObjectVariety.Exception)
             return Ok();
         
@@ -47,7 +44,7 @@ internal sealed class OperationValidator : BaseValidator<OperationValidatedObjec
     }
 }
 
-public sealed class OperationValidatedObject(Delegate? operation) : IValidatedObject
+public sealed class OperationValidationContext(Delegate? operation) : IValidationContext
 {
     public Delegate? Operation { get; } = operation;
 }

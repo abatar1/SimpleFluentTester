@@ -15,12 +15,12 @@ public interface ITestSuiteReporterConfiguration
     ITestSuiteReportBuilder? ReportBuilder { get; set; }
     
     /// <summary>
-    /// Allows to setup custom logger for reporter; otherwise default console logger will be used.
+    /// Allows to set up custom logging builder for reporter; otherwise default console logger will be used.
     /// </summary>
-    ILogger? Logger { get; set; }
+    Action<ILoggingBuilder>? LoggingBuilder { get; set; }
     
     /// <summary>
     /// Allows to specify predicate that defines should test case be printed or not; by default only failed test cases will be printed.
     /// </summary>
-    Func<CompletedTestCase, bool>? ShouldPrintPredicate { get; set; }
+    Func<CompletedTestCase, bool>? PrintablePredicate { get; set; }
 }

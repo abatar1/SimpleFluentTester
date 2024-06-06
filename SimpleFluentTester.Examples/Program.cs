@@ -1,11 +1,12 @@
-﻿using SimpleFluentTester.Examples;
+﻿using Microsoft.Extensions.Logging;
+using SimpleFluentTester.Examples;
 using SimpleFluentTester.TestSuite;
 using SimpleFluentTester.TestSuite.Case;
 
 // 1 Example.
 // Setup test suite with default reporter (default output format).
 // Then add few test cases, run them and print report.
-TestSuite.Sequential
+TestSuite.Sequential.Ignore
     .WithDisplayName("First example")
     .UseOperation(CustomMethods.Adder)  
     .Expect(2).WithInput(1, 1) // Number and type of input parameters should be the same as delegate's parameters, otherwise exception will be thrown.
@@ -16,22 +17,24 @@ TestSuite.Sequential
 // 2 Example.
 // Setup test suite with custom reporter CustomReporterFactory.
 // Then add few test cases, run them and print report.
-TestSuite.Sequential
+TestSuite.Sequential.Ignore
     .WithDisplayName("Second example")
     .UseOperation(CustomMethods.Adder) 
     .Expect(2).WithInput(1, 1)
     .Expect(-3).WithInput(-1, -1)
     .Run()
-    .Report((config, result) =>
+    .Report((builder, _) =>
     {
-        config.ReportBuilder = new CustomTestSuiteReportBuilder(result);
-        config.ShouldPrintPredicate = testCase => testCase.Assert.Status == AssertStatus.NotPassed;
+        builder
+            .WithReportBuilder(() => new CustomTestSuiteReportBuilder())
+            .WithPrintablePredicate(testCase => testCase.Assert.Status == AssertStatus.NotPassed)
+            .WithLoggingBuilder(x => x.AddSimpleConsole());
     });
     
 // 3 Example.
 // This example shows that UseOperation could be skipped.
 // Instead, TestSuiteDelegateAttribute could be used on target method.
-TestSuite.Sequential
+TestSuite.Sequential.Ignore
     .WithDisplayName("Third example")
     .Expect(2).WithInput(1, 1)
     .Expect(-3).WithInput(-1, -1)
@@ -41,7 +44,7 @@ TestSuite.Sequential
 // 4 Example.
 // This example demonstrates how custom types can be used with the TestSuite.
 // To achieve this, define a comparer function using WithExpectedReturnType().
-TestSuite.Sequential
+TestSuite.Sequential.Ignore
     .WithDisplayName("Fourth example")
     .UseOperation(CustomMethods.CustomAdder) 
     .Expect(CustomValue.FromInt(2)).WithInput(CustomValue.FromInt(1), CustomValue.FromInt(1))
@@ -55,7 +58,9 @@ TestSuite.Sequential
 TestSuite.Sequential
     .WithDisplayName("Fifth example")
     .UseOperation(CustomMethods.Adder) 
+    .WithComparer<int>((x, y) => x == y)
     .Expect(null).WithInput(1, 1)
+    .Expect("test").WithInput(1, 1)
     .Expect(-3).WithInput(-1, -1, -1)
     .Expect("-3").WithInput("test", -1)
     .Run()

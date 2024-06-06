@@ -15,14 +15,22 @@ public static class ComparedObjectExtensions
         Assert.Equal(comparedObject.Value.ToString(), comparedObject.ToString());
     }
     
-    public static void AssertException<TException>(this IComparedObject comparedObject, TException exception)
+    public static void AssertException<TException>(this IComparedObject comparedObject, TException expectedException)
         where TException : Exception
     {
+        if (comparedObject is not ExceptionObject exceptionObject)
+        {
+            Assert.Fail($"Expected exception result, actual result was {comparedObject.Value}");
+            return;
+        }
+
+        var actualException = (Exception) exceptionObject.Value;
+            
         Assert.NotNull(comparedObject);
-        Assert.NotNull(comparedObject.Value);
+        Assert.NotNull(actualException);
         Assert.NotNull(comparedObject.Type);
         Assert.Equal(ComparedObjectVariety.Exception, comparedObject.Variety);
-        Assert.Equal(exception, comparedObject.Value);
+        Assert.Equal(expectedException.Message, actualException.Message);
         Assert.Equal(typeof(TException), comparedObject.Type);
         Assert.Equal($"Exception {comparedObject.Type}", comparedObject.ToString());
     }

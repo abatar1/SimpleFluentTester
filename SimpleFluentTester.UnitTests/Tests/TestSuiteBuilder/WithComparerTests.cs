@@ -20,7 +20,7 @@ public class WithComparerTests
 
         // Assert
         var message = $"{typeof(NotEquatableTestObject).FullName} type should be assignable from {typeof(IEquatable<>).Name} or comparer should be defined";
-        reporter.TestSuiteResult.Validation.AssertInvalid(ValidationSubject.Comparer, message);
+        reporter.AssertInvalid(ValidationSubject.Comparer, message);
     }
     
     [Fact]
@@ -37,7 +37,7 @@ public class WithComparerTests
 
         // Assert
         var message = "Test case type was System.String, but comparer type is System.Int32";
-        reporter.TestSuiteResult.Validation.AssertInvalid(ValidationSubject.Comparer, message);
+        reporter.AssertInvalid(ValidationSubject.Comparer, message);
     }
     
     [Fact]
@@ -54,7 +54,7 @@ public class WithComparerTests
             .Run();
 
         // Assert
-        reporter.TestSuiteResult.Validation.AssertValid();
+        reporter.AssertValid();
     }
     
     [Fact]
@@ -72,6 +72,6 @@ public class WithComparerTests
 
         // Assert
         var message = "Test case type was System.Int32, but comparer type is System.String";
-        reporter.TestSuiteResult.Validation.AssertInvalid(ValidationSubject.Comparer, message);
+        reporter.AssertInvalid(ValidationSubject.Comparer, message);
     }
 }

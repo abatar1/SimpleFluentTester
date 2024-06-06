@@ -4,18 +4,22 @@ using SimpleFluentTester.TestSuite.Case;
 using SimpleFluentTester.TestSuite.ComparedObject;
 using SimpleFluentTester.TestSuite.Context;
 using SimpleFluentTester.UnitTests.Extensions;
-using SimpleFluentTester.UnitTests.TestObjects;
 using SimpleFluentTester.Validators.Core;
 
 namespace SimpleFluentTester.UnitTests.Helpers;
 
 public static class TestSuiteFactory
 {
-    private static readonly ComparedObjectFactory ComparedObjectFactory = new();
-
-    public static TestCase CreateTestCase(object?[] inputs, object? expected)
+    public static TestCase CreateAndAddTestCase(ITestSuiteContextContainer container, object?[] inputs, object? expected)
     {
-        return new TestCase(ComparedObjectFactory.WrapMany(inputs), ComparedObjectFactory.Wrap(expected), 1);
+        var testCase = new TestCase(
+            () => container.Context.Operation,
+            () => container.Context.Comparer,
+            ComparedObjectFactory.WrapMany(inputs), 
+            ComparedObjectFactory.Wrap(expected), 
+            1);
+        container.Context.TestCases.Add(testCase);
+        return testCase;
     }
 
     public static ITestSuiteContextContainer CreateEmptyContextContainer(
@@ -40,9 +44,9 @@ public static class TestSuiteFactory
         return new TestSuiteContextContainer(context);
     }
 
-    public static TestSuiteResult CreateTestSuiteResult(
+    public static TestSuiteRunResult CreateTestSuiteRunResult(
         ValidationResult? validationResult = null,
-        TestCaseOperation? testCaseOperation = null,
+        TestCase? testCase = null,
         int testCaseToRun = 1,
         bool shouldBeExecuted = true,
         int testCaseNumber = 1)
@@ -53,15 +57,15 @@ public static class TestSuiteFactory
             contextContainer.Context.AddValidation(validationResult);
 
         var completedTestCases = new List<CompletedTestCase>();
-        if (testCaseOperation != null)
+        if (testCase != null)
         {
-            var completedTestCase = contextContainer.CompleteTestCase(testCaseOperation, testCaseToRun);
+            var completedTestCase = testCase.CompleteTestCase(contextContainer, testCaseToRun);
             completedTestCases.Add(completedTestCase);
         }
 
-        return new TestSuiteResult(
+        return new TestSuiteRunResult(
             completedTestCases,
-            new ValidationUnpacker().Unpack(contextContainer.Context),
+            ValidationPipe.ValidatePacked(contextContainer.Context),
             contextContainer.Context.Operation,
             contextContainer.Context.Name,
             contextContainer.Context.Number,

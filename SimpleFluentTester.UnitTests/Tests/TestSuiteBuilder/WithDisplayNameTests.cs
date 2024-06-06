@@ -17,6 +17,6 @@ public class WithDisplayNameTests
         var reporter = builder.Run();
         
         // Assert
-        Assert.Equal(displayName, reporter.TestSuiteResult.DisplayName);
+        Assert.Equal(displayName, reporter.TestSuiteRunResult.DisplayName);
     }
 }

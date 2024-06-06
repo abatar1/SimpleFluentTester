@@ -11,7 +11,7 @@ namespace SimpleFluentTester.Reporter;
 
 public static class TestSuiteReportDefaults
 {
-    public static LogLevel DetermineLogLevel(this TestSuiteResult testSuiteResult)
+    public static LogLevel DetermineLogLevel(this TestSuiteRunResult testSuiteResult)
     {
         var contextNotValid = !testSuiteResult.Validation.IsValid;
         var someTestCasesNotPassed = testSuiteResult.TestCases
@@ -24,7 +24,7 @@ public static class TestSuiteReportDefaults
         return LogLevel.Information;
     }
     
-    public static string ToHeaderString(this TestSuiteResult testSuiteResult)
+    public static string ToHeaderString(this TestSuiteRunResult testSuiteResult)
     {
         var stringBuilder = new StringBuilder();
         stringBuilder.AppendLine($"Executing tests for target method [{testSuiteResult.Operation?.Method}]");
@@ -43,7 +43,7 @@ public static class TestSuiteReportDefaults
         return stringBuilder.ToString();
     }
     
-    public static string ToFooterString(this TestSuiteResult testSuiteResult)
+    public static string ToFooterString(this TestSuiteRunResult testSuiteResult)
     {
         var stringBuilder = new StringBuilder();
         stringBuilder.AppendLine();

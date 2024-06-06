@@ -6,7 +6,7 @@ using SimpleFluentTester.Validators.Core;
 
 namespace SimpleFluentTester.TestSuite.Context;
 
-public interface ITestSuiteContext : IValidated
+public interface ITestSuiteContext : IValidatedObject
 {
     int Number { get; }
     

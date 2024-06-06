@@ -4,9 +4,12 @@ using SimpleFluentTester.TestSuite.Case;
 
 namespace SimpleFluentTester.Reporter;
 
+/// <summary>
+/// Converts <see cref="TestSuiteRunResult"/> to printable formatted string.
+/// </summary>
 public interface ITestSuiteReportBuilder
 {
     PrintableTestSuiteResult? TestSuiteResultToString(
-        TestSuiteResult testSuiteResult,
-        Func<CompletedTestCase, bool> shouldPrintPredicate);
+        TestSuiteRunResult testSuiteRunResult,
+        Func<CompletedTestCase, bool>? shouldPrintPredicate);
 }

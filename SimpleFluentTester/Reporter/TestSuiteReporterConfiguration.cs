@@ -9,10 +9,10 @@ internal sealed class TestSuiteReporterConfiguration : ITestSuiteReporterConfigu
 {
     /// <inheritdoc cref="ITestSuiteReporterConfiguration.ReportBuilder"/>
     public ITestSuiteReportBuilder? ReportBuilder { get; set; }
-    
-    /// <inheritdoc cref="ITestSuiteReporterConfiguration.Logger"/>
-    public ILogger? Logger { get; set; }
-    
-    /// <inheritdoc cref="ITestSuiteReporterConfiguration.ShouldPrintPredicate"/>
-    public Func<CompletedTestCase, bool>? ShouldPrintPredicate { get; set; }
+
+    /// <inheritdoc cref="ITestSuiteReporterConfiguration.LoggingBuilder"/>
+    public Action<ILoggingBuilder>? LoggingBuilder { get; set; }
+
+    /// <inheritdoc cref="ITestSuiteReporterConfiguration.PrintablePredicate"/>
+    public Func<CompletedTestCase, bool>? PrintablePredicate { get; set; }
 }

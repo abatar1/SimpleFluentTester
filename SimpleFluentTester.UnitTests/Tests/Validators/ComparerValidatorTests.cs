@@ -13,10 +13,10 @@ public sealed class ComparerValidatorTests
     {
         // Assign
         var validator = new ComparerValidator();
-        var customValidated = new CustomValidated(new Dictionary<ValidationSubject, IList<Func<ValidationResult>>>());
+        var customValidated = new CustomValidatedObject(new Dictionary<ValidationSubject, IList<Func<ValidationResult>>>());
         
         // Act
-        var func = () => validator.Validate(customValidated, new EmptyValidatedObject());
+        var func = () => validator.Validate(customValidated, new EmptyValidationContext());
 
         // Assert
         Assert.Throws<ValidationUnexpectedException>(func);
@@ -30,7 +30,7 @@ public sealed class ComparerValidatorTests
         var container = TestSuiteFactory.CreateEmptyContextContainer();
         
         // Act
-        var validationResult = validator.Validate(container.Context, new EmptyValidatedObject());
+        var validationResult = validator.Validate(container.Context, new EmptyValidationContext());
 
         // Assert
         validationResult.AssertValid();
@@ -43,17 +43,15 @@ public sealed class ComparerValidatorTests
         var validator = new ComparerValidator();
         var container = TestSuiteFactory.CreateEmptyContextContainer();
 
-        var testCase1 = TestSuiteFactory.CreateTestCase([1], "test");
-        container.Context.TestCases.Add(testCase1);
+        TestSuiteFactory.CreateAndAddTestCase(container, [1], "test");
         
-        var testCase2 = TestSuiteFactory.CreateTestCase([1], 13);
-        container.Context.TestCases.Add(testCase2);
+        TestSuiteFactory.CreateAndAddTestCase(container, [1], 13);
         
         // Act
-        var validationResult = validator.Validate(container.Context, new EmptyValidatedObject());
+        var validationResult = validator.Validate(container.Context, new EmptyValidationContext());
 
         // Assert
-        validationResult.AssertInvalid(ValidationSubject.Comparer, "Expected types more than one in TestCase collection");
+        validationResult.AssertInvalid(ValidationSubject.Comparer, "TestCase expected object types are more than one in TestSuite collection");
     }
     
     [Fact]
@@ -63,11 +61,10 @@ public sealed class ComparerValidatorTests
         var validator = new ComparerValidator();
         var container = TestSuiteFactory.CreateEmptyContextContainer();
         
-        var testCase = TestSuiteFactory.CreateTestCase([1], new EquatableTestObject(1));
-        container.Context.TestCases.Add(testCase);
+        TestSuiteFactory.CreateAndAddTestCase(container, [1], new EquatableTestObject(1));
         
         // Act
-        var validationResult = validator.Validate(container.Context, new EmptyValidatedObject());
+        var validationResult = validator.Validate(container.Context, new EmptyValidationContext());
 
         // Assert
         validationResult.AssertValid();
@@ -80,11 +77,10 @@ public sealed class ComparerValidatorTests
         var validator = new ComparerValidator();
         var container = TestSuiteFactory.CreateEmptyContextContainer();
         
-        var testCase = TestSuiteFactory.CreateTestCase([1], new NotEquatableTestObject(1));
-        container.Context.TestCases.Add(testCase);
+        TestSuiteFactory.CreateAndAddTestCase(container, [1], new NotEquatableTestObject(1));
         
         // Act
-        var validationResult = validator.Validate(container.Context, new EmptyValidatedObject());
+        var validationResult = validator.Validate(container.Context, new EmptyValidationContext());
 
         // Assert
         validationResult.AssertInvalid(ValidationSubject.Comparer, $"{typeof(NotEquatableTestObject).FullName} type should be assignable from IEquatable`1 or comparer should be defined");
@@ -97,13 +93,12 @@ public sealed class ComparerValidatorTests
         var validator = new ComparerValidator();
         var container = TestSuiteFactory.CreateEmptyContextContainer();
 
-        var testCase = TestSuiteFactory.CreateTestCase([1], 1);
-        container.Context.TestCases.Add(testCase);
+        TestSuiteFactory.CreateAndAddTestCase(container, [1], 1);
 
         container.WithComparer((int x, int y) => x == y);
 
         // Act
-        var validationResult = validator.Validate(container.Context, new EmptyValidatedObject());
+        var validationResult = validator.Validate(container.Context, new EmptyValidationContext());
 
         // Assert
         validationResult.AssertValid();
@@ -116,13 +111,12 @@ public sealed class ComparerValidatorTests
         var validator = new ComparerValidator();
         var container = TestSuiteFactory.CreateEmptyContextContainer();
 
-        var testCase = TestSuiteFactory.CreateTestCase([1], 1);
-        container.Context.TestCases.Add(testCase);
+        TestSuiteFactory.CreateAndAddTestCase(container, [1], 1);
 
         container.WithComparer((int x, int y) => x + y);
 
         // Act
-        var validationResult = validator.Validate(container.Context, new EmptyValidatedObject());
+        var validationResult = validator.Validate(container.Context, new EmptyValidationContext());
 
         // Assert
         validationResult.AssertInvalid(ValidationSubject.Comparer, "Return type of the custom comparer is not bool but System.Int32, something went wrong during initialization");
@@ -135,13 +129,12 @@ public sealed class ComparerValidatorTests
         var validator = new ComparerValidator();
         var container = TestSuiteFactory.CreateEmptyContextContainer();
 
-        var testCase = TestSuiteFactory.CreateTestCase([1], 1);
-        container.Context.TestCases.Add(testCase);
+        TestSuiteFactory.CreateAndAddTestCase(container, [1], 1);
 
         container.WithComparer((int _, int _, int _) => true);
 
         // Act
-        var validationResult = validator.Validate(container.Context, new EmptyValidatedObject());
+        var validationResult = validator.Validate(container.Context, new EmptyValidationContext());
 
         // Assert
         validationResult.AssertInvalid(ValidationSubject.Comparer, "Custom comparer has 3 parameters, but should has 2, something went wrong during initialization");
@@ -154,13 +147,12 @@ public sealed class ComparerValidatorTests
         var validator = new ComparerValidator();
         var container = TestSuiteFactory.CreateEmptyContextContainer();
 
-        var testCase = TestSuiteFactory.CreateTestCase([1], 1);
-        container.Context.TestCases.Add(testCase);
+        TestSuiteFactory.CreateAndAddTestCase(container, [1], 1);
 
         container.WithComparer((int _, string _) => true);
 
         // Act
-        var validationResult = validator.Validate(container.Context, new EmptyValidatedObject());
+        var validationResult = validator.Validate(container.Context, new EmptyValidationContext());
 
         // Assert
         validationResult.AssertInvalid(ValidationSubject.Comparer, "Comparer has not the same input parameter type, something went wrong during initialization");
@@ -173,13 +165,12 @@ public sealed class ComparerValidatorTests
         var validator = new ComparerValidator();
         var container = TestSuiteFactory.CreateEmptyContextContainer();
 
-        var testCase = TestSuiteFactory.CreateTestCase([1], new NotEquatableTestObject(1));
-        container.Context.TestCases.Add(testCase);
+        TestSuiteFactory.CreateAndAddTestCase(container, [1], new NotEquatableTestObject(1));
 
         container.WithComparer((int x, int y) => x == y);
 
         // Act
-        var validationResult = validator.Validate(container.Context, new EmptyValidatedObject());
+        var validationResult = validator.Validate(container.Context, new EmptyValidationContext());
 
         // Assert
         validationResult.AssertInvalid(ValidationSubject.Comparer, $"Test case type was {typeof(NotEquatableTestObject).FullName}, but comparer type is System.Int32");

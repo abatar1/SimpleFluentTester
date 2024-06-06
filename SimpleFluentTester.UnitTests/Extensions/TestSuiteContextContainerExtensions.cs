@@ -1,7 +1,5 @@
 using SimpleFluentTester.TestSuite.Case;
-using SimpleFluentTester.TestSuite.ComparedObject;
 using SimpleFluentTester.TestSuite.Context;
-using SimpleFluentTester.UnitTests.TestObjects;
 using SimpleFluentTester.Validators;
 using SimpleFluentTester.Validators.Core;
 
@@ -10,16 +8,18 @@ namespace SimpleFluentTester.UnitTests.Extensions;
 public static class TestSuiteContextContainerExtensions
 {
     public static CompletedTestCase CompleteTestCase(
-        this ITestSuiteContextContainer contextContainer,
-        TestCaseOperation testCaseOperation,
+        this TestCase testCase,
+        ITestSuiteContextContainer contextContainer,
         params int[] testCasesToRun)
     {
-        contextContainer.WithOperation(testCaseOperation.Operation);
+        var operation = testCase.OperationFactory.Invoke();
+        if (operation == null)
+            throw new InvalidOperationException("Operation should be specified before completing test case. This is a unit test exception, ensure that test written correctly.");
+        contextContainer.WithOperation(operation);
         var testCasesHash = new HashSet<int>(testCasesToRun);
-        var testCasePipeline = new TestCasePipeline(contextContainer.Context, new ComparedObjectFactory(), new ValidationUnpacker(), testCasesHash);
-        var testCase = testCaseOperation.TestCase;
-        testCase.RegisterValidation<OperationValidator>(() => new OperationValidatedObject(contextContainer.Context.Operation));
-        testCase.RegisterValidation<InputsValidator>(() => new InputsValidatedObject(contextContainer.Context.Operation));
+        var testCasePipeline = new TestCasePipeline(testCasesHash);
+        testCase.RegisterValidation<OperationValidator>(() => new OperationValidationContext(contextContainer.Context.Operation));
+        testCase.RegisterValidation<InputsValidator>(() => new InputsValidationContext(contextContainer.Context.Operation));
         return testCasePipeline.ToCompleted(testCase);
     }
 }

@@ -84,14 +84,15 @@ should be printed or define your own logger:
 ```csharp
 TestSuite.Sequential
     .UseOperation(Adder)
-    .Expect(2).WithInput(1, 1) 
+    .Expect(2).WithInput(1, 1)
     .Run()
-    .Report((config, testResult) =>
+    .Report((builder, testSuiteRunResult) =>
     {
-        config.ReportBuilder = new CustomTestSuiteReportBuilder(result);
-        config.ShouldPrintPredicate = testCase => testCase.Assert.Status == AssertStatus.NotPassed;
-        config.Logger = NullLogger.Instance;
-    };
+        builder
+            .WithReportBuilder(() => new CustomTestSuiteReportBuilder())
+            .WithPrintablePredicate(testCase => testCase.Assert.Status == AssertStatus.NotPassed)
+            .WithLoggingBuilder(x => x.AddSimpleConsole());
+    });
 ```
 
 If your project contains multiple test suites simultaneously, and you wish to debug only one of them, 

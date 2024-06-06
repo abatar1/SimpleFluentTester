@@ -25,7 +25,7 @@ public class RunTests
         
         // Assert
         var message = "Invalid test case numbers were given as input";
-        reporter1.TestSuiteResult.Validation.AssertInvalid(ValidationSubject.TestNumbers, message);
-        reporter2.TestSuiteResult.Validation.AssertInvalid(ValidationSubject.TestNumbers, message);
+        reporter1.AssertInvalid(ValidationSubject.TestNumbers, message);
+        reporter2.AssertInvalid(ValidationSubject.TestNumbers, message);
     }
 }

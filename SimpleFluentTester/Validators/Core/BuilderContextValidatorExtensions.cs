@@ -5,16 +5,16 @@ namespace SimpleFluentTester.Validators.Core;
 
 internal static class BuilderContextValidatorExtensions
 {
-    public static IValidated AddValidation(
-        this IValidated validated,
+    public static IValidatedObject AddValidation(
+        this IValidatedObject validated,
         ValidationResult validationResult)
     {
         return AddValidation(validated, validationResult.Subject, () => validationResult);
     }
 
-    public static IValidated RegisterValidation<TValidator>(
-        this IValidated validated,
-        Func<IValidatedObject>? validatedObjectFactory = null)
+    public static IValidatedObject RegisterValidation<TValidator>(
+        this IValidatedObject validated,
+        Func<IValidationContext>? validationContextFactory = null)
         where TValidator : IValidator
     {
         IValidator validator;
@@ -29,26 +29,26 @@ internal static class BuilderContextValidatorExtensions
         }
 
         var validatedType = validated.GetType();
-        if (!validator.AllowedTypes.Contains(validatedType))
+        if (validator.AllowedType != validatedType)
         {
             var message =
-                $"Could not register validator {validator.GetType()} for this {nameof(IValidated)} type {validatedType}, it is not allowed";
+                $"Could not register validator {validator.GetType()} for this {nameof(IValidatedObject)} type {validatedType}, it is not allowed";
             throw new InvalidOperationException(message);
         }
 
-        AddValidation(validated, validator.Subject, () => RunValidation(validator, validated, validatedObjectFactory));
+        AddValidation(validated, validator.Subject, () => RunValidation(validator, validated, validationContextFactory));
         return validated;
     }
 
     private static ValidationResult RunValidation(
         IValidator validator, 
-        IValidated validated, 
-        Func<IValidatedObject>? validatedObjectFactory)
+        IValidatedObject validated, 
+        Func<IValidationContext>? validationContextFactory = null)
     {
         try
         {
-            var validatedObject = validatedObjectFactory?.Invoke() ?? new EmptyValidatedObject();
-            return validator.Validate(validated, validatedObject);
+            var validationContext = validationContextFactory?.Invoke() ?? new EmptyValidationContext();
+            return validator.Validate(validated, validationContext);
         }
         catch (Exception e)
         {
@@ -57,8 +57,8 @@ internal static class BuilderContextValidatorExtensions
         }
     }
     
-    private static IValidated AddValidation(
-        IValidated validated,
+    private static IValidatedObject AddValidation(
+        IValidatedObject validated,
         ValidationSubject subject,
         Func<ValidationResult> validationFactory)
     {
