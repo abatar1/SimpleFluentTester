@@ -1,25 +1,32 @@
 using System;
 using System.Reflection;
 using SimpleFluentTester.TestSuite.ComparedObject;
-using SimpleFluentTester.TestSuite.Context;
+using SimpleFluentTester.Validators.Core;
 
 namespace SimpleFluentTester.TestSuite.Case;
 
-internal sealed class TestCaseAffirmer(ITestSuiteContext context)
+internal sealed class TestCaseAsserter
 {
+    /// <summary>
+    /// Asserts given <see cref="TestCase"/> which means compares expected result with an actual result.
+    /// </summary>
     public AssertResult Assert(TestCase testCase, IComparedObject output)
     {
+        var comparer = testCase.ComparerFactory.Invoke();
+        
         try
         {
-            var assertStatus = AssertInternal(output, testCase.Expected, context.Comparer);
+            var assertStatus = AssertInternal(output, testCase.Expected, comparer);
             return new AssertResult(output, assertStatus);
         }
         catch (TargetInvocationException e)
         {
+            testCase.AddValidation(ValidationResult.NonValid(ValidationSubject.Comparer, "Comparer execution failed with an exception."));
             return new AssertResult(output, AssertStatus.Failed, e.InnerException, e.InnerException?.Message);
         }
         catch (Exception e)
         {
+            testCase.AddValidation(ValidationResult.NonValid(ValidationSubject.Comparer, $"Comparer execution failed with an exception [{e.Message}]."));
             return new AssertResult(output, AssertStatus.Failed, e, e.Message);
         }
     }

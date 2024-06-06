@@ -9,10 +9,9 @@ public sealed class ComparedObjectFactoryTests
     public void Wrap_NullObject_ShouldBeValid()
     {
         // Assign
-        var comparedObjectFactory = new ComparedObjectFactory();
-
+        
         // Act
-        var comparedObject = comparedObjectFactory.Wrap(null);
+        var comparedObject = ComparedObjectFactory.Wrap(null);
 
         // Assert
         comparedObject.AssertNull();
@@ -22,11 +21,10 @@ public sealed class ComparedObjectFactoryTests
     public void Wrap_Value_ShouldBeValid()
     {
         // Assign
-        var comparedObjectFactory = new ComparedObjectFactory();
 
         // Act
         var obj = 1;
-        var comparedObject = comparedObjectFactory.Wrap(obj);
+        var comparedObject = ComparedObjectFactory.Wrap(obj);
 
         // Assert
         comparedObject.AssertValue(obj);
@@ -36,11 +34,10 @@ public sealed class ComparedObjectFactoryTests
     public void Wrap_Exception_ShouldBeValid()
     {
         // Assign
-        var comparedObjectFactory = new ComparedObjectFactory();
 
         // Act
         var obj = new Exception();
-        var comparedObject = comparedObjectFactory.Wrap(obj);
+        var comparedObject = ComparedObjectFactory.Wrap(obj);
 
         // Assert
         comparedObject.AssertException(obj);

@@ -1,7 +1,5 @@
 using System.Diagnostics;
-using Moq;
 using SimpleFluentTester.TestSuite.Case;
-using SimpleFluentTester.TestSuite.ComparedObject;
 using SimpleFluentTester.UnitTests.Extensions;
 using SimpleFluentTester.UnitTests.Helpers;
 using SimpleFluentTester.UnitTests.TestObjects;
@@ -18,23 +16,16 @@ public sealed class TestCaseExecutorTests
         var input = new[] { 1, 2 }.Cast<object?>().ToArray();
         
         var container = TestSuiteFactory.CreateEmptyContextContainer(operation: (int x, int y) => x + y);
-        
-        var comparedObjectFactory = new ComparedObjectFactory();
-        var comparedObjectFactoryMock = new Mock<IComparedObjectFactory>();
-        comparedObjectFactoryMock
-            .Setup(x => x.Wrap(It.Is<int>(y => y == expectedResult)))
-            .Returns(comparedObjectFactory.Wrap(expectedResult));
-        var testCaseExecutor = new TestCaseExecutor(container.Context, comparedObjectFactoryMock.Object);
 
-        var testCase = TestSuiteFactory.CreateTestCase(input, expectedResult);
+        var testCaseExecutor = new TestCaseExecutor();
+        
+        var testCase = TestSuiteFactory.CreateAndAddTestCase(container, input, expectedResult);
         var sw = new Stopwatch();
         
         // Act
         var result = testCaseExecutor.Execute(testCase, sw);
 
         // Assert
-        comparedObjectFactoryMock
-            .Verify(x => x.Wrap(It.Is<int>(y => y == expectedResult)), Times.Once);
         Assert.Empty(testCase.Validations);
         result.AssertValue(expectedResult);
     }
@@ -49,22 +40,15 @@ public sealed class TestCaseExecutorTests
             throw exception;
         });
         
-        var comparedObjectFactory = new ComparedObjectFactory();
-        var comparedObjectFactoryMock = new Mock<IComparedObjectFactory>();
-        comparedObjectFactoryMock
-            .Setup(x => x.Wrap(It.Is<CustomWithMessageException>(y => y == exception)))
-            .Returns(comparedObjectFactory.Wrap(exception));
-        var testCaseExecutor = new TestCaseExecutor(container.Context, comparedObjectFactoryMock.Object);
+        var testCaseExecutor = new TestCaseExecutor();
 
-        var testCase = TestSuiteFactory.CreateTestCase([1, 2], 3);
+        var testCase = TestSuiteFactory.CreateAndAddTestCase(container, [1, 2], 3);
         var sw = new Stopwatch();
         
         // Act
         var result = testCaseExecutor.Execute(testCase, sw);
 
         // Assert
-        comparedObjectFactoryMock
-            .Verify(x => x.Wrap(It.Is<CustomWithMessageException>(y => y == exception)), Times.Once);
         Assert.Empty(testCase.Validations);
         result.AssertException(exception);
     }
@@ -78,24 +62,17 @@ public sealed class TestCaseExecutorTests
         
         var container = TestSuiteFactory.CreateEmptyContextContainer(operation: (int x, int y) => x + y);
         
-        var comparedObjectFactory = new ComparedObjectFactory();
-        var comparedObjectFactoryMock = new Mock<IComparedObjectFactory>();
-        comparedObjectFactoryMock
-            .Setup(x => x.Wrap(It.IsAny<Exception>()))
-            .Returns(comparedObjectFactory.Wrap(exception));
-        var testCaseExecutor = new TestCaseExecutor(container.Context, comparedObjectFactoryMock.Object);
+        var testCaseExecutor = new TestCaseExecutor();
 
-        var testCase = TestSuiteFactory.CreateTestCase(input, 6);
+        var testCase = TestSuiteFactory.CreateAndAddTestCase(container, input, 6);
         var sw = new Stopwatch();
         
         // Act
         var result = testCaseExecutor.Execute(testCase, sw);
 
         // Assert
-        comparedObjectFactoryMock
-            .Verify(x => x.Wrap(It.IsAny<Exception>()), Times.Once);
         Assert.Single(testCase.Validations);
-        result.AssertException(exception);
+        result.AssertException(new System.Reflection.TargetParameterCountException("Parameter count mismatch."));
     }
     
     [Fact]
@@ -106,10 +83,9 @@ public sealed class TestCaseExecutorTests
         
         var container = TestSuiteFactory.CreateEmptyContextContainer();
         
-        var comparedObjectFactory = new ComparedObjectFactory();
-        var testCaseExecutor = new TestCaseExecutor(container.Context, comparedObjectFactory);
+        var testCaseExecutor = new TestCaseExecutor();
 
-        var testCase = TestSuiteFactory.CreateTestCase(input, 6);
+        var testCase = TestSuiteFactory.CreateAndAddTestCase(container, input, 6);
         var sw = new Stopwatch();
         
         // Act

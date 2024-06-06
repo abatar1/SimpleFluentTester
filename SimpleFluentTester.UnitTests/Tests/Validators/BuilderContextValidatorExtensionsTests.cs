@@ -19,14 +19,14 @@ public class BuilderContextValidatorExtensionsTests
         // Assert
         Assert.Equal(nameof(CustomValidator), validator.Key);
         Assert.Equal(subject, validator.Subject);
-        Assert.NotEmpty(validator.AllowedTypes);
+        Assert.NotNull(validator.AllowedType);
     }
     
     [Fact]
     public void AddValidation_AddSingleValidation_ShouldBeSingle()
     {
         // Assign
-        var validated = new CustomValidated(new Dictionary<ValidationSubject, IList<Func<ValidationResult>>>());
+        var validated = new CustomValidatedObject(new Dictionary<ValidationSubject, IList<Func<ValidationResult>>>());
         
         // Act
         validated.AddValidation(ValidationTestResults.Valid);
@@ -40,7 +40,7 @@ public class BuilderContextValidatorExtensionsTests
     public void AddValidation_AddTwoValidations_ShouldBeValid()
     {
         // Assign
-        var validated = new CustomValidated(new Dictionary<ValidationSubject, IList<Func<ValidationResult>>>());
+        var validated = new CustomValidatedObject(new Dictionary<ValidationSubject, IList<Func<ValidationResult>>>());
         
         // Act
         validated.AddValidation(ValidationTestResults.Valid);
@@ -55,7 +55,7 @@ public class BuilderContextValidatorExtensionsTests
     public void RegisterValidation_InvalidValidator_ShouldThrowException()
     {
         // Assign
-        var validated = new CustomValidated(new Dictionary<ValidationSubject, IList<Func<ValidationResult>>>());
+        var validated = new CustomValidatedObject(new Dictionary<ValidationSubject, IList<Func<ValidationResult>>>());
         
         // Act
         var func = () => validated.RegisterValidation<CustomValidator>();
@@ -68,7 +68,7 @@ public class BuilderContextValidatorExtensionsTests
     public void RegisterValidation_InvalidValidatedType_ShouldThrowException()
     {
         // Assign
-        var validated = new CustomValidated(new Dictionary<ValidationSubject, IList<Func<ValidationResult>>>());
+        var validated = new CustomValidatedObject(new Dictionary<ValidationSubject, IList<Func<ValidationResult>>>());
         
         // Act
         var func = () => validated.RegisterValidation<OperationValidator>();
@@ -81,14 +81,14 @@ public class BuilderContextValidatorExtensionsTests
     public void RegisterValidation_ValidRegistrationFailedValidator_ShouldBeInvalid()
     {
         // Assign
-        var validated = TestSuiteFactory.CreateTestCase([1], 1);
-        var unpacker = new ValidationUnpacker();
+        var container = TestSuiteFactory.CreateEmptyContextContainer();
+        var validated = TestSuiteFactory.CreateAndAddTestCase(container, [1], 1);
         
         // Act
         validated.RegisterValidation<OperationValidator>();
 
         // Assert
-        var validation = unpacker.Unpack(validated);
+        var validation = ValidationPipe.ValidatePacked(validated);
         validation.AssertFailed<ValidationUnexpectedException>(ValidationSubject.Operation, "Failed to validate SimpleFluentTester.TestSuite.Case.TestCase with SimpleFluentTester.Validators.OperationValidator validator.");
     }
     
@@ -96,14 +96,14 @@ public class BuilderContextValidatorExtensionsTests
     public void RegisterValidation_ValidRegistration_ShouldBeValid()
     {
         // Assign
-        var validated = TestSuiteFactory.CreateTestCase([1], 1);
-        var unpacker = new ValidationUnpacker();
+        var container = TestSuiteFactory.CreateEmptyContextContainer();
+        var validated = TestSuiteFactory.CreateAndAddTestCase(container, [1], 1);
         
         // Act
-        validated.RegisterValidation<OperationValidator>(() => new OperationValidatedObject(() => 1));
+        validated.RegisterValidation<OperationValidator>(() => new OperationValidationContext(() => 1));
 
         // Assert
-        var validation = unpacker.Unpack(validated);
+        var validation = ValidationPipe.ValidatePacked(validated);
         validation.AssertValid();
     }
 }

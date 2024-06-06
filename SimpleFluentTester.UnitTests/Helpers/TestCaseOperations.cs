@@ -1,60 +1,66 @@
 using SimpleFluentTester.TestSuite;
 using SimpleFluentTester.TestSuite.Case;
 using SimpleFluentTester.TestSuite.ComparedObject;
-using SimpleFluentTester.UnitTests.TestObjects;
 
 namespace SimpleFluentTester.UnitTests.Helpers;
 
 public static class TestCaseOperations
 {
     private static int Operation(int x, int y) => x + y;
+    
+    private static bool Comparer(int x, int y) => x == y;
         
     private static int ThrowOperation(int _, int __) => throw new Exception();
-
-    private static readonly IComparedObjectFactory ComparedObjectFactory = new ComparedObjectFactory();
+    
+    private static bool ThrowComparer(int _, int __) => throw new Exception();
 
     public static ITestSuiteBuilder UseAdderOperation(this ITestSuiteBuilder builder)
     {
         return builder.UseOperation((int x, int y) => x + y);
     }
         
-    public static TestCaseOperation Passed
+    public static TestCase Passed
     {
         get
         {
             var expected = ComparedObjectFactory.Wrap(3);
-            var testCase = new TestCase(ComparedObjectFactory.WrapMany([1, 2]), expected, 1);
-            return new TestCaseOperation(Operation, testCase);
+            return new TestCase(() => Operation, () => Comparer,ComparedObjectFactory.WrapMany([1, 2]), expected, 1);
         }
     }
         
-    public static TestCaseOperation NotPassed
+    public static TestCase NotPassed
     {
         get
         {
             var expected = ComparedObjectFactory.Wrap(4);
-            var testCase = new TestCase(ComparedObjectFactory.WrapMany([1, 2]), expected, 1);
-            return new TestCaseOperation(Operation, testCase);
+            return new TestCase(() => Operation, () => Comparer,ComparedObjectFactory.WrapMany([1, 2]), expected, 1);
         }
     }
         
-    public static TestCaseOperation NotPassedWithException
+    public static TestCase NotPassedWithOperationException
     {
         get
         {
             var expected = ComparedObjectFactory.Wrap(3);
-            var testCase = new TestCase(ComparedObjectFactory.WrapMany([1, 2]), expected, 1);
-            return new TestCaseOperation(ThrowOperation, testCase);
+            return new TestCase(() => ThrowOperation, () => Comparer,ComparedObjectFactory.WrapMany([1, 2]), expected, 1);
+        }
+    }
+    
+    public static TestCase NotPassedWithComparerException
+    {
+        get
+        {
+            var expected = ComparedObjectFactory.Wrap(3);
+            return new TestCase(() => Operation, () => ThrowComparer,ComparedObjectFactory.WrapMany([1, 2]), expected, 1);
         }
     }
         
-    public static TestCaseOperation Invalid
+    public static TestCase Invalid
     {
         get
         {
             var expected = ComparedObjectFactory.Wrap(4);
-            var testCase = new TestCase(ComparedObjectFactory.WrapMany(["test", 2]), expected, 1);
-            return new TestCaseOperation(Operation, testCase);
+            return new TestCase(() => Operation, () => Comparer,ComparedObjectFactory.WrapMany(["test", 2]), expected, 1);
         }
     }
     

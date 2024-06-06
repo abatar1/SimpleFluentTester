@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using SimpleFluentTester.TestSuite.ComparedObject;
 using SimpleFluentTester.TestSuite.Context;
@@ -7,18 +6,17 @@ using SimpleFluentTester.Validators.Core;
 
 namespace SimpleFluentTester.Validators;
 
-internal sealed class ComparerValidator : BaseValidator<EmptyValidatedObject>
+internal sealed class ComparerValidator : BaseValidator<EmptyValidationContext, ITestSuiteContext>
 {
-    public override ISet<Type> AllowedTypes => new HashSet<Type>([ValidatedTypes.Context]);
+    public override Type AllowedType => ValidatedTypes.Context;
+    
     public override ValidationSubject Subject => ValidationSubject.Comparer;
 
-    public override ValidationResult Validate(
-        IValidated validated, 
-        IValidatedObject validatedObject)
+    protected override ValidationResult ValidateCore(
+        ITestSuiteContext testSuiteContext, 
+        EmptyValidationContext validationContext)
     {
-        var context = CastValidated<ITestSuiteContext>(validated);
-
-        var testCaseExpectedObjects = context.TestCases
+        var testCaseExpectedObjects = testSuiteContext.TestCases
             .Where(x => x.Expected.Type != null)
             .Select(x => x.Expected)
             .Where(x => x.Variety == ComparedObjectVariety.Value)
@@ -28,17 +26,17 @@ internal sealed class ComparerValidator : BaseValidator<EmptyValidatedObject>
             return Ok();
         
         if (testCaseExpectedObjects.Count > 1)
-            return NonValid("Expected types more than one in TestCase collection");
+            return NonValid("TestCase expected object types are more than one in TestSuite collection");
             
         var testCaseExpectedObject = (ValueObject) testCaseExpectedObjects.First().First();
 
-        if (context.Comparer != null)
+        if (testSuiteContext.Comparer != null)
         {
-            if (context.Comparer?.Method.ReturnParameter?.ParameterType != typeof(bool))
+            if (testSuiteContext.Comparer?.Method.ReturnParameter?.ParameterType != typeof(bool))
                 return NonValid(
-                    $"Return type of the custom comparer is not bool but {context.Comparer?.Method.ReturnParameter?.ParameterType}, something went wrong during initialization");
+                    $"Return type of the custom comparer is not bool but {testSuiteContext.Comparer?.Method.ReturnParameter?.ParameterType}, something went wrong during initialization");
 
-            var parameters = context.Comparer.Method.GetParameters();
+            var parameters = testSuiteContext.Comparer.Method.GetParameters();
             if (parameters.Length != 2)
                 return NonValid(
                     $"Custom comparer has {parameters.Length} parameters, but should has 2, something went wrong during initialization");

@@ -4,11 +4,15 @@ using SimpleFluentTester.Validators.Core;
 
 namespace SimpleFluentTester.TestSuite.Case;
 
+/// <summary>
+/// Represents <see cref="TestCase"/> after proceeding by <see cref="TestCasePipeline"/>. Contains validation results of TestCase,
+/// assertion result, elapsed execution time. Could be ignored using <see cref="CompletedTestCase.NotExecuted"/>
+/// </summary>
 public sealed class CompletedTestCase
 {
     internal CompletedTestCase(AssertResult assertResult,
         TimeSpan elapsedTime,
-        ValidationUnpacked validationUnpacked, 
+        PackedValidation packedValidation, 
         TestCase testCase)
     {
         Number = testCase.Number;
@@ -16,7 +20,7 @@ public sealed class CompletedTestCase
         ElapsedTime = elapsedTime;
         Inputs = testCase.Inputs;
         Expected = testCase.Expected;
-        Validation = validationUnpacked;
+        Validation = packedValidation;
     }
 
     public int Number { get; }
@@ -29,14 +33,14 @@ public sealed class CompletedTestCase
 
     public IComparedObject Expected { get; }
 
-    public ValidationUnpacked Validation { get; }
+    public PackedValidation Validation { get; }
 
     public static CompletedTestCase NotExecuted(TestCase testCase)
     {
         return new CompletedTestCase(
             AssertResult.Ignored,
             TimeSpan.Zero,
-            ValidationUnpacked.Empty,
+            PackedValidation.Empty,
             testCase); 
     }
 }

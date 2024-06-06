@@ -8,7 +8,6 @@ namespace SimpleFluentTester.TestSuite.Case;
 
 internal sealed class TestCaseBuilder(
     ITestSuiteContextContainer contextContainer, 
-    IComparedObjectFactory comparedObjectFactory,
     IComparedObject expected, 
     IList<ValidationResult>? validationResults = null) : ITestCaseBuilder
 {
@@ -17,7 +16,12 @@ internal sealed class TestCaseBuilder(
     /// </summary>
     public ITestSuiteBuilder WithInput(params object?[] inputs)
     {
-        var testCase = new TestCase(comparedObjectFactory.WrapMany(inputs), expected, contextContainer.Context.TestCases.Count + 1);
+        var testCase = new TestCase(
+            () => contextContainer.Context.Operation,
+            () => contextContainer.Context.Comparer, 
+            ComparedObjectFactory.WrapMany(inputs), 
+            expected, 
+            contextContainer.Context.TestCases.Count + 1);
 
         if (validationResults != null && validationResults.Count != 0)
         {
@@ -25,8 +29,8 @@ internal sealed class TestCaseBuilder(
                 testCase.AddValidation(validationResult);
         }
         
-        testCase.RegisterValidation<OperationValidator>(() => new OperationValidatedObject(contextContainer.Context.Operation));
-        testCase.RegisterValidation<InputsValidator>(() => new InputsValidatedObject(contextContainer.Context.Operation));
+        testCase.RegisterValidation<OperationValidator>(() => new OperationValidationContext(contextContainer.Context.Operation));
+        testCase.RegisterValidation<InputsValidator>(() => new InputsValidationContext(contextContainer.Context.Operation));
             
         contextContainer.Context.TestCases.Add(testCase);
 

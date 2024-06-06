@@ -3,6 +3,9 @@ using SimpleFluentTester.TestSuite.ComparedObject;
 
 namespace SimpleFluentTester.TestSuite.Case;
 
+/// <summary>
+/// Represents assertion result of the test case, could be calculated, ignored or executed with an exception.
+/// </summary>
 public sealed record AssertResult(
     IComparedObject Output,
     AssertStatus Status,

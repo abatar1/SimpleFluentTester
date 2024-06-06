@@ -4,9 +4,13 @@ using System.Linq;
 
 namespace SimpleFluentTester.Validators.Core;
 
-public sealed class ValidationUnpacker : IValidationUnpacker
+public static class ValidationPipe
 {
-    public ValidationUnpacked Unpack(IValidated validated)
+    /// <summary>
+    /// Invokes all validations for the object inherited from <see cref="IValidatedObject"/> interface.
+    /// All validation's results of a single object packed into single object.
+    /// </summary>
+    public static PackedValidation ValidatePacked(IValidatedObject validated)
     {
         var generalStatus = ValidationStatus.Valid;
         var validationResults = validated.Validations
@@ -39,7 +43,7 @@ public sealed class ValidationUnpacker : IValidationUnpacker
                 return ValidationResult.FromStatus(currentValidationStatus, x.Key, message, aggregateException);
             })
             .ToList();
-        return new ValidationUnpacked(generalStatus, validationResults);
+        return new PackedValidation(validated, validationResults, generalStatus);
     }
 
     private static string? GetAggregatedMessage(IList<ValidationResult> validationResults)

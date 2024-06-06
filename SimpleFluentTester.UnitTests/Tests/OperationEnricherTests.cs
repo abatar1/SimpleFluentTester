@@ -19,7 +19,7 @@ public sealed class OperationEnricherTests
         var container = TestSuiteFactory.CreateEmptyContextContainer(entryAssemblyProviderMock.Object);
         
         // Act 
-        OperationEnricher.TryToEnrichAttributeOperation(container);
+        container.TryToEnrichAttributeOperation();
 
         // Assert
         const string message = $"No entry Assembly have been found when trying to find {nameof(TestSuiteDelegateAttribute)} definitions.";
@@ -40,7 +40,7 @@ public sealed class OperationEnricherTests
         var container = TestSuiteFactory.CreateEmptyContextContainer(entryAssemblyProviderMock.Object);
         
         // Act 
-        OperationEnricher.TryToEnrichAttributeOperation(container);
+        container.TryToEnrichAttributeOperation();
 
         // Assert
         const string message =
@@ -68,7 +68,7 @@ public sealed class OperationEnricherTests
         var container = TestSuiteFactory.CreateEmptyContextContainer(entryAssemblyProviderMock.Object);
         
         // Act 
-        OperationEnricher.TryToEnrichAttributeOperation(container);
+        container.TryToEnrichAttributeOperation();
 
         // Assert
         const string message = $"You defined more than one method with {nameof(TestSuiteDelegateAttribute)}.";
@@ -105,7 +105,7 @@ public sealed class OperationEnricherTests
         var container = TestSuiteFactory.CreateEmptyContextContainer(entryAssemblyProviderMock.Object);
         
         // Act 
-        OperationEnricher.TryToEnrichAttributeOperation(container);
+        container.TryToEnrichAttributeOperation();
 
         // Assert
         container.Context.AssertValidValidation();
@@ -145,7 +145,7 @@ public sealed class OperationEnricherTests
         var container = TestSuiteFactory.CreateEmptyContextContainer(entryAssemblyProviderMock.Object);
         
         // Act 
-        OperationEnricher.TryToEnrichAttributeOperation(container);
+        container.TryToEnrichAttributeOperation();
 
         // Assert
         const string message =
@@ -198,7 +198,7 @@ public sealed class OperationEnricherTests
         var container = TestSuiteFactory.CreateEmptyContextContainer(entryAssemblyProviderMock.Object, activator: activatorMock.Object);
         
         // Act 
-        OperationEnricher.TryToEnrichAttributeOperation(container);
+        container.TryToEnrichAttributeOperation();
 
         // Assert
         container.Context.AssertValidValidation();

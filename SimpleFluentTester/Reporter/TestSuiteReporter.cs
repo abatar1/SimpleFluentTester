@@ -1,67 +1,36 @@
 ﻿using System;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Console;
 using SimpleFluentTester.TestSuite;
-using SimpleFluentTester.TestSuite.Case;
 
 namespace SimpleFluentTester.Reporter;
 
-internal sealed class TestSuiteReporter(TestSuiteResult testRunResult) : ITestSuiteReporter
+internal sealed class TestSuiteReporter(TestSuiteRunResult testSuiteRunResult) : ITestSuiteReporter
 {
-    public void Report(Action<ITestSuiteReporterConfiguration, TestSuiteResult>? configurationBuilder = null)
+    public void Report(Action<ITestSuiteReporterConfigurationBuilder, TestSuiteRunResult>? configurationBuilderInvoker = null)
     {
-        var configuration = new TestSuiteReporterConfiguration();
-        configurationBuilder?.Invoke(configuration, TestSuiteResult);
+        var configurationBuilder = new TestSuiteReporterConfigurationBuilder();
+        configurationBuilderInvoker?.Invoke(configurationBuilder, TestSuiteRunResult);
+        var configuration = configurationBuilder.Build();
+        
+        if (configuration.LoggingBuilder == null)
+            throw new InvalidOperationException("Even default logging builder was not specified, should be a bug.");
 
-        var reportBuilder = configuration.ReportBuilder ?? new DefaultTestSuiteReportBuilder();
-        var logger = configuration.Logger ?? DefaultLogger;
-        var shouldPrintPredicate = configuration.ShouldPrintPredicate ?? DefaultShouldPrintPredicate;
+        var logger = LoggerFactory.Create(configuration.LoggingBuilder).CreateLogger(TestSuiteRunResult.DisplayName ?? GetType().Name);
+        
         try
         {
-            var printableResult = reportBuilder.TestSuiteResultToString(TestSuiteResult, shouldPrintPredicate);
+            var printableResult = configuration.ReportBuilder?.TestSuiteResultToString(TestSuiteRunResult, configuration.PrintablePredicate);
             if (printableResult == null)
                 return;
+          
             logger.Log(printableResult.LogLevel, printableResult.EventId, null, printableResult.Message);
         }
         catch (Exception e)
         {
-            logger.LogError(new EventId(TestSuiteResult.Number), e, "Couldn't report a result of {number} TestSuite",
-                TestSuiteResult.Number);
+            logger.LogError(new EventId(TestSuiteRunResult.Number), e, "Couldn't report a result of {number} TestSuite",
+                TestSuiteRunResult.Number);
         }
     }
 
-    public TestSuiteResult TestSuiteResult { get; } = testRunResult;
-
-    private ILogger DefaultLogger
-    {
-        get
-        {
-            var loggerFactory = LoggerFactory.Create(loggerBuilder =>
-            {
-                loggerBuilder.ClearProviders();
-                loggerBuilder.AddSimpleConsole(x =>
-                {
-                    x.TimestampFormat = "HH:mm:ss.fff ";
-                    x.IncludeScopes = true;
-                    x.ColorBehavior = LoggerColorBehavior.Enabled;
-                });
-            });
-
-            return loggerFactory.CreateLogger(TestSuiteResult.DisplayName ?? GetType().Name);
-        }
-    }
-
-    private static Func<CompletedTestCase, bool> DefaultShouldPrintPredicate
-    {
-        get
-        {
-            return testCase =>
-            {
-                var notPassed = testCase.Assert.Status == AssertStatus.NotPassed;
-                var notPassedWithException = testCase.Assert.Status == AssertStatus.NotPassedWithException;
-                var notValid = !testCase.Validation.IsValid;
-                return notPassed || notPassedWithException || notValid;
-            };
-        }
-    }
+    public TestSuiteRunResult TestSuiteRunResult { get; } = testSuiteRunResult;
 }

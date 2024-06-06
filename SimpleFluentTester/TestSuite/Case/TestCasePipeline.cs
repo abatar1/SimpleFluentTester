@@ -1,35 +1,32 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using SimpleFluentTester.TestSuite.ComparedObject;
-using SimpleFluentTester.TestSuite.Context;
 using SimpleFluentTester.Validators.Core;
 
 namespace SimpleFluentTester.TestSuite.Case;
 
-internal sealed class TestCasePipeline(
-    ITestSuiteContext context,
-    IComparedObjectFactory comparedObjectFactory,
-    IValidationUnpacker validationUnpacker,
-    ISet<int> testNumbersHash)
+internal sealed class TestCasePipeline(ISet<int> testNumbersHash)
 {
-    private readonly TestCaseAffirmer _testCaseAffirmer = new(context);
-    private readonly TestCaseExecutor _testCaseExecutor = new(context, comparedObjectFactory);
+    private readonly TestCaseAsserter _testCaseAsserter = new();
+    private readonly TestCaseExecutor _testCaseExecutor = new();
 
+    /// <summary>
+    /// Unpack, execute and assert test cases. Produces <see cref="CompletedTestCase"/> from <see cref="TestCase"/>.
+    /// </summary>
     public CompletedTestCase ToCompleted(TestCase testCase)
     {
         if (!ShouldBeExecuted(testCase))
             return CompletedTestCase.NotExecuted(testCase);
         
-        var validationUnpacked = validationUnpacker.Unpack(testCase);
+        var packedValidation = ValidationPipe.ValidatePacked(testCase);
         
-        if (!validationUnpacked.IsValid)
-            return new CompletedTestCase(AssertResult.Ignored, TimeSpan.Zero, validationUnpacked, testCase); 
+        if (!packedValidation.IsValid)
+            return new CompletedTestCase(AssertResult.Ignored, TimeSpan.Zero, packedValidation, testCase); 
         
         var stopwatch = new Stopwatch();
         var output = _testCaseExecutor.Execute(testCase, stopwatch);
-        var assertResult = _testCaseAffirmer.Assert(testCase, output);
-        return new CompletedTestCase(assertResult, stopwatch.Elapsed, validationUnpacked, testCase);
+        var assertResult = _testCaseAsserter.Assert(testCase, output);
+        return new CompletedTestCase(assertResult, stopwatch.Elapsed, packedValidation, testCase);
     }
     
     private bool ShouldBeExecuted(TestCase testCase)

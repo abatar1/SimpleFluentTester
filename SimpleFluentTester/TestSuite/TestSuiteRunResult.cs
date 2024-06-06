@@ -5,9 +5,9 @@ using SimpleFluentTester.Validators.Core;
 
 namespace SimpleFluentTester.TestSuite;
 
-public sealed class TestSuiteResult(
+public sealed class TestSuiteRunResult(
     IList<CompletedTestCase> validatedTestCases,
-    ValidationUnpacked validation,
+    PackedValidation validation,
     Delegate? operation,
     string? displayName,
     int number,
@@ -17,7 +17,7 @@ public sealed class TestSuiteResult(
     
     public IList<CompletedTestCase> TestCases { get; } = validatedTestCases;
 
-    public ValidationUnpacked Validation { get; } = validation;
+    public PackedValidation Validation { get; } = validation;
 
     public Delegate? Operation { get; } = operation;
 

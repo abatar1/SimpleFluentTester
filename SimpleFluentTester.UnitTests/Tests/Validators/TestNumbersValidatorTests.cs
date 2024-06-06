@@ -15,7 +15,7 @@ public sealed class TestNumbersValidatorTests
         var container = TestSuiteFactory.CreateEmptyContextContainer();
         
         // Act
-        var func = () => validator.Validate(container.Context, new EmptyValidatedObject());
+        var func = () => validator.Validate(container.Context, new EmptyValidationContext());
 
         // Assert
         Assert.Throws<ValidationUnexpectedException>(func);
@@ -26,11 +26,11 @@ public sealed class TestNumbersValidatorTests
     {
         // Assign
         var validator = new TestNumbersValidator();
-        var validated = new CustomValidated(new Dictionary<ValidationSubject, IList<Func<ValidationResult>>>());
-        var validatedObject = new TestNumbersValidatedObject(new HashSet<int>());
+        var validated = new CustomValidatedObject(new Dictionary<ValidationSubject, IList<Func<ValidationResult>>>());
+        var validationContext = new TestNumbersValidationContext(new HashSet<int>());
         
         // Act
-        var func = () => validator.Validate(validated, validatedObject);
+        var func = () => validator.Validate(validated, validationContext);
 
         // Assert
         Assert.Throws<ValidationUnexpectedException>(func);
@@ -42,10 +42,10 @@ public sealed class TestNumbersValidatorTests
         // Assign
         var validator = new TestNumbersValidator();
         var container = TestSuiteFactory.CreateEmptyContextContainer();
-        var validatedObject = new TestNumbersValidatedObject(new HashSet<int>());
+        var validationContext = new TestNumbersValidationContext(new HashSet<int>());
         
         // Act
-        var validationResult = validator.Validate(container.Context, validatedObject);
+        var validationResult = validator.Validate(container.Context, validationContext);
 
         // Assert
         validationResult.AssertValid();
@@ -57,13 +57,12 @@ public sealed class TestNumbersValidatorTests
         // Assign
         var validator = new TestNumbersValidator();
         var container = TestSuiteFactory.CreateEmptyContextContainer();
-        var validatedObject = new TestNumbersValidatedObject(new HashSet<int>([1]));
+        var validationContext = new TestNumbersValidationContext(new HashSet<int>([1]));
         
-        var testCase1 = TestSuiteFactory.CreateTestCase([1], "test");
-        container.Context.TestCases.Add(testCase1);
+        TestSuiteFactory.CreateAndAddTestCase(container, [1], "test");
         
         // Act
-        var validationResult = validator.Validate(container.Context, validatedObject);
+        var validationResult = validator.Validate(container.Context, validationContext);
 
         // Assert
         validationResult.AssertValid();
@@ -75,13 +74,12 @@ public sealed class TestNumbersValidatorTests
         // Assign
         var validator = new TestNumbersValidator();
         var container = TestSuiteFactory.CreateEmptyContextContainer();
-        var validatedObject = new TestNumbersValidatedObject(new HashSet<int>([2]));
+        var validationContext = new TestNumbersValidationContext(new HashSet<int>([2]));
         
-        var testCase1 = TestSuiteFactory.CreateTestCase([1], "test");
-        container.Context.TestCases.Add(testCase1);
+        TestSuiteFactory.CreateAndAddTestCase(container, [1], "test");
         
         // Act
-        var validationResult = validator.Validate(container.Context, validatedObject);
+        var validationResult = validator.Validate(container.Context, validationContext);
 
         // Assert
         validationResult.AssertInvalid(ValidationSubject.TestNumbers, "Invalid test case numbers were given as input");
@@ -93,13 +91,12 @@ public sealed class TestNumbersValidatorTests
         // Assign
         var validator = new TestNumbersValidator();
         var container = TestSuiteFactory.CreateEmptyContextContainer();
-        var validatedObject = new TestNumbersValidatedObject(new HashSet<int>([1, 2]));
+        var validationContext = new TestNumbersValidationContext(new HashSet<int>([1, 2]));
         
-        var testCase1 = TestSuiteFactory.CreateTestCase([1], "test");
-        container.Context.TestCases.Add(testCase1);
+        TestSuiteFactory.CreateAndAddTestCase(container, [1], "test");
         
         // Act
-        var validationResult = validator.Validate(container.Context, validatedObject);
+        var validationResult = validator.Validate(container.Context, validationContext);
 
         // Assert
         validationResult.AssertInvalid(ValidationSubject.TestNumbers, "Invalid test case numbers were given as input");

@@ -19,7 +19,7 @@ public class WithInputTests
             .Run();
         
         // Assert
-        var message = "Invalid inputs number, should be 2, but was 3, inputs 1, 1, 1";
+        var message = "Invalid inputs number, should be 2, but was 3.";
         reporter.AssertTestCaseExists(1).Validation.AssertInvalid(ValidationSubject.Inputs, message);
     }
     
@@ -36,7 +36,7 @@ public class WithInputTests
             .Run();
         
         // Assert
-        var message = "Invalid inputs number, should be 2, but was 1, inputs 1";
+        var message = "Invalid inputs number, should be 2, but was 1.";
         reporter.AssertTestCaseExists(1).Validation.AssertInvalid(ValidationSubject.Inputs, message);
     }
     
@@ -53,7 +53,7 @@ public class WithInputTests
             .Run();
         
         // Assert
-        var message = "Passed parameters and expected operation parameters are not equal";
+        var message = "Passed parameters and expected operation parameters are not equal.";
         reporter.AssertTestCaseExists(1).Validation.AssertInvalid(ValidationSubject.Inputs, message);
     }
     
@@ -70,6 +70,6 @@ public class WithInputTests
             .Run();
         
         // Assert
-        reporter.TestSuiteResult.Validation.AssertValid();
+        reporter.AssertValid();
     }
 }

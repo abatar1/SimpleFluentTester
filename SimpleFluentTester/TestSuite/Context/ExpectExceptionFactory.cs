@@ -11,11 +11,13 @@ public static class ExpectExceptionFactory
 {
     private static readonly IDictionary<Type, List<ParameterInfo[]>> ParameterInfoMap = new Dictionary<Type, List<ParameterInfo[]>>();
     
+    /// <summary>
+    /// Converts input exception as an expected object, validated that it could be constructed from the given type and message if provided.
+    /// </summary>
     public static ValidatedObject Create(
         ITestSuiteContextContainer container,
-        IComparedObjectFactory comparedObjectFactory,
         Type exceptionType,
-        string? message)
+        string? message = null)
     {
         if (!ParameterInfoMap.TryGetValue(exceptionType, out var publicConstructorParams))
         {
@@ -30,10 +32,10 @@ public static class ExpectExceptionFactory
         {
             if (!HasStringCtor(publicConstructorParams))
                 return ValidationFailed($"{exceptionType} do not have public .ctor() with string parameter");
-            return TryCreateException(container, comparedObjectFactory, exceptionType, message);
+            return TryCreateException(container, exceptionType, message);
         }
         
-        return TryCreateException(container, comparedObjectFactory, exceptionType);
+        return TryCreateException(container, exceptionType);
     }
 
     private static ValidatedObject ValidationFailed(string message)
@@ -54,7 +56,6 @@ public static class ExpectExceptionFactory
 
     private static ValidatedObject TryCreateException(
         ITestSuiteContextContainer container,
-        IComparedObjectFactory comparedObjectFactory,
         Type exceptionType,
         string? message = null)
     {
@@ -65,7 +66,7 @@ public static class ExpectExceptionFactory
         else
             exception = container.Context.Activator.CreateInstance(exceptionType, message);
         
-        var wrappedException = comparedObjectFactory.Wrap(exception);
+        var wrappedException = ComparedObjectFactory.Wrap(exception);
         
         return new ValidatedObject(wrappedException);
     }

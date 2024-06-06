@@ -20,7 +20,7 @@ public class UseOperationTests
             .Run();
 
         // Assert
-        reporter.TestSuiteResult.Validation.AssertValid();
+        reporter.AssertValid();
     }
     
     [Fact]
@@ -74,7 +74,7 @@ public class UseOperationTests
 
         // Assert
         var message = "You should specify an operation first with an TestSuiteDelegateAttribute attribute or using UseOperation method.";
-        reporter.TestSuiteResult.Validation.AssertInvalid(ValidationSubject.Operation, message);
+        reporter.AssertInvalid(ValidationSubject.Operation, message);
     }
     
     [Fact]

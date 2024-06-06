@@ -3,44 +3,41 @@ using SimpleFluentTester.Validators.Core;
 
 namespace SimpleFluentTester.UnitTests.Tests.Validators;
 
-public sealed class ValidationUnpackerTests
+public sealed class ValidationPipeTests
 {
     [Fact]
-    public void Unpack_EmptyValidations_ShouldBeValid()
+    public void ValidatePacked_EmptyValidations_ShouldBeValid()
     {
         // Assign
-        var unpacker = new ValidationUnpacker();
-        var validated = new CustomValidated(new Dictionary<ValidationSubject, IList<Func<ValidationResult>>>());
+        var validated = new CustomValidatedObject(new Dictionary<ValidationSubject, IList<Func<ValidationResult>>>());
 
         // Act
-        var validationUnpacked = unpacker.Unpack(validated);
+        var packedValidation = ValidationPipe.ValidatePacked(validated);
 
         // Assert
-        validationUnpacked.AssertValid();
+        packedValidation.AssertValid();
     }
     
     [Fact]
-    public void Unpack_ValidValidation_ShouldBeValid()
+    public void ValidatePacked_ValidValidation_ShouldBeValid()
     {
         // Assign
-        var unpacker = new ValidationUnpacker();
         const ValidationSubject subject = ValidationSubject.Operation;
         var validationResults = new List<Func<ValidationResult>> { () => ValidationResult.Valid(subject) };
         var validations = new Dictionary<ValidationSubject, IList<Func<ValidationResult>>> { { subject, validationResults } };
-        var validated = new CustomValidated(validations);
+        var validated = new CustomValidatedObject(validations);
 
         // Act
-        var validationUnpacked = unpacker.Unpack(validated);
+        var packedValidation = ValidationPipe.ValidatePacked(validated);
 
         // Assert
-        validationUnpacked.AssertValid();
+        packedValidation.AssertValid();
     }
     
     [Fact]
-    public void Unpack_NonValidValidation_ShouldBeNonValid()
+    public void ValidatePacked_NonValidValidation_ShouldBeNonValid()
     {
         // Assign
-        var unpacker = new ValidationUnpacker();
         const ValidationSubject subject = ValidationSubject.Operation;
         const string message = "ErrorMessage";
         var validationResults = new List<Func<ValidationResult>>
@@ -49,20 +46,19 @@ public sealed class ValidationUnpackerTests
             () => ValidationResult.Valid(subject)
         };
         var validations = new Dictionary<ValidationSubject, IList<Func<ValidationResult>>> { { subject, validationResults } };
-        var validated = new CustomValidated(validations);
+        var validated = new CustomValidatedObject(validations);
 
         // Act
-        var validationUnpacked = unpacker.Unpack(validated);
-
+        var packedValidation = ValidationPipe.ValidatePacked(validated);
+        
         // Assert
-        validationUnpacked.AssertInvalid(subject, message);
+        packedValidation.AssertInvalid(subject, message);
     }
     
     [Fact]
-    public void Unpack_MultipleNonValidValidation_ShouldBeNonValidAndAggregated()
+    public void ValidatePacked_MultipleNonValidValidation_ShouldBeNonValidAndAggregated()
     {
         // Assign
-        var unpacker = new ValidationUnpacker();
         const ValidationSubject subject = ValidationSubject.Operation;
         const string message1 = "ErrorMessage1";
         const string message2 = "ErrorMessage2";
@@ -72,20 +68,19 @@ public sealed class ValidationUnpackerTests
                 () => ValidationResult.NonValid(subject, message2) 
             };
         var validations = new Dictionary<ValidationSubject, IList<Func<ValidationResult>>> { { subject, validationResults } };
-        var validated = new CustomValidated(validations);
+        var validated = new CustomValidatedObject(validations);
 
         // Act
-        var validationUnpacked = unpacker.Unpack(validated);
+        var packedValidation = ValidationPipe.ValidatePacked(validated);
 
         // Assert
-        validationUnpacked.AssertInvalid(subject, string.Join(Environment.NewLine, [message1, message2]));
+        packedValidation.AssertInvalid(subject, string.Join(Environment.NewLine, [message1, message2]));
     }
     
     [Fact]
-    public void Unpack_NonValidAndFailedValidation_ShouldBeFailed()
+    public void ValidatePacked_NonValidAndFailedValidation_ShouldBeFailed()
     {
         // Assign
-        var unpacker = new ValidationUnpacker();
         const ValidationSubject subject = ValidationSubject.Operation;
         const string message1 = "ErrorMessage1";
         const string message2 = "ErrorMessage2";
@@ -97,13 +92,13 @@ public sealed class ValidationUnpackerTests
                 () => ValidationResult.Failed(subject, exception, message2),
             };
         var validations = new Dictionary<ValidationSubject, IList<Func<ValidationResult>>> { { subject, validationResults } };
-        var validated = new CustomValidated(validations);
+        var validated = new CustomValidatedObject(validations);
 
         // Act
-        var validationUnpacked = unpacker.Unpack(validated);
+        var packedValidation = ValidationPipe.ValidatePacked(validated);
 
         // Assert
         var expectedMessage = string.Join(Environment.NewLine, [message1, message2]);
-        validationUnpacked.AssertFailed<InvalidDataException>(subject, expectedMessage);
+        packedValidation.AssertFailed<InvalidDataException>(subject, expectedMessage);
     }
 }

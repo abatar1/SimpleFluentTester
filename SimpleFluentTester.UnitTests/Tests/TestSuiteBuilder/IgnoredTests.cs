@@ -18,7 +18,7 @@ public class IgnoredTests
         var reporter = builder.Run();
         
         // Assert
-        Assert.False(reporter.TestSuiteResult.ShouldBeExecuted);
+        Assert.False(reporter.TestSuiteRunResult.ShouldBeExecuted);
         reporter.AssertTestCaseExists(1).AssertSkippedTestResult(2, [1, 1, 1]);
         reporter.AssertTestCaseExists(2).AssertSkippedTestResult(3, [1, 1, 1]);
     }

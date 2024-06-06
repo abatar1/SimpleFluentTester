@@ -4,26 +4,24 @@ namespace SimpleFluentTester.UnitTests.Extensions;
 
 public static class TestValidationExtensions
 {
-    private static readonly ValidationUnpacker ValidationUnpacker = new();
-    
-    public static void AssertNotValidValidation(this IValidated validated, ValidationSubject subject, string message)
+    public static void AssertNotValidValidation(this IValidatedObject validated, ValidationSubject subject, string message)
     {
-        var unpacked = ValidationUnpacker.Unpack(validated);
+        var unpacked = ValidationPipe.ValidatePacked(validated);
         unpacked.AssertInvalid(subject, message);
     }
     
-    public static void AssertValidValidation(this IValidated context)
+    public static void AssertValidValidation(this IValidatedObject context)
     {
-        var unpacked = ValidationUnpacker.Unpack(context);
+        var unpacked = ValidationPipe.ValidatePacked(context);
         unpacked.AssertValid();
     }
     
-    public static void AssertInvalid(this ValidationUnpacked validationUnpacked, ValidationSubject validationSubject, string message)
+    public static void AssertInvalid(this PackedValidation packedValidation, ValidationSubject validationSubject, string message)
     {
-        Assert.NotNull(validationUnpacked);
+        Assert.NotNull(packedValidation);
         
-        Assert.False(validationUnpacked.IsValid);
-        var validations = validationUnpacked.GetNonValid();
+        Assert.False(packedValidation.IsValid);
+        var validations = packedValidation.GetNonValid();
         Assert.NotEmpty(validations);
         var validation = validations
             .FirstOrDefault(x => x.Subject == validationSubject);
@@ -31,12 +29,12 @@ public static class TestValidationExtensions
         validation.AssertInvalid(validationSubject, message);
     }
     
-    public static void AssertFailed<TException>(this ValidationUnpacked validationUnpacked, ValidationSubject validationSubject, string message)
+    public static void AssertFailed<TException>(this PackedValidation packedValidation, ValidationSubject validationSubject, string message)
     {
-        Assert.NotNull(validationUnpacked);
+        Assert.NotNull(packedValidation);
         
-        Assert.False(validationUnpacked.IsValid);
-        var validations = validationUnpacked.GetNonValid();
+        Assert.False(packedValidation.IsValid);
+        var validations = packedValidation.GetNonValid();
         Assert.NotEmpty(validations);
         var validation = validations
             .FirstOrDefault(x => x.Subject == validationSubject);
@@ -44,27 +42,27 @@ public static class TestValidationExtensions
         validation.AssertFailed<TException>(validationSubject, message);
     }
     
-    public static void AssertValid(this ValidationUnpacked validationUnpacked)
+    public static void AssertValid(this PackedValidation packedValidation)
     {
-        Assert.Empty(validationUnpacked.GetNonValid());
-        Assert.True(validationUnpacked.IsValid);
+        Assert.Empty(packedValidation.GetNonValid());
+        Assert.True(packedValidation.IsValid);
     }
     
-    public static void AssertInvalid(this ValidationResult validation, ValidationSubject validationSubject, string message)
+    public static void AssertInvalid(this ValidationResult validationResult, ValidationSubject validationSubject, string message)
     {
-        Assert.NotNull(validation);
-        Assert.Equal(ValidationStatus.NonValid, validation.Status);
-        Assert.Equal(validationSubject, validation.Subject);
-        Assert.Equal(message, validation.Message);
+        Assert.NotNull(validationResult);
+        Assert.Equal(ValidationStatus.NonValid, validationResult.Status);
+        Assert.Equal(validationSubject, validationResult.Subject);
+        Assert.Equal(message, validationResult.Message);
     }
     
-    public static void AssertFailed<TException>(this ValidationResult validation, ValidationSubject validationSubject, string message)
+    public static void AssertFailed<TException>(this ValidationResult validationResult, ValidationSubject validationSubject, string message)
     {
-        Assert.NotNull(validation);
-        Assert.Equal(ValidationStatus.Failed, validation.Status);
-        Assert.Equal(validationSubject, validation.Subject);
-        Assert.Equal(message, validation.Message);
-        var aggregatedException = Assert.IsType<AggregateException>(validation.Exception);
+        Assert.NotNull(validationResult);
+        Assert.Equal(ValidationStatus.Failed, validationResult.Status);
+        Assert.Equal(validationSubject, validationResult.Subject);
+        Assert.Equal(message, validationResult.Message);
+        var aggregatedException = Assert.IsType<AggregateException>(validationResult.Exception);
         Assert.Contains(aggregatedException.InnerExceptions, x => x.GetType() == typeof(TException));
     }
     

@@ -3,12 +3,13 @@ using SimpleFluentTester.Validators.Core;
 namespace SimpleFluentTester.UnitTests.Tests.Validators;
 
 internal sealed class CustomValidator(ValidationSubject validationSubject) 
-    : BaseValidator<EmptyValidatedObject>
+    : BaseValidator<EmptyValidationContext, EmptyValidatedObject>
 {
-    public override ISet<Type> AllowedTypes => new HashSet<Type>([ValidatedTypes.Context]);
+    public override Type AllowedType => ValidatedTypes.Context;
+    
     public override ValidationSubject Subject => validationSubject;
 
-    public override ValidationResult Validate(IValidated validated, IValidatedObject validatedObject)
+    protected override ValidationResult ValidateCore(EmptyValidatedObject validatedObject, EmptyValidationContext validationContext)
     {
         return Ok();
     }

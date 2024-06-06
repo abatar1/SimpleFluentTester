@@ -3,9 +3,11 @@ using System.Linq;
 
 namespace SimpleFluentTester.Validators.Core;
 
-public sealed class ValidationUnpacked(ValidationStatus status, IList<ValidationResult> results)
+public sealed class PackedValidation(IValidatedObject validatedObject, IList<ValidationResult> results, ValidationStatus status)
 {
-    public static ValidationUnpacked Empty => new(ValidationStatus.Valid, new List<ValidationResult>());
+    public IValidatedObject ValidatedObject { get; } = validatedObject;
+    
+    public static PackedValidation Empty => new(new EmptyValidatedObject(), new List<ValidationResult>(), ValidationStatus.Valid);
 
     public IReadOnlyCollection<ValidationResult> GetNonValid()
     {
