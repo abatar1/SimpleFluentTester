@@ -59,7 +59,7 @@ public static class TestSuiteFactory
         var completedTestCases = new List<CompletedTestCase>();
         if (testCase != null)
         {
-            var completedTestCase = contextContainer.CompleteTestCase(testCase, testCaseToRun);
+            var completedTestCase = testCase.CompleteTestCase(contextContainer, testCaseToRun);
             completedTestCases.Add(completedTestCase);
         }
 

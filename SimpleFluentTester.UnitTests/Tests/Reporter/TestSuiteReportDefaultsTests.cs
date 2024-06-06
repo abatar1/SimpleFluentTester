@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using SimpleFluentTester.Reporter;
+using SimpleFluentTester.TestSuite.Case;
 using SimpleFluentTester.UnitTests.Extensions;
 using SimpleFluentTester.UnitTests.Helpers;
 
@@ -173,7 +174,7 @@ public sealed class TestSuiteReportDefaultsTests
     {
         // Assign
         var container = TestSuiteFactory.CreateEmptyContextContainer();
-        var completedTestCase = container.CompleteTestCase(TestCaseOperations.Passed);
+        var completedTestCase = TestCaseOperations.Passed.CompleteTestCase(container);
         
         // Act
         var formattedString = completedTestCase.ToFormattedString();
@@ -193,7 +194,7 @@ public sealed class TestSuiteReportDefaultsTests
     {
         // Assign
         var container = TestSuiteFactory.CreateEmptyContextContainer();
-        var completedTestCase = container.CompleteTestCase(TestCaseOperations.NotPassed);
+        var completedTestCase = TestCaseOperations.NotPassed.CompleteTestCase(container);
         
         // Act
         var formattedString = completedTestCase.ToFormattedString();
@@ -213,7 +214,7 @@ public sealed class TestSuiteReportDefaultsTests
     {
         // Assign
         var container = TestSuiteFactory.CreateEmptyContextContainer();
-        var completedTestCase = container.CompleteTestCase(TestCaseOperations.NotPassedWithOperationException);
+        var completedTestCase = TestCaseOperations.NotPassedWithOperationException.CompleteTestCase(container);
         
         // Act
         var formattedString = completedTestCase.ToFormattedString();
@@ -233,7 +234,7 @@ public sealed class TestSuiteReportDefaultsTests
     {
         // Assign
         var container = TestSuiteFactory.CreateEmptyContextContainer();
-        var completedTestCase = container.CompleteTestCase(TestCaseOperations.Invalid);
+        var completedTestCase = TestCaseOperations.Invalid.CompleteTestCase(container);
         
         // Act
         var formattedString = completedTestCase.ToFormattedString();

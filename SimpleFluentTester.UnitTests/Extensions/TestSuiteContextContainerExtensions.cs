@@ -8,8 +8,8 @@ namespace SimpleFluentTester.UnitTests.Extensions;
 public static class TestSuiteContextContainerExtensions
 {
     public static CompletedTestCase CompleteTestCase(
-        this ITestSuiteContextContainer contextContainer,
-        TestCase testCase,
+        this TestCase testCase,
+        ITestSuiteContextContainer contextContainer,
         params int[] testCasesToRun)
     {
         var operation = testCase.OperationFactory.Invoke();
