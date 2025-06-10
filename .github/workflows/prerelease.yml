@@ -16,5 +16,6 @@ jobs:
       project-name: SimpleFluentTester
       version-fragment: 'bug'
       nuget-name: 'simplefluenttester'
+      dotnet-version: 9
     secrets:
       NUGET_TOKEN: ${{ secrets.NUGET_TOKEN }}
