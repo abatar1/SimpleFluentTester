@@ -11,5 +11,5 @@ public interface ITestSuiteReportBuilder
 {
     PrintableTestSuiteResult? TestSuiteResultToString(
         TestSuiteRunResult testSuiteRunResult,
-        Func<CompletedTestCase, bool>? shouldPrintPredicate);
+        Func<AssertedTestCase, bool>? shouldPrintPredicate);
 }

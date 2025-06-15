@@ -6,7 +6,7 @@ namespace SimpleFluentTester.UnitTests.Extensions;
 public static class CompletedTestCaseExtensions
 {
     public static void AssertPassed<TExpected>(
-        this CompletedTestCase testCase,
+        this AssertedTestCase testCase,
         TExpected? expected,
         object?[] inputs,
         Func<TExpected?, TExpected?, bool>? comparer = null)
@@ -19,7 +19,7 @@ public static class CompletedTestCaseExtensions
     }
     
     public static void AssertFailed(
-        this CompletedTestCase testCase,
+        this AssertedTestCase testCase,
         Exception exception,
         string message)
     {
@@ -36,7 +36,7 @@ public static class CompletedTestCaseExtensions
     }
 
     public static void AssertNotPassed<TExpected>(
-        this CompletedTestCase testCase,
+        this AssertedTestCase testCase,
         TExpected? expected,
         object?[] inputs,
         Func<TExpected?, TExpected?, bool>? comparer = null)
@@ -49,7 +49,7 @@ public static class CompletedTestCaseExtensions
     }
 
     public static void AssertNotPassedWithException<TExpected>(
-        this CompletedTestCase testCase,
+        this AssertedTestCase testCase,
         TExpected? expected,
         object?[] inputs,
         Type exceptionType,
@@ -67,7 +67,7 @@ public static class CompletedTestCaseExtensions
     }
     
     public static void AssertSkippedTestResult(
-        this CompletedTestCase testCase,
+        this AssertedTestCase testCase,
         object? expected,
         object?[] inputs)
     {
@@ -82,7 +82,7 @@ public static class CompletedTestCaseExtensions
     }
 
     private static void AssertOutput<TExpected>(
-        this CompletedTestCase testCase,
+        this AssertedTestCase testCase,
         TExpected? expectedResult,
         IEnumerable<object?> expectedInputs,
         bool shouldBeEqual,
@@ -120,7 +120,7 @@ public static class CompletedTestCaseExtensions
         Assert.Equal(shouldBeEqual, comparer.Invoke(expectedResult, (TExpected?)testCase.Assert.Output.Value));
     }
     
-    private static void AssertNullOutput(this CompletedTestCase testCase)
+    private static void AssertNullOutput(this AssertedTestCase testCase)
     {
         Assert.NotNull(testCase.Assert.Output);
         Assert.Null(testCase.Assert.Output.Value);

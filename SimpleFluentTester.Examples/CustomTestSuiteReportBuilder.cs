@@ -8,8 +8,7 @@ namespace SimpleFluentTester.Examples;
 
 internal sealed class CustomTestSuiteReportBuilder : ITestSuiteReportBuilder
 {
-    public PrintableTestSuiteResult? TestSuiteResultToString(TestSuiteRunResult testSuiteRunResult, 
-        Func<CompletedTestCase, bool>? shouldPrintPredicate)
+    public PrintableTestSuiteResult? TestSuiteResultToString(TestSuiteRunResult testSuiteRunResult, Func<AssertedTestCase, bool>? shouldPrintPredicate)
     {
         if (!testSuiteRunResult.ShouldBeExecuted)
             return null;

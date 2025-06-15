@@ -1,4 +1,3 @@
-using SimpleFluentTester.UnitTests.Extensions;
 using SimpleFluentTester.UnitTests.Helpers;
 using SimpleFluentTester.Validators;
 using SimpleFluentTester.Validators.Core;
@@ -29,7 +28,7 @@ public class BuilderContextValidatorExtensionsTests
         var validated = new CustomValidatedObject(new Dictionary<ValidationSubject, IList<Func<ValidationResult>>>());
         
         // Act
-        validated.AddValidation(ValidationTestResults.Valid);
+        validated.AddReadyValidation(ValidationTestResults.Valid);
 
         // Assert
         Assert.Single(validated.Validations);
@@ -43,8 +42,8 @@ public class BuilderContextValidatorExtensionsTests
         var validated = new CustomValidatedObject(new Dictionary<ValidationSubject, IList<Func<ValidationResult>>>());
         
         // Act
-        validated.AddValidation(ValidationTestResults.Valid);
-        validated.AddValidation(ValidationTestResults.Valid);
+        validated.AddReadyValidation(ValidationTestResults.Valid);
+        validated.AddReadyValidation(ValidationTestResults.Valid);
 
         // Assert
         Assert.Single(validated.Validations);
@@ -58,7 +57,7 @@ public class BuilderContextValidatorExtensionsTests
         var validated = new CustomValidatedObject(new Dictionary<ValidationSubject, IList<Func<ValidationResult>>>());
         
         // Act
-        var func = () => validated.RegisterValidation<CustomValidator>();
+        var func = () => validated.RegisterFutureValidation<CustomValidator>();
 
         // Assert
         Assert.Throws<InvalidOperationException>(func);
@@ -71,7 +70,7 @@ public class BuilderContextValidatorExtensionsTests
         var validated = new CustomValidatedObject(new Dictionary<ValidationSubject, IList<Func<ValidationResult>>>());
         
         // Act
-        var func = () => validated.RegisterValidation<OperationValidator>();
+        var func = () => validated.RegisterFutureValidation<OperationValidator>();
 
         // Assert
         Assert.Throws<InvalidOperationException>(func);
@@ -85,7 +84,7 @@ public class BuilderContextValidatorExtensionsTests
         var validated = TestSuiteFactory.CreateAndAddTestCase(container, [1], 1);
         
         // Act
-        validated.RegisterValidation<OperationValidator>();
+        validated.RegisterFutureValidation<OperationValidator>();
 
         // Assert
         var validation = ValidationPipe.ValidatePacked(validated);
@@ -100,7 +99,7 @@ public class BuilderContextValidatorExtensionsTests
         var validated = TestSuiteFactory.CreateAndAddTestCase(container, [1], 1);
         
         // Act
-        validated.RegisterValidation<OperationValidator>(() => new OperationValidationContext(() => 1));
+        validated.RegisterFutureValidation<OperationValidator>(() => new OperationValidationContext(() => 1));
 
         // Assert
         var validation = ValidationPipe.ValidatePacked(validated);

@@ -21,7 +21,7 @@ internal sealed class TestSuiteReporterConfigurationBuilder : ITestSuiteReporter
         return this;
     }
 
-    public ITestSuiteReporterConfigurationBuilder WithPrintablePredicate(Func<CompletedTestCase, bool> printablePredicate)
+    public ITestSuiteReporterConfigurationBuilder WithPrintablePredicate(Func<AssertedTestCase, bool> printablePredicate)
     {
         _configuration.PrintablePredicate = printablePredicate;
         return this;
@@ -54,7 +54,7 @@ internal sealed class TestSuiteReporterConfigurationBuilder : ITestSuiteReporter
     }
     
 
-    private static Func<CompletedTestCase, bool> DefaultPrintablePredicate
+    private static Func<AssertedTestCase, bool> DefaultPrintablePredicate
     {
         get
         {
@@ -63,7 +63,7 @@ internal sealed class TestSuiteReporterConfigurationBuilder : ITestSuiteReporter
                 var notPassed = testCase.Assert.Status == AssertStatus.NotPassed;
                 var notPassedWithException = testCase.Assert.Status == AssertStatus.NotPassedWithException;
                 var failed = testCase.Assert.Status == AssertStatus.Failed;
-                var notValid = !testCase.Validation.IsValid;
+                var notValid = !testCase.IsValid;
                 return notPassed || notPassedWithException || notValid || failed;
             };
         }

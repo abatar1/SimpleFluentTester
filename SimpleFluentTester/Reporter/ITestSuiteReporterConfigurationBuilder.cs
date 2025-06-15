@@ -10,7 +10,7 @@ public interface ITestSuiteReporterConfigurationBuilder
 
     ITestSuiteReporterConfigurationBuilder WithLoggingBuilder(Action<ILoggingBuilder> loggingBuilder);
 
-    ITestSuiteReporterConfigurationBuilder WithPrintablePredicate(Func<CompletedTestCase, bool> printablePredicate);
+    ITestSuiteReporterConfigurationBuilder WithPrintablePredicate(Func<AssertedTestCase, bool> printablePredicate);
 
     ITestSuiteReporterConfiguration Build();
 }

@@ -1,4 +1,3 @@
-using SimpleFluentTester.UnitTests.Extensions;
 using SimpleFluentTester.Validators.Core;
 
 namespace SimpleFluentTester.UnitTests.Tests.Validators;

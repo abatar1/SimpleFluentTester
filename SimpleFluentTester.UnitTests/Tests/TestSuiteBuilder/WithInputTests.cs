@@ -15,7 +15,7 @@ public class WithInputTests
             
         // Act    
         var reporter = builder
-            .Expect(2).WithInput(1, 1, 1)
+            .ExpectResult(2).WithInput(1, 1, 1)
             .Run();
         
         // Assert
@@ -32,7 +32,7 @@ public class WithInputTests
             
         // Act    
         var reporter = builder
-            .Expect(2).WithInput(1)
+            .ExpectResult(2).WithInput(1)
             .Run();
         
         // Assert
@@ -49,7 +49,7 @@ public class WithInputTests
             
         // Act    
         var reporter = builder
-            .Expect(2).WithInput(1, "test")
+            .ExpectResult(2).WithInput(1, "test")
             .Run();
         
         // Assert
@@ -66,7 +66,7 @@ public class WithInputTests
             
         // Act    
         var reporter = builder
-            .Expect(2).WithInput(1, 1)
+            .ExpectResult(2).WithInput(1, 1)
             .Run();
         
         // Assert

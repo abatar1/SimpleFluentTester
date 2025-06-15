@@ -8,5 +8,5 @@ public static class ValidatedTypes
 {
     public static Type Context { get; } = typeof(TestSuiteContext);
 
-    public static Type TestCase { get; } = typeof(TestCase);
+    public static Type TestCase { get; } = typeof(DeferredTestCase);
 }

@@ -2,7 +2,7 @@ using System;
 
 namespace SimpleFluentTester.TestSuite.Context;
 
-public interface ITestSuiteContextContainer
+internal interface ITestSuiteContextContainer
 {
     ITestSuiteContext Context { get; }
 
@@ -10,7 +10,7 @@ public interface ITestSuiteContextContainer
 
     void WithDisplayName(string displayName);
 
-    void WithComparer(Delegate comparer);
+    void WithComparer<TExpected>(ComparerDelegate<TExpected> comparer);
 
     void DoNotExecute();
 }

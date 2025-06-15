@@ -1,5 +1,3 @@
-using System;
-
 namespace SimpleFluentTester.Validators.Core;
 
 internal abstract class BaseValidator<TValidationContext, TValidatedObject> : IValidator
@@ -12,8 +10,6 @@ internal abstract class BaseValidator<TValidationContext, TValidatedObject> : IV
     }
 
     public virtual string Key { get; }
-
-    public abstract Type AllowedType { get; }
     
     public abstract ValidationSubject Subject { get; }
 

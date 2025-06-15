@@ -14,7 +14,7 @@ public sealed class DefaultTestSuiteReportBuilderTests
         // Assign
         var testSuiteResult = TestSuiteFactory.CreateTestSuiteRunResult(shouldBeExecuted: false);
         var reporter = new DefaultTestSuiteReportBuilder();
-        var shouldPrintPredicateMock = new Mock<Func<CompletedTestCase, bool>>();
+        var shouldPrintPredicateMock = new Mock<Func<AssertedTestCase, bool>>();
 
         // Act
         var stringResult = reporter.TestSuiteResultToString(testSuiteResult, shouldPrintPredicateMock.Object);
@@ -22,7 +22,7 @@ public sealed class DefaultTestSuiteReportBuilderTests
         // Assert
         Assert.Null(stringResult);
         shouldPrintPredicateMock
-            .Verify(x => x.Invoke(It.IsAny<CompletedTestCase>()), Times.Never);
+            .Verify(x => x.Invoke(It.IsAny<AssertedTestCase>()), Times.Never);
     }
 
     [Fact]
@@ -31,7 +31,7 @@ public sealed class DefaultTestSuiteReportBuilderTests
         // Assign
         var testSuiteResult = TestSuiteFactory.CreateTestSuiteRunResult();
         var reporter = new DefaultTestSuiteReportBuilder();
-        var shouldPrintPredicateMock = new Mock<Func<CompletedTestCase, bool>>();
+        var shouldPrintPredicateMock = new Mock<Func<AssertedTestCase, bool>>();
 
         // Act
         var stringResult = reporter.TestSuiteResultToString(testSuiteResult, shouldPrintPredicateMock.Object);
@@ -43,7 +43,7 @@ public sealed class DefaultTestSuiteReportBuilderTests
         Assert.Equal("No test cases were added", stringResult.Message);
         Assert.Equal(testSuiteResult.Number, stringResult.EventId);
         shouldPrintPredicateMock
-            .Verify(x => x.Invoke(It.IsAny<CompletedTestCase>()), Times.Never);
+            .Verify(x => x.Invoke(It.IsAny<AssertedTestCase>()), Times.Never);
     }
 
     [Fact]
@@ -54,7 +54,7 @@ public sealed class DefaultTestSuiteReportBuilderTests
             ValidationTestResults.NonValid,
             TestCaseOperations.Passed);
         var reporter = new DefaultTestSuiteReportBuilder();
-        var shouldPrintPredicateMock = new Mock<Func<CompletedTestCase, bool>>();
+        var shouldPrintPredicateMock = new Mock<Func<AssertedTestCase, bool>>();
 
         // Act
         var stringResult = reporter.TestSuiteResultToString(testSuiteResult, shouldPrintPredicateMock.Object);
@@ -65,7 +65,7 @@ public sealed class DefaultTestSuiteReportBuilderTests
         Assert.NotNull(stringResult.Message);
         Assert.Equal(testSuiteResult.Number, stringResult.EventId);
         shouldPrintPredicateMock
-            .Verify(x => x.Invoke(It.IsAny<CompletedTestCase>()), Times.Once);
+            .Verify(x => x.Invoke(It.IsAny<AssertedTestCase>()), Times.Once);
     }
     
     [Fact]
@@ -76,7 +76,7 @@ public sealed class DefaultTestSuiteReportBuilderTests
             ValidationTestResults.Valid,
             TestCaseOperations.Passed);
         var reporter = new DefaultTestSuiteReportBuilder();
-        var shouldPrintPredicateMock = new Mock<Func<CompletedTestCase, bool>>();
+        var shouldPrintPredicateMock = new Mock<Func<AssertedTestCase, bool>>();
 
         // Act
         var stringResult = reporter.TestSuiteResultToString(testSuiteResult, shouldPrintPredicateMock.Object);
@@ -87,7 +87,7 @@ public sealed class DefaultTestSuiteReportBuilderTests
         Assert.NotNull(stringResult.Message);
         Assert.Equal(testSuiteResult.Number, stringResult.EventId);
         shouldPrintPredicateMock
-            .Verify(x => x.Invoke(It.IsAny<CompletedTestCase>()), Times.Once);
+            .Verify(x => x.Invoke(It.IsAny<AssertedTestCase>()), Times.Once);
     }
 
     [Fact]
@@ -98,7 +98,7 @@ public sealed class DefaultTestSuiteReportBuilderTests
             ValidationTestResults.Valid,
             TestCaseOperations.Invalid);
         var reporter = new DefaultTestSuiteReportBuilder();
-        var shouldPrintPredicateMock = new Mock<Func<CompletedTestCase, bool>>();
+        var shouldPrintPredicateMock = new Mock<Func<AssertedTestCase, bool>>();
 
         // Act
         var stringResult = reporter.TestSuiteResultToString(testSuiteResult, shouldPrintPredicateMock.Object);
@@ -109,7 +109,7 @@ public sealed class DefaultTestSuiteReportBuilderTests
         Assert.NotNull(stringResult.Message);
         Assert.Equal(testSuiteResult.Number, stringResult.EventId);
         shouldPrintPredicateMock
-            .Verify(x => x.Invoke(It.IsAny<CompletedTestCase>()), Times.Once);
+            .Verify(x => x.Invoke(It.IsAny<AssertedTestCase>()), Times.Once);
     }
 
     [Fact]
@@ -120,7 +120,7 @@ public sealed class DefaultTestSuiteReportBuilderTests
             ValidationTestResults.Valid,
             TestCaseOperations.NotPassed);
         var reporter = new DefaultTestSuiteReportBuilder();
-        var shouldPrintPredicateMock = new Mock<Func<CompletedTestCase, bool>>();
+        var shouldPrintPredicateMock = new Mock<Func<AssertedTestCase, bool>>();
 
         // Act
         var stringResult = reporter.TestSuiteResultToString(testSuiteResult, shouldPrintPredicateMock.Object);
@@ -131,7 +131,7 @@ public sealed class DefaultTestSuiteReportBuilderTests
         Assert.NotNull(stringResult.Message);
         Assert.Equal(testSuiteResult.Number, stringResult.EventId);
         shouldPrintPredicateMock
-            .Verify(x => x.Invoke(It.IsAny<CompletedTestCase>()), Times.Once);
+            .Verify(x => x.Invoke(It.IsAny<AssertedTestCase>()), Times.Once);
     }
 
     [Fact]
@@ -142,7 +142,7 @@ public sealed class DefaultTestSuiteReportBuilderTests
             ValidationTestResults.Valid,
             TestCaseOperations.Passed);
         var reporter = new DefaultTestSuiteReportBuilder();
-        var shouldPrintPredicateMock = new Mock<Func<CompletedTestCase, bool>>();
+        var shouldPrintPredicateMock = new Mock<Func<AssertedTestCase, bool>>();
 
         // Act
         var stringResult = reporter.TestSuiteResultToString(testSuiteResult, shouldPrintPredicateMock.Object);
@@ -153,7 +153,7 @@ public sealed class DefaultTestSuiteReportBuilderTests
         Assert.NotNull(stringResult.Message);
         Assert.Equal(testSuiteResult.Number, stringResult.EventId);
         shouldPrintPredicateMock
-            .Verify(x => x.Invoke(It.IsAny<CompletedTestCase>()), Times.Once);
+            .Verify(x => x.Invoke(It.IsAny<AssertedTestCase>()), Times.Once);
     }
     
     [Fact]
@@ -165,7 +165,7 @@ public sealed class DefaultTestSuiteReportBuilderTests
             TestCaseOperations.Passed,
             testCaseToRun: 2);
         var reporter = new DefaultTestSuiteReportBuilder();
-        var shouldPrintPredicateMock = new Mock<Func<CompletedTestCase, bool>>();
+        var shouldPrintPredicateMock = new Mock<Func<AssertedTestCase, bool>>();
 
         // Act
         var stringResult = reporter.TestSuiteResultToString(testSuiteResult, shouldPrintPredicateMock.Object);
@@ -176,6 +176,6 @@ public sealed class DefaultTestSuiteReportBuilderTests
         Assert.NotNull(stringResult.Message);
         Assert.Equal(testSuiteResult.Number, stringResult.EventId);
         shouldPrintPredicateMock
-            .Verify(x => x.Invoke(It.IsAny<CompletedTestCase>()), Times.Once);
+            .Verify(x => x.Invoke(It.IsAny<AssertedTestCase>()), Times.Once);
     }
 }

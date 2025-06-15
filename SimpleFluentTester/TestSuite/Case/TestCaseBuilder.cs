@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using SimpleFluentTester.TestSuite.ComparedObject;
 using SimpleFluentTester.TestSuite.Context;
@@ -11,14 +12,11 @@ internal sealed class TestCaseBuilder(
     IComparedObject expected, 
     IList<ValidationResult>? validationResults = null) : ITestCaseBuilder
 {
-    /// <summary>
-    /// Defines input parameters; their types should match the types of the tested method's input parameters and should be in the same order.
-    /// </summary>
     public ITestSuiteBuilder WithInput(params object?[] inputs)
     {
-        var testCase = new TestCase(
-            () => contextContainer.Context.Operation,
-            () => contextContainer.Context.Comparer, 
+        var testCase = new DeferredTestCase(
+            new Lazy<Delegate?>(() => contextContainer.Context.Operation),
+            new Lazy<Delegate?>(() => contextContainer.Context.Comparer), 
             ComparedObjectFactory.WrapMany(inputs), 
             expected, 
             contextContainer.Context.TestCases.Count + 1);
@@ -26,14 +24,23 @@ internal sealed class TestCaseBuilder(
         if (validationResults != null && validationResults.Count != 0)
         {
             foreach (var validationResult in validationResults)
-                testCase.AddValidation(validationResult);
+                testCase.AddReadyValidation(validationResult);
         }
         
-        testCase.RegisterValidation<OperationValidator>(() => new OperationValidationContext(contextContainer.Context.Operation));
-        testCase.RegisterValidation<InputsValidator>(() => new InputsValidationContext(contextContainer.Context.Operation));
+        testCase.RegisterFutureValidation<OperationValidator>();
+        testCase.RegisterFutureValidation<InputsValidator>();
+        testCase.RegisterFutureValidation<ComparerValidator>();
             
         contextContainer.Context.TestCases.Add(testCase);
 
         return new TestSuiteBuilder(contextContainer);
+    }
+
+    public ITestSuiteBuilder And
+    {
+        get
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

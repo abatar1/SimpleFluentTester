@@ -17,10 +17,10 @@ public class RunTests
         
         // Act
         var reporter1 = builder1
-            .Expect(2).WithInput(1, 1)
+            .ExpectResult(2).WithInput(1, 1)
             .Run(2);
         var reporter2 = builder2
-            .Expect(2).WithInput(1, 1)
+            .ExpectResult(2).WithInput(1, 1)
             .Run(1, 2);
         
         // Assert

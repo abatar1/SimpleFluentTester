@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using SimpleFluentTester.TestSuite.ComparedObject;
+using SimpleFluentTester.TestSuite.Context;
 using SimpleFluentTester.Validators.Core;
 
-namespace SimpleFluentTester.TestSuite.Context;
+namespace SimpleFluentTester.TestSuite.Case;
 
-public static class ExpectExceptionFactory
+internal static class ExpectExceptionFactory
 {
-    private static readonly IDictionary<Type, List<ParameterInfo[]>> ParameterInfoMap = new Dictionary<Type, List<ParameterInfo[]>>();
+    private static readonly IDictionary<Type, List<ParameterInfo[]>> ExceptionsParameterInfoMap = new Dictionary<Type, List<ParameterInfo[]>>();
     
     /// <summary>
     /// Converts input exception as an expected object, validated that it could be constructed from the given type and message if provided.
@@ -19,23 +20,23 @@ public static class ExpectExceptionFactory
         Type exceptionType,
         string? message = null)
     {
-        if (!ParameterInfoMap.TryGetValue(exceptionType, out var publicConstructorParams))
+        if (!ExceptionsParameterInfoMap.TryGetValue(exceptionType, out var publicConstructorParams))
         {
             publicConstructorParams = exceptionType
                 .GetConstructors(BindingFlags.Public | BindingFlags.Instance)
                 .Select(x => x.GetParameters())
                 .ToList();
-            ParameterInfoMap[exceptionType] = publicConstructorParams;
+            ExceptionsParameterInfoMap[exceptionType] = publicConstructorParams;
         }
 
         if (!string.IsNullOrWhiteSpace(message))
         {
             if (!HasStringCtor(publicConstructorParams))
                 return ValidationFailed($"{exceptionType} do not have public .ctor() with string parameter");
-            return TryCreateException(container, exceptionType, message);
+            return TryCreateExceptionObject(container, exceptionType, message);
         }
         
-        return TryCreateException(container, exceptionType);
+        return TryCreateExceptionObject(container, exceptionType);
     }
 
     private static ValidatedObject ValidationFailed(string message)
@@ -54,7 +55,7 @@ public static class ExpectExceptionFactory
             });
     }
 
-    private static ValidatedObject TryCreateException(
+    private static ValidatedObject TryCreateExceptionObject(
         ITestSuiteContextContainer container,
         Type exceptionType,
         string? message = null)

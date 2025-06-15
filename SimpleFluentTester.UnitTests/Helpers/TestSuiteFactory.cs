@@ -8,11 +8,11 @@ using SimpleFluentTester.Validators.Core;
 
 namespace SimpleFluentTester.UnitTests.Helpers;
 
-public static class TestSuiteFactory
+internal static class TestSuiteFactory
 {
-    public static TestCase CreateAndAddTestCase(ITestSuiteContextContainer container, object?[] inputs, object? expected)
+    public static DeferredTestCase CreateAndAddTestCase(ITestSuiteContextContainer container, object?[] inputs, object? expected)
     {
-        var testCase = new TestCase(
+        var testCase = new DeferredTestCase(
             () => container.Context.Operation,
             () => container.Context.Comparer,
             ComparedObjectFactory.WrapMany(inputs), 
@@ -46,7 +46,7 @@ public static class TestSuiteFactory
 
     public static TestSuiteRunResult CreateTestSuiteRunResult(
         ValidationResult? validationResult = null,
-        TestCase? testCase = null,
+        DeferredTestCase? testCase = null,
         int testCaseToRun = 1,
         bool shouldBeExecuted = true,
         int testCaseNumber = 1)
@@ -56,7 +56,7 @@ public static class TestSuiteFactory
         if (validationResult != null)
             contextContainer.Context.AddValidation(validationResult);
 
-        var completedTestCases = new List<CompletedTestCase>();
+        var completedTestCases = new List<AssertedTestCase>();
         if (testCase != null)
         {
             var completedTestCase = testCase.CompleteTestCase(contextContainer, testCaseToRun);

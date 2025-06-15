@@ -6,7 +6,7 @@ namespace SimpleFluentTester.UnitTests.Extensions;
 
 public static class TestSuiteReporterExtensions
 {
-    public static CompletedTestCase AssertTestCaseExists(
+    public static AssertedTestCase AssertTestCaseExists(
         this ITestSuiteReporter testSuiteReporter, 
         int testNumber)
     {

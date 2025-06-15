@@ -3,27 +3,17 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using SimpleFluentTester.Helpers;
-using SimpleFluentTester.Validators.Core;
 
 namespace SimpleFluentTester.TestSuite.Context;
 
-public static class OperationEnricher
+internal static class OperationEnricher
 {
     public static void TryToEnrichAttributeOperation(this ITestSuiteContextContainer container)
     {
         if (container.Context.Operation != null)
             return;
-
-        try
-        {
-            var operation = GetDelegateFromAttributedMethod(container.Context.EntryAssemblyProvider, container.Context.Activator);
-            container.Context.AddValidation(ValidationResult.Valid(ValidationSubject.Operation));
-            container.WithOperation(operation);
-        }
-        catch (Exception e)
-        {
-            container.Context.AddValidation(ValidationResult.NonValid(ValidationSubject.Operation, e.Message));
-        }
+        var operation = GetDelegateFromAttributedMethod(container.Context.EntryAssemblyProvider, container.Context.Activator);
+        container.WithOperation(operation);
     }
 
     private static Delegate GetDelegateFromAttributedMethod(IEntryAssemblyProvider entryAssemblyProvider,
@@ -31,8 +21,7 @@ public static class OperationEnricher
     {
         var entryAssembly = entryAssemblyProvider.Get();
         if (entryAssembly == null)
-            throw new InvalidOperationException(
-                $"No entry {nameof(Assembly)} have been found when trying to find {nameof(TestSuiteDelegateAttribute)} definitions.");
+            throw new InvalidContextException($"No entry {nameof(Assembly)} have been found when trying to find {nameof(TestSuiteDelegateAttribute)} definitions.");
 
         const BindingFlags bindingAttr = BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static;
         var operationMembers = entryAssembly.GetTypes()
@@ -41,11 +30,9 @@ public static class OperationEnricher
             .ToList();
 
         if (operationMembers.Count == 0)
-            throw new InvalidOperationException(
-                $"You should specify an operation first with an {nameof(TestSuiteDelegateAttribute)} attribute or using {nameof(TestSuiteBuilder.UseOperation)} method.");
+            throw new InvalidContextException($"You should specify an operation first with an {nameof(TestSuiteDelegateAttribute)} attribute or using {nameof(TestSuiteBuilder.UseOperation)} method.");
         if (operationMembers.Count > 1)
-            throw new InvalidOperationException(
-                $"You defined more than one method with {nameof(TestSuiteDelegateAttribute)}.");
+            throw new InvalidContextException($"You defined more than one method with {nameof(TestSuiteDelegateAttribute)}.");
 
         var assemblyMethodOfTestSuite = (MethodInfo)operationMembers.Single();
 
@@ -63,8 +50,7 @@ public static class OperationEnricher
         var assemblyMethodClassCtorOfTestSuite = methodClassCtor
             .FirstOrDefault(x => x.GetParameters().Length == 0);
         if (assemblyMethodClassCtorOfTestSuite == null)
-            throw new InvalidOperationException(
-                $"{nameof(TestSuiteDelegateAttribute)} has been defined for non-static method where declaring type do not have empty constructors. Please add empty constructor or consider using static method.");
+            throw new InvalidContextException($"{nameof(TestSuiteDelegateAttribute)} has been defined for non-static method where declaring type do not have empty constructors. Please add empty constructor or consider using static method.");
 
         var target = activator.CreateInstance(methodClassType);
 

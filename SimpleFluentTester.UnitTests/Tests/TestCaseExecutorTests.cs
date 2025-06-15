@@ -1,6 +1,5 @@
 using System.Diagnostics;
 using SimpleFluentTester.TestSuite.Case;
-using SimpleFluentTester.UnitTests.Extensions;
 using SimpleFluentTester.UnitTests.Helpers;
 using SimpleFluentTester.UnitTests.TestObjects;
 
@@ -16,14 +15,12 @@ public sealed class TestCaseExecutorTests
         var input = new[] { 1, 2 }.Cast<object?>().ToArray();
         
         var container = TestSuiteFactory.CreateEmptyContextContainer(operation: (int x, int y) => x + y);
-
-        var testCaseExecutor = new TestCaseExecutor();
         
         var testCase = TestSuiteFactory.CreateAndAddTestCase(container, input, expectedResult);
         var sw = new Stopwatch();
         
         // Act
-        var result = testCaseExecutor.Execute(testCase, sw);
+        var result = TestCaseExecutor.Execute(testCase, sw);
 
         // Assert
         Assert.Empty(testCase.Validations);
@@ -39,14 +36,12 @@ public sealed class TestCaseExecutorTests
         {
             throw exception;
         });
-        
-        var testCaseExecutor = new TestCaseExecutor();
 
         var testCase = TestSuiteFactory.CreateAndAddTestCase(container, [1, 2], 3);
         var sw = new Stopwatch();
         
         // Act
-        var result = testCaseExecutor.Execute(testCase, sw);
+        var result = TestCaseExecutor.Execute(testCase, sw);
 
         // Assert
         Assert.Empty(testCase.Validations);
@@ -57,18 +52,15 @@ public sealed class TestCaseExecutorTests
     public void Execute_InvalidInput_ShouldReturnExceptionWithValidation()
     {
         // Assign
-        var exception = new CustomWithMessageException("Message");
         var input = new[] { 1, 2, 3 }.Cast<object?>().ToArray();
         
         var container = TestSuiteFactory.CreateEmptyContextContainer(operation: (int x, int y) => x + y);
-        
-        var testCaseExecutor = new TestCaseExecutor();
 
         var testCase = TestSuiteFactory.CreateAndAddTestCase(container, input, 6);
         var sw = new Stopwatch();
         
         // Act
-        var result = testCaseExecutor.Execute(testCase, sw);
+        var result = TestCaseExecutor.Execute(testCase, sw);
 
         // Assert
         Assert.Single(testCase.Validations);
@@ -82,14 +74,12 @@ public sealed class TestCaseExecutorTests
         var input = new[] { 1, 2, 3 }.Cast<object?>().ToArray();
         
         var container = TestSuiteFactory.CreateEmptyContextContainer();
-        
-        var testCaseExecutor = new TestCaseExecutor();
 
         var testCase = TestSuiteFactory.CreateAndAddTestCase(container, input, 6);
         var sw = new Stopwatch();
         
         // Act
-        var result = testCaseExecutor.Execute(testCase, sw);
+        var result = TestCaseExecutor.Execute(testCase, sw);
 
         // Assert
         Assert.NotNull(result);

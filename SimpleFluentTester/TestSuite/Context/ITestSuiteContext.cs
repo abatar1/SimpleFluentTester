@@ -2,11 +2,10 @@ using System;
 using System.Collections.Generic;
 using SimpleFluentTester.Helpers;
 using SimpleFluentTester.TestSuite.Case;
-using SimpleFluentTester.Validators.Core;
 
 namespace SimpleFluentTester.TestSuite.Context;
 
-public interface ITestSuiteContext : IValidatedObject
+internal interface ITestSuiteContext
 {
     int Number { get; }
     
@@ -18,7 +17,7 @@ public interface ITestSuiteContext : IValidatedObject
 
     IActivator Activator { get; }
 
-    IList<TestCase> TestCases { get; }
+    IList<DeferredTestCase> TestCases { get; }
 
     Delegate? Operation { get; }
     

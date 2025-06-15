@@ -8,16 +8,16 @@ public static class ValidationPipe
 {
     /// <summary>
     /// Invokes all validations for the object inherited from <see cref="IValidatedObject"/> interface.
-    /// All validation's results of a single object packed into single object.
+    /// All validation's results of a single object are packed into a single object.
     /// </summary>
-    public static PackedValidation ValidatePacked(IValidatedObject validated)
+    public static List<ValidationResult> GetValidationResults(this IValidatedObject validated)
     {
         var generalStatus = ValidationStatus.Valid;
-        var validationResults = validated.Validations
+        return validated.Validations
             .Select(x =>
             {
                 var validationResults = x.Value
-                    .Select(y => y.Invoke())
+                    .Select(y => y.Value)
                     .ToList();
                 
                 var currentValidationStatus = ValidationStatus.Valid;
@@ -43,7 +43,6 @@ public static class ValidationPipe
                 return ValidationResult.FromStatus(currentValidationStatus, x.Key, message, aggregateException);
             })
             .ToList();
-        return new PackedValidation(validated, validationResults, generalStatus);
     }
 
     private static string? GetAggregatedMessage(IList<ValidationResult> validationResults)

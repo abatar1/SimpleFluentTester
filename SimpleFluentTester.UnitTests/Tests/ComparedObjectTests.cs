@@ -11,7 +11,7 @@ public sealed class ComparedObjectFactoryTests
         // Assign
         
         // Act
-        var comparedObject = ComparedObjectFactory.Wrap(null);
+        var comparedObject = ComparedObjectFactory.Wrap<object>(null);
 
         // Assert
         comparedObject.AssertNull();

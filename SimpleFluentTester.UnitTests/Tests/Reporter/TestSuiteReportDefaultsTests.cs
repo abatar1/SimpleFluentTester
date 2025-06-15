@@ -1,6 +1,5 @@
 using Microsoft.Extensions.Logging;
 using SimpleFluentTester.Reporter;
-using SimpleFluentTester.TestSuite.Case;
 using SimpleFluentTester.UnitTests.Extensions;
 using SimpleFluentTester.UnitTests.Helpers;
 

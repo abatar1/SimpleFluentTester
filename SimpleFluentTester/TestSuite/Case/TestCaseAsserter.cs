@@ -5,33 +5,38 @@ using SimpleFluentTester.Validators.Core;
 
 namespace SimpleFluentTester.TestSuite.Case;
 
-internal sealed class TestCaseAsserter
+internal static class TestCaseAsserter
 {
     /// <summary>
-    /// Asserts given <see cref="TestCase"/> which means compares expected result with an actual result.
+    /// Asserts given <see cref="DeferredTestCase"/> which means compares an expected result with an actual result.
     /// </summary>
-    public AssertResult Assert(TestCase testCase, IComparedObject output)
+    public static AssertedTestCase Assert(this ExecutedTestCase executedTestCase)
     {
-        var comparer = testCase.ComparerFactory.Invoke();
-        
+        AssertResult assertResult;
         try
         {
-            var assertStatus = AssertInternal(output, testCase.Expected, comparer);
-            return new AssertResult(output, assertStatus);
+            var assertStatus = AssertInternal(executedTestCase.Result, executedTestCase.Expected, executedTestCase.Comparer);
+            assertResult = new AssertResult(executedTestCase.Result, assertStatus);
         }
         catch (TargetInvocationException e)
         {
-            testCase.AddValidation(ValidationResult.NonValid(ValidationSubject.Comparer, "Comparer execution failed with an exception."));
-            return new AssertResult(output, AssertStatus.Failed, e.InnerException, e.InnerException?.Message);
+            executedTestCase.AddReadyValidation(ValidationResult.NonValid(ValidationSubject.Comparer, "Comparer execution failed with an exception."));
+            assertResult = new AssertResult(executedTestCase.Result, AssertStatus.Failed, e.InnerException, e.InnerException?.Message);
         }
         catch (Exception e)
         {
-            testCase.AddValidation(ValidationResult.NonValid(ValidationSubject.Comparer, $"Comparer execution failed with an exception [{e.Message}]."));
-            return new AssertResult(output, AssertStatus.Failed, e, e.Message);
+            executedTestCase.AddReadyValidation(ValidationResult.NonValid(ValidationSubject.Comparer, $"Comparer execution failed with an exception [{e.Message}]."));
+            assertResult = new AssertResult(executedTestCase.Result, AssertStatus.Failed, e, e.Message);
         }
+        return BuildAsserted(assertResult, executedTestCase);
     }
 
-    private static AssertStatus AssertInternal(IComparedObject output, IComparedObject expected, Delegate? comparer)
+    private static AssertedTestCase BuildAsserted(AssertResult assertResult, ExecutedTestCase executedTestCase)
+    {
+        return new AssertedTestCase(assertResult, executedTestCase, executedTestCase.ElapsedTime);
+    }
+
+    private static AssertStatus AssertInternal(IComparedObject output, IComparedObject expected, Delegate comparer)
     {
         bool passed;
         switch (output.Variety)
@@ -48,7 +53,7 @@ internal sealed class TestCaseAsserter
 
                 var equalMessage = true;
                 if (!string.IsNullOrWhiteSpace(expectedException?.Message))
-                    equalMessage = expectedException?.Message == outputException?.Message;
+                    equalMessage = expectedException.Message == outputException?.Message;
                 passed = equalMessage && expected.Type == output.Type;
                 break;
             }
@@ -57,17 +62,13 @@ internal sealed class TestCaseAsserter
                 var hasSameVariety = output.Variety == expected.Variety;
                 var hasSameType = output.Type == expected.Type;
                 
-                var valueObject = (ValueObject)output;
-                
-                bool isEqual;
-                if (comparer != null)
-                    isEqual = (bool)comparer.Method.Invoke(comparer.Target, [output.Value, expected.Value]);
-                else
-                    isEqual = valueObject.Value.Equals(expected.Value);
+                var isEqual = (bool)comparer.Method.Invoke(comparer.Target, [output.Value, expected.Value]);
 
                 passed = hasSameVariety && hasSameType && isEqual;
                 break;
             }
+            case ComparedObjectVariety.Parameter:
+                throw new NotSupportedException("Something went wrong, parameter is not supposed to be asserted and converted before assertion.");
             default:
                 throw new ArgumentOutOfRangeException();
         }

@@ -19,7 +19,7 @@ public class ExpectTests
             
         // Act    
         var reporter = builder
-            .Expect(2).WithInput(1, 1)
+            .ExpectResult(2).WithInput(1, 1)
             .Run();
         
         // Assert
@@ -35,7 +35,7 @@ public class ExpectTests
             
         // Act    
         var reporter = builder
-            .Expect(null).WithInput(null, 1)
+            .ExpectResult(null).WithInput(null, 1)
             .Run();
         
         // Assert
@@ -51,8 +51,8 @@ public class ExpectTests
             
         // Act    
         var reporter = builder
-            .Expect(2).WithInput(1, 1)
-            .Expect(3).WithInput(1, 1)
+            .ExpectResult(2).WithInput(1, 1)
+            .ExpectResult(3).WithInput(1, 1)
             .Run();
         
         // Assert
@@ -69,9 +69,9 @@ public class ExpectTests
             
         // Act    
         var reporter = builder
-            .Expect(2).WithInput(1, 1)
-            .Expect(2).WithInput(2, 1)
-            .Expect(3).WithInput(2, 1)
+            .ExpectResult(2).WithInput(1, 1)
+            .ExpectResult(2).WithInput(2, 1)
+            .ExpectResult(3).WithInput(2, 1)
             .Run(1, 2);
 
         // Assert
@@ -90,7 +90,7 @@ public class ExpectTests
         
         // Act
         var reporter = builder
-            .Expect(2).WithInput(1, 1)
+            .ExpectResult(2).WithInput(1, 1)
             .Run();
         
         // Assert
@@ -110,7 +110,7 @@ public class ExpectTests
         
         // Act
         var reporter = builder
-            .Expect(2).WithInput(1, 1)
+            .ExpectResult(2).WithInput(1, 1)
             .Run();
         
         // Assert
@@ -134,7 +134,7 @@ public class ExpectTests
         
         // Act
         var reporter = builder
-            .Expect(2).WithInput(1, 1)
+            .ExpectResult(2).WithInput(1, 1)
             .Run();
         
         // Assert
@@ -151,7 +151,7 @@ public class ExpectTests
         
         // Act
         var reporter = builder
-            .Expect(new EquatableTestObject(2)).WithInput(new EquatableTestObject(1), new EquatableTestObject(1))
+            .ExpectResult(new EquatableTestObject(2)).WithInput(new EquatableTestObject(1), new EquatableTestObject(1))
             .Run();
         
         // Assert
@@ -172,7 +172,7 @@ public class ExpectTests
         
         // Act
         var reporter = builder
-            .Expect(new EquatableTestObject(2)).WithInput(new EquatableTestObject(1), new EquatableTestObject(1))
+            .ExpectResult(new EquatableTestObject(2)).WithInput(new EquatableTestObject(1), new EquatableTestObject(1))
             .Run();
         
         // Assert
@@ -190,7 +190,7 @@ public class ExpectTests
             
         // Act    
         var reporter = builder
-            .Expect("123").WithInput(1, 1)
+            .ExpectResult("123").WithInput(1, 1)
             .Run();
         
         // Assert
@@ -207,7 +207,7 @@ public class ExpectTests
             
         // Act    
         var reporter = builder
-            .Expect(null).WithInput(1, 1)
+            .ExpectResult(null).WithInput(1, 1)
             .Run();
         
         // Assert
@@ -224,7 +224,7 @@ public class ExpectTests
             
         // Act    
         var reporter = builder
-            .Expect(2).WithInput(1, 1)
+            .ExpectResult(2).WithInput(1, 1)
             .Run();
         
         // Assert

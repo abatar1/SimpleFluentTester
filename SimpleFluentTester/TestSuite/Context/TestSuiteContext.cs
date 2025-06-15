@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using SimpleFluentTester.Helpers;
 using SimpleFluentTester.TestSuite.Case;
-using SimpleFluentTester.Validators.Core;
 
 namespace SimpleFluentTester.TestSuite.Context;
 
@@ -11,10 +10,9 @@ internal sealed class TestSuiteContext(
     string name,
     IEntryAssemblyProvider entryAssemblyProvider,
     IActivator activator,
-    IList<TestCase> testCases,
+    IList<DeferredTestCase> testCases,
     Delegate? operation,
     Delegate? comparer,
-    IDictionary<ValidationSubject, IList<Func<ValidationResult>>> validations,
     bool shouldBeExecuted) : ITestSuiteContext
 {
     public int Number { get; } = number;
@@ -27,11 +25,9 @@ internal sealed class TestSuiteContext(
 
     public IActivator Activator { get; } = activator;
 
-    public IList<TestCase> TestCases { get; } = testCases;
+    public IList<DeferredTestCase> TestCases { get; } = testCases;
     
     public Delegate? Operation { get; } = operation;
     
     public Delegate? Comparer { get; } = comparer;
-
-    public IDictionary<ValidationSubject, IList<Func<ValidationResult>>> Validations { get; } = validations;
 }

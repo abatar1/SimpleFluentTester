@@ -4,5 +4,6 @@ public enum ComparedObjectVariety
 {
     Null,
     Value,
-    Exception
+    Exception,
+    Parameter
 }

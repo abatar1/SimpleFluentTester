@@ -19,48 +19,48 @@ public static class TestCaseOperations
         return builder.UseOperation((int x, int y) => x + y);
     }
         
-    public static TestCase Passed
+    public static DeferredTestCase Passed
     {
         get
         {
             var expected = ComparedObjectFactory.Wrap(3);
-            return new TestCase(() => Operation, () => Comparer,ComparedObjectFactory.WrapMany([1, 2]), expected, 1);
+            return new DeferredTestCase(() => Operation, () => Comparer,ComparedObjectFactory.WrapMany([1, 2]), expected, 1);
         }
     }
         
-    public static TestCase NotPassed
+    public static DeferredTestCase NotPassed
     {
         get
         {
             var expected = ComparedObjectFactory.Wrap(4);
-            return new TestCase(() => Operation, () => Comparer,ComparedObjectFactory.WrapMany([1, 2]), expected, 1);
+            return new DeferredTestCase(() => Operation, () => Comparer,ComparedObjectFactory.WrapMany([1, 2]), expected, 1);
         }
     }
         
-    public static TestCase NotPassedWithOperationException
+    public static DeferredTestCase NotPassedWithOperationException
     {
         get
         {
             var expected = ComparedObjectFactory.Wrap(3);
-            return new TestCase(() => ThrowOperation, () => Comparer,ComparedObjectFactory.WrapMany([1, 2]), expected, 1);
+            return new DeferredTestCase(() => ThrowOperation, () => Comparer,ComparedObjectFactory.WrapMany([1, 2]), expected, 1);
         }
     }
     
-    public static TestCase NotPassedWithComparerException
+    public static DeferredTestCase NotPassedWithComparerException
     {
         get
         {
             var expected = ComparedObjectFactory.Wrap(3);
-            return new TestCase(() => Operation, () => ThrowComparer,ComparedObjectFactory.WrapMany([1, 2]), expected, 1);
+            return new DeferredTestCase(() => Operation, () => ThrowComparer,ComparedObjectFactory.WrapMany([1, 2]), expected, 1);
         }
     }
         
-    public static TestCase Invalid
+    public static DeferredTestCase Invalid
     {
         get
         {
             var expected = ComparedObjectFactory.Wrap(4);
-            return new TestCase(() => Operation, () => Comparer,ComparedObjectFactory.WrapMany(["test", 2]), expected, 1);
+            return new DeferredTestCase(() => Operation, () => Comparer,ComparedObjectFactory.WrapMany(["test", 2]), expected, 1);
         }
     }
     

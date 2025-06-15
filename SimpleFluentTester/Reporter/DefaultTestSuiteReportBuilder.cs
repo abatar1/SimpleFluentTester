@@ -12,7 +12,7 @@ internal sealed class DefaultTestSuiteReportBuilder : ITestSuiteReportBuilder
 {
     public PrintableTestSuiteResult? TestSuiteResultToString(
         TestSuiteRunResult testSuiteRunResult,
-        Func<CompletedTestCase, bool>? shouldPrintPredicate)
+        Func<AssertedTestCase, bool>? shouldPrintPredicate)
     {
         if (!testSuiteRunResult.ShouldBeExecuted)
             return null;
@@ -24,7 +24,7 @@ internal sealed class DefaultTestSuiteReportBuilder : ITestSuiteReportBuilder
 
         stringBuilder.AppendLine(testSuiteRunResult.ToHeaderString());
 
-        IEnumerable<CompletedTestCase> testCaseEnumerable = testSuiteRunResult.TestCases;
+        IEnumerable<AssertedTestCase> testCaseEnumerable = testSuiteRunResult.TestCases;
         if (shouldPrintPredicate != null)
             testCaseEnumerable = testCaseEnumerable.Where(shouldPrintPredicate);
         var printableTestCases = testCaseEnumerable.ToList();

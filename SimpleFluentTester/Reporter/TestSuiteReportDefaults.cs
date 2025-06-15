@@ -13,13 +13,12 @@ public static class TestSuiteReportDefaults
 {
     public static LogLevel DetermineLogLevel(this TestSuiteRunResult testSuiteResult)
     {
-        var contextNotValid = !testSuiteResult.Validation.IsValid;
         var someTestCasesNotPassed = testSuiteResult.TestCases
             .Any(x => x.Assert.Status != AssertStatus.Passed);
         var someTestCasesNotValid = testSuiteResult.TestCases
-            .Any(x => !x.Validation.IsValid);
+            .Any(x => !x.IsValid);
         
-        if (someTestCasesNotPassed || someTestCasesNotValid || contextNotValid)
+        if (someTestCasesNotPassed || someTestCasesNotValid || !testSuiteResult.IsValid)
             return LogLevel.Error;
         return LogLevel.Information;
     }
@@ -33,12 +32,10 @@ public static class TestSuiteReportDefaults
             .Count(x => x.Assert.Status != AssertStatus.Ignored);
         stringBuilder.AppendLine($" Tests to execute: {executedTestCaseCount}");
 
-        if (!testSuiteResult.Validation.IsValid)
+        if (!testSuiteResult.IsValid)
         {
-            var validationResults = testSuiteResult.Validation.GetNonValid();
             stringBuilder.AppendLine("Test suite did not pass a validation");
-            foreach (var validationResult in validationResults)
-                AppendValidationResult(stringBuilder, validationResult);
+            stringBuilder.AppendLine($"The reason: {testSuiteResult.Exception}");
         }
         return stringBuilder.ToString();
     }
@@ -71,7 +68,7 @@ public static class TestSuiteReportDefaults
         var notValidTestCaseNumbers = testCasesGroupedByAssert
             .Where(x => x.Key is AssertStatus.Ignored)
             .SelectMany(x => x)
-            .Where(x => !x.Validation.IsValid)
+            .Where(x => !x.IsValid)
             .Select(x => x.Number)
             .ToList();
         var notPassedTestCaseNumbers = executedTestCasesGroupedByAssert
@@ -125,14 +122,14 @@ public static class TestSuiteReportDefaults
         return stringBuilder.ToString();
     }
     
-    public static string ToFormattedString(this CompletedTestCase testCase)
+    public static string ToFormattedString(this AssertedTestCase testCase)
     {
         var stringBuilder = new StringBuilder();
         
-        if (!testCase.Validation.IsValid)
+        if (!testCase.IsValid)
         {
             stringBuilder.AppendLine($"Test case [{testCase.Number}] not passed with a validation error:");
-            var validationResults = testCase.Validation.GetNonValid();
+            var validationResults = testCase.GetNonValid();
             foreach (var validationResult in validationResults)
                 AppendValidationResult(stringBuilder, validationResult);
         }
@@ -174,7 +171,7 @@ public static class TestSuiteReportDefaults
         AppendInput(testCase, stringBuilder);
         AppendExpected(testCase, stringBuilder);
 
-        if (testCase.Validation.IsValid)
+        if (testCase.IsValid)
         {
             if (testCase.Assert.Status != AssertStatus.NotPassedWithException)
                 stringBuilder.AppendLine($"\tOutput: '{testCase.Assert.Output}'");
@@ -190,7 +187,7 @@ public static class TestSuiteReportDefaults
         stringBuilder.AppendLine("\tError message: " + validationResult.Message);
     }
 
-    private static void AppendStatisticsString(StringBuilder stringBuilder, ICollection<CompletedTestCase> executedTestCases)
+    private static void AppendStatisticsString(StringBuilder stringBuilder, ICollection<AssertedTestCase> executedTestCases)
     {
         if (executedTestCases.Count == 0)
             return;
@@ -211,7 +208,7 @@ public static class TestSuiteReportDefaults
         stringBuilder.Append(statisticsBuilder);
     }
 
-    private static void AppendInput(CompletedTestCase testCase, StringBuilder stringBuilder)
+    private static void AppendInput(AssertedTestCase testCase, StringBuilder stringBuilder)
     {
         if (testCase.Inputs.Length == 1)
             stringBuilder.AppendLine($"\tInput: '{testCase.Inputs}'");
@@ -219,7 +216,7 @@ public static class TestSuiteReportDefaults
             stringBuilder.AppendLine($"\tInputs: {string.Join(", ", testCase.Inputs.Select(x => $"'{x}'"))}");
     }
     
-    private static void AppendExpected(CompletedTestCase testCase, StringBuilder stringBuilder)
+    private static void AppendExpected(AssertedTestCase testCase, StringBuilder stringBuilder)
     {
         stringBuilder.AppendLine($"\tExpected: '{testCase.Expected}'");
     }

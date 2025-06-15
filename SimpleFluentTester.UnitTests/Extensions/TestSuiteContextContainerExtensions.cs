@@ -5,10 +5,10 @@ using SimpleFluentTester.Validators.Core;
 
 namespace SimpleFluentTester.UnitTests.Extensions;
 
-public static class TestSuiteContextContainerExtensions
+internal static class TestSuiteContextContainerExtensions
 {
-    public static CompletedTestCase CompleteTestCase(
-        this TestCase testCase,
+    public static AssertedTestCase CompleteTestCase(
+        this DeferredTestCase testCase,
         ITestSuiteContextContainer contextContainer,
         params int[] testCasesToRun)
     {
@@ -18,8 +18,8 @@ public static class TestSuiteContextContainerExtensions
         contextContainer.WithOperation(operation);
         var testCasesHash = new HashSet<int>(testCasesToRun);
         var testCasePipeline = new TestCasePipeline(testCasesHash);
-        testCase.RegisterValidation<OperationValidator>(() => new OperationValidationContext(contextContainer.Context.Operation));
-        testCase.RegisterValidation<InputsValidator>(() => new InputsValidationContext(contextContainer.Context.Operation));
+        testCase.RegisterFutureValidation<OperationValidator>(() => new OperationValidationContext(contextContainer.Context.Operation));
+        testCase.RegisterFutureValidation<InputsValidator>(() => new InputsValidationContext(contextContainer.Context.Operation));
         return testCasePipeline.ToCompleted(testCase);
     }
 }

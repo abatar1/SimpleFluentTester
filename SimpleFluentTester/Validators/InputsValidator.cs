@@ -2,27 +2,26 @@ using System;
 using System.Linq;
 using SimpleFluentTester.TestSuite.Case;
 using SimpleFluentTester.TestSuite.ComparedObject;
+using SimpleFluentTester.TestSuite.Parameter;
 using SimpleFluentTester.Validators.Core;
 
 namespace SimpleFluentTester.Validators;
 
-internal sealed class InputsValidator : BaseValidator<InputsValidationContext, TestCase>
+internal sealed class InputsValidator : BaseValidator<EmptyValidationContext, DeferredTestCase>
 {
-    public override Type AllowedType => ValidatedTypes.TestCase;
-    
     public override ValidationSubject Subject => ValidationSubject.Inputs;
 
     protected override ValidationResult ValidateCore(
-        TestCase testCase, 
-        InputsValidationContext validationContext)
+        DeferredTestCase testCase, 
+        EmptyValidationContext _)
     {
         var inputs = testCase.Inputs;
-        var operationParameterInfos = validationContext.Operation?.Method.GetParameters().ToList();
+        var operationParameterInfos = testCase.OperationFactory.Value?.Method.GetParameters().ToList();
 
         if (inputs.Length != operationParameterInfos?.Count)
         {
             var formattedInputs = string.Join(", ", inputs.Select(x => x.ToString()));
-            return NonValid($"Invalid inputs number, should be {operationParameterInfos?.Count}, but was {inputs.Length}.");
+            return NonValid($"Invalid inputs number, should be {operationParameterInfos?.Count}, but was {formattedInputs}.");
         }
 
         var parametersTypesAreValid = inputs
@@ -30,6 +29,14 @@ internal sealed class InputsValidator : BaseValidator<InputsValidationContext, T
             .All(x => ValidateInputType(x.input, x.parameter.ParameterType));
         if (!parametersTypesAreValid)
             return NonValid("Passed parameters and expected operation parameters are not equal.");
+        
+        if (testCase.Expected.Variety == ComparedObjectVariety.Parameter)
+        {
+            var parameterInfo = ObjectParameterExtractor.ExtractExpectedParameter(testCase);
+            var hasParameter = operationParameterInfos.Any(inputParameterInfo => inputParameterInfo.MetadataToken == parameterInfo.MetadataToken);
+            if (!hasParameter)
+                return NonValid($"Could not find parameter with name {parameterInfo.Name} and position {parameterInfo.Position}.");
+        }
         
         return Ok();
     }
@@ -45,10 +52,4 @@ internal sealed class InputsValidator : BaseValidator<InputsValidationContext, T
 
         return input.Type == underlyingReturnParameterType;
     }
-}
-
-public sealed class InputsValidationContext(Delegate? operation)
-    : IValidationContext
-{
-    public Delegate? Operation { get; } = operation;
 }

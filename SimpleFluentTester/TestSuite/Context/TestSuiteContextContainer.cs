@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using SimpleFluentTester.Helpers;
 using SimpleFluentTester.TestSuite.Case;
-using SimpleFluentTester.Validators.Core;
 
 namespace SimpleFluentTester.TestSuite.Context;
 
@@ -25,7 +24,6 @@ internal sealed class TestSuiteContextContainer : ITestSuiteContextContainer
             Context.TestCases,
             operation,
             Context.Comparer,
-            Context.Validations,
             Context.ShouldBeExecuted);
     }
     
@@ -39,11 +37,10 @@ internal sealed class TestSuiteContextContainer : ITestSuiteContextContainer
             Context.TestCases,
             Context.Operation,
             Context.Comparer,
-            Context.Validations,
             Context.ShouldBeExecuted);
     }
     
-    public void WithComparer(Delegate comparer)
+    public void WithComparer<TExpected>(ComparerDelegate<TExpected> comparer)
     {
         Context = new TestSuiteContext(
             Context.Number,
@@ -53,7 +50,6 @@ internal sealed class TestSuiteContextContainer : ITestSuiteContextContainer
             Context.TestCases,
             Context.Operation,
             comparer,
-            Context.Validations,
             Context.ShouldBeExecuted);
     }
     
@@ -67,7 +63,6 @@ internal sealed class TestSuiteContextContainer : ITestSuiteContextContainer
             Context.TestCases,
             Context.Operation,
             Context.Comparer,
-            Context.Validations,
             false);
     }
         
@@ -78,10 +73,9 @@ internal sealed class TestSuiteContextContainer : ITestSuiteContextContainer
             nameof(TestSuite),
             new EntryAssemblyProvider(), 
             new DefaultActivator(),
-            new List<TestCase>(), 
+            new List<DeferredTestCase>(), 
             null, 
             null,
-            new Dictionary<ValidationSubject, IList<Func<ValidationResult>>>(),
             true);
         return new TestSuiteContextContainer(context);
     }

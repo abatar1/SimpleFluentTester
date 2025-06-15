@@ -1,18 +1,25 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace SimpleFluentTester.Validators.Core;
 
 internal static class BuilderContextValidatorExtensions
 {
-    public static IValidatedObject AddValidation(
+    public static bool Validate(this IValidatedObject validated)
+    {
+        var results = validated.GetValidationResults();
+        return results.All(x => x.Status == ValidationStatus.Valid);
+    }
+    
+    public static IValidatedObject AddReadyValidation(
         this IValidatedObject validated,
         ValidationResult validationResult)
     {
         return AddValidation(validated, validationResult.Subject, () => validationResult);
     }
 
-    public static IValidatedObject RegisterValidation<TValidator>(
+    public static IValidatedObject RegisterFutureValidation<TValidator>(
         this IValidatedObject validated,
         Func<IValidationContext>? validationContextFactory = null)
         where TValidator : IValidator
@@ -26,14 +33,6 @@ internal static class BuilderContextValidatorExtensions
         {
             var message = $"Couldn't register validator for a type {typeof(TValidator)}.";
             throw new InvalidOperationException(message, e);
-        }
-
-        var validatedType = validated.GetType();
-        if (validator.AllowedType != validatedType)
-        {
-            var message =
-                $"Could not register validator {validator.GetType()} for this {nameof(IValidatedObject)} type {validatedType}, it is not allowed";
-            throw new InvalidOperationException(message);
         }
 
         AddValidation(validated, validator.Subject, () => RunValidation(validator, validated, validationContextFactory));
@@ -63,9 +62,9 @@ internal static class BuilderContextValidatorExtensions
         Func<ValidationResult> validationFactory)
     {
         if (validated.Validations.ContainsKey(subject))
-            validated.Validations[subject].Add(validationFactory);
+            validated.Validations[subject].Add(new Lazy<ValidationResult>(validationFactory));
         else
-            validated.Validations[subject] = new List<Func<ValidationResult>> { validationFactory };
+            validated.Validations[subject] = new List<Lazy<ValidationResult>> { new(validationFactory) };
         return validated;
     }
 }

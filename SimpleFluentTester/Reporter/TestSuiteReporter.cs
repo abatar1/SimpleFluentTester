@@ -20,9 +20,7 @@ internal sealed class TestSuiteReporter(TestSuiteRunResult testSuiteRunResult) :
 
         try
         {
-            var printableResult =
-                configuration.ReportBuilder?.TestSuiteResultToString(TestSuiteRunResult,
-                    configuration.PrintablePredicate);
+            var printableResult = configuration.ReportBuilder?.TestSuiteResultToString(TestSuiteRunResult, configuration.PrintablePredicate);
             if (printableResult == null)
                 return;
 
@@ -30,8 +28,7 @@ internal sealed class TestSuiteReporter(TestSuiteRunResult testSuiteRunResult) :
         }
         catch (Exception e)
         {
-            logger.LogError(new EventId(TestSuiteRunResult.Number), e, "Couldn't report a result of {number} TestSuite",
-                TestSuiteRunResult.Number);
+            logger.LogError(new EventId(TestSuiteRunResult.Number), e, "Couldn't report a result of {number} TestSuite", TestSuiteRunResult.Number);
         }
         finally
         {
