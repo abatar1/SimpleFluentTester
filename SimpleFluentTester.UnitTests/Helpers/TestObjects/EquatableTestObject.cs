@@ -1,4 +1,4 @@
-namespace SimpleFluentTester.UnitTests.TestObjects;
+namespace SimpleFluentTester.UnitTests.Helpers.TestObjects;
 
 public class EquatableTestObject(int value) : IEquatable<EquatableTestObject>
 {

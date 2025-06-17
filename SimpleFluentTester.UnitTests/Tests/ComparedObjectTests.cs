@@ -1,17 +1,19 @@
 using SimpleFluentTester.TestSuite.ComparedObject;
-using SimpleFluentTester.UnitTests.Extensions;
+using SimpleFluentTester.UnitTests.Helpers.Extensions;
 
 namespace SimpleFluentTester.UnitTests.Tests;
 
+// todo add parameters
 public sealed class ComparedObjectFactoryTests
 {
     [Fact]
     public void Wrap_NullObject_ShouldBeValid()
     {
         // Assign
+        string? obj = null;
         
         // Act
-        var comparedObject = ComparedObjectFactory.Wrap<object>(null);
+        var comparedObject = ComparedObjectFactory.Wrap<object>(obj);
 
         // Assert
         comparedObject.AssertNull();
@@ -21,9 +23,9 @@ public sealed class ComparedObjectFactoryTests
     public void Wrap_Value_ShouldBeValid()
     {
         // Assign
+        var obj = 1;
 
         // Act
-        var obj = 1;
         var comparedObject = ComparedObjectFactory.Wrap(obj);
 
         // Assert
@@ -34,9 +36,9 @@ public sealed class ComparedObjectFactoryTests
     public void Wrap_Exception_ShouldBeValid()
     {
         // Assign
+        var obj = new Exception();
 
         // Act
-        var obj = new Exception();
         var comparedObject = ComparedObjectFactory.Wrap(obj);
 
         // Assert

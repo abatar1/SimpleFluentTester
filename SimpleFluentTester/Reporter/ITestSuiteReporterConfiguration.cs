@@ -10,12 +10,12 @@ namespace SimpleFluentTester.Reporter;
 public interface ITestSuiteReporterConfiguration
 {
     /// <summary>
-    /// Allows setting custom string report builder; otherwise the default builder will be used.
+    /// Allows setting a custom string report builder; otherwise the default builder will be used.
     /// </summary>
     ITestSuiteReportBuilder? ReportBuilder { get; set; }
     
     /// <summary>
-    /// Allows to set up custom logging builder for a reporter; otherwise the default console logger will be used.
+    /// Allows setting up custom logging builder for a reporter; otherwise the default console logger will be used.
     /// </summary>
     Action<ILoggingBuilder>? LoggingBuilder { get; set; }
     

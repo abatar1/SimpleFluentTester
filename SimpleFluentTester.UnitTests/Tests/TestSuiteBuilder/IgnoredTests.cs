@@ -1,9 +1,9 @@
-using SimpleFluentTester.UnitTests.Extensions;
 using SimpleFluentTester.UnitTests.Helpers;
+using SimpleFluentTester.UnitTests.Helpers.Extensions;
 
 namespace SimpleFluentTester.UnitTests.Tests.TestSuiteBuilder;
 
-public class IgnoredTests
+public sealed class IgnoredTests
 {
     [Fact]
     public void Ignored_AddedTestCasesAndIgnoredThem_TestCasesShouldBeIgnored()

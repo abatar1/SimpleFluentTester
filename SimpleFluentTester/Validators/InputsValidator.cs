@@ -21,7 +21,7 @@ internal sealed class InputsValidator : BaseValidator<EmptyValidationContext, De
         if (inputs.Length != operationParameterInfos?.Count)
         {
             var formattedInputs = string.Join(", ", inputs.Select(x => x.ToString()));
-            return NonValid($"Invalid inputs number, should be {operationParameterInfos?.Count}, but was {formattedInputs}.");
+            return NonValid($"Invalid inputs number, should have {operationParameterInfos?.Count} parameters, but had {inputs.Length}: [{formattedInputs}]");
         }
 
         var parametersTypesAreValid = inputs

@@ -1,34 +1,17 @@
 using Microsoft.Extensions.Logging;
 using SimpleFluentTester.Reporter;
-using SimpleFluentTester.UnitTests.Extensions;
 using SimpleFluentTester.UnitTests.Helpers;
+using SimpleFluentTester.UnitTests.Helpers.Extensions;
 
 namespace SimpleFluentTester.UnitTests.Tests.Reporter;
 
 public sealed class TestSuiteReportDefaultsTests
 {
     [Fact]
-    public void DetermineLogLevel_InvalidContext_ShouldBeError()
-    {
-        // Assign
-        var testSuiteResult = TestSuiteFactory.CreateTestSuiteRunResult(
-            ValidationTestResults.NonValid,
-            TestCaseOperations.Passed);
-        
-        // Act
-        var logLevel = testSuiteResult.DetermineLogLevel();
-        
-        // Assert
-        Assert.Equal(LogLevel.Error, logLevel);
-    }
-    
-    [Fact]
     public void DetermineLogLevel_InvalidTestCase_ShouldBeError()
     {
         // Assign
-        var testSuiteResult = TestSuiteFactory.CreateTestSuiteRunResult(
-            ValidationTestResults.Valid,
-            TestCaseOperations.Invalid);
+        var testSuiteResult = TestSuiteFactory.CreateTestSuiteRunResult(testCase: TestCaseExamples.Invalid);
         
         // Act
         var logLevel = testSuiteResult.DetermineLogLevel();
@@ -41,9 +24,7 @@ public sealed class TestSuiteReportDefaultsTests
     public void DetermineLogLevel_NotPassedTestCase_ShouldBeError()
     {
         // Assign
-        var testSuiteResult = TestSuiteFactory.CreateTestSuiteRunResult(
-            ValidationTestResults.Valid,
-            TestCaseOperations.NotPassed);
+        var testSuiteResult = TestSuiteFactory.CreateTestSuiteRunResult(testCase: TestCaseExamples.NotPassed);
         
         // Act
         var logLevel = testSuiteResult.DetermineLogLevel();
@@ -56,9 +37,7 @@ public sealed class TestSuiteReportDefaultsTests
     public void DetermineLogLevel_PassedTestCase_ShouldBeInformation()
     {
         // Assign
-        var testSuiteResult = TestSuiteFactory.CreateTestSuiteRunResult(
-            ValidationTestResults.Valid,
-            TestCaseOperations.Passed);
+        var testSuiteResult = TestSuiteFactory.CreateTestSuiteRunResult(testCase: TestCaseExamples.Passed);
         
         // Act
         var logLevel = testSuiteResult.DetermineLogLevel();
@@ -66,44 +45,12 @@ public sealed class TestSuiteReportDefaultsTests
         // Assert
         Assert.Equal(LogLevel.Information, logLevel);
     }
-
-    [Fact]
-    public void ToHeaderString_ValidContext_NoValidationStrings()
-    {
-        // Assign
-        var testSuiteResult = TestSuiteFactory.CreateTestSuiteRunResult(
-            ValidationTestResults.Valid,
-            TestCaseOperations.Passed);
-        
-        // Act
-        var headerString = testSuiteResult.ToHeaderString();
-        
-        // Assert
-        Assert.Equal(2, CountNonEmptyLines(headerString));
-    }
     
     [Fact]
-    public void ToHeaderString_NonValidContext_WithValidationStrings()
+    public void ToFooterString_PassedTestCase_NoValidationStrings()
     {
         // Assign
-        var testSuiteResult = TestSuiteFactory.CreateTestSuiteRunResult(
-            ValidationTestResults.NonValid,
-            TestCaseOperations.Passed);
-        
-        // Act
-        var headerString = testSuiteResult.ToHeaderString();
-        
-        // Assert
-        Assert.Equal(2 + 1 + 2, CountNonEmptyLines(headerString));
-    }
-    
-    [Fact]
-    public void ToFooterString_ValidTestCase_NoValidationStrings()
-    {
-        // Assign
-        var testSuiteResult = TestSuiteFactory.CreateTestSuiteRunResult(
-            ValidationTestResults.Valid,
-            TestCaseOperations.Passed);
+        var testSuiteResult = TestSuiteFactory.CreateTestSuiteRunResult(testCase: TestCaseExamples.Passed);
         
         // Act
         var footerString = testSuiteResult.ToFooterString();
@@ -118,9 +65,7 @@ public sealed class TestSuiteReportDefaultsTests
     public void ToFooterString_InvalidTestCase_WithValidationStrings()
     {
         // Assign
-        var testSuiteResult = TestSuiteFactory.CreateTestSuiteRunResult(
-            ValidationTestResults.Valid,
-            TestCaseOperations.Invalid);
+        var testSuiteResult = TestSuiteFactory.CreateTestSuiteRunResult(testCase: TestCaseExamples.Invalid);
         
         // Act
         var footerString = testSuiteResult.ToFooterString();
@@ -136,9 +81,7 @@ public sealed class TestSuiteReportDefaultsTests
     public void ToFooterString_NotPassedTestCase_WithValidationStrings()
     {
         // Assign
-        var testSuiteResult = TestSuiteFactory.CreateTestSuiteRunResult(
-            ValidationTestResults.Valid,
-            TestCaseOperations.NotPassed);
+        var testSuiteResult = TestSuiteFactory.CreateTestSuiteRunResult(testCase: TestCaseExamples.NotPassed);
         
         // Act
         var footerString = testSuiteResult.ToFooterString();
@@ -154,9 +97,7 @@ public sealed class TestSuiteReportDefaultsTests
     public void ToFooterString_NotPassedWithException_WithValidationStrings()
     {
         // Assign
-        var testSuiteResult = TestSuiteFactory.CreateTestSuiteRunResult(
-            ValidationTestResults.Valid,
-            TestCaseOperations.NotPassedWithOperationException);
+        var testSuiteResult = TestSuiteFactory.CreateTestSuiteRunResult(testCase: TestCaseExamples.NotPassedWithOperationException);
         
         // Act
         var footerString = testSuiteResult.ToFooterString();
@@ -173,7 +114,7 @@ public sealed class TestSuiteReportDefaultsTests
     {
         // Assign
         var container = TestSuiteFactory.CreateEmptyContextContainer();
-        var completedTestCase = TestCaseOperations.Passed.CompleteTestCase(container);
+        var completedTestCase = TestCaseExamples.Passed.CompleteTestCase(container);
         
         // Act
         var formattedString = completedTestCase.ToFormattedString();
@@ -193,7 +134,7 @@ public sealed class TestSuiteReportDefaultsTests
     {
         // Assign
         var container = TestSuiteFactory.CreateEmptyContextContainer();
-        var completedTestCase = TestCaseOperations.NotPassed.CompleteTestCase(container);
+        var completedTestCase = TestCaseExamples.NotPassed.CompleteTestCase(container);
         
         // Act
         var formattedString = completedTestCase.ToFormattedString();
@@ -213,7 +154,7 @@ public sealed class TestSuiteReportDefaultsTests
     {
         // Assign
         var container = TestSuiteFactory.CreateEmptyContextContainer();
-        var completedTestCase = TestCaseOperations.NotPassedWithOperationException.CompleteTestCase(container);
+        var completedTestCase = TestCaseExamples.NotPassedWithOperationException.CompleteTestCase(container);
         
         // Act
         var formattedString = completedTestCase.ToFormattedString();
@@ -233,7 +174,7 @@ public sealed class TestSuiteReportDefaultsTests
     {
         // Assign
         var container = TestSuiteFactory.CreateEmptyContextContainer();
-        var completedTestCase = TestCaseOperations.Invalid.CompleteTestCase(container);
+        var completedTestCase = TestCaseExamples.Invalid.CompleteTestCase(container);
         
         // Act
         var formattedString = completedTestCase.ToFormattedString();
@@ -249,12 +190,7 @@ public sealed class TestSuiteReportDefaultsTests
         Assert.Equal(6, lines.Count);
     }
 
-    private static int CountNonEmptyLines(string str)
-    {
-        return SeparateToLines(str).Count;
-    }
-
-    private static IList<string> SeparateToLines(string str)
+    private static List<string> SeparateToLines(string str)
     {
         return str.Split(Environment.NewLine)
             .Where(x => !string.IsNullOrWhiteSpace(x))

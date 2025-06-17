@@ -20,12 +20,12 @@ internal static class TestCaseAsserter
         }
         catch (TargetInvocationException e)
         {
-            executedTestCase.AddReadyValidation(ValidationResult.NonValid(ValidationSubject.Comparer, "Comparer execution failed with an exception."));
+            executedTestCase.AddReadyValidation(ValidationResult.Failed(ValidationSubject.Comparer, e.InnerException,"Comparer execution failed with an exception."));
             assertResult = new AssertResult(executedTestCase.Result, AssertStatus.Failed, e.InnerException, e.InnerException?.Message);
         }
         catch (Exception e)
         {
-            executedTestCase.AddReadyValidation(ValidationResult.NonValid(ValidationSubject.Comparer, $"Comparer execution failed with an exception [{e.Message}]."));
+            executedTestCase.AddReadyValidation(ValidationResult.Failed(ValidationSubject.Comparer, e, $"Comparer execution failed with an exception [{e.Message}]."));
             assertResult = new AssertResult(executedTestCase.Result, AssertStatus.Failed, e, e.Message);
         }
         return BuildAsserted(assertResult, executedTestCase);
@@ -62,13 +62,13 @@ internal static class TestCaseAsserter
                 var hasSameVariety = output.Variety == expected.Variety;
                 var hasSameType = output.Type == expected.Type;
                 
-                var isEqual = (bool)comparer.Method.Invoke(comparer.Target, [output.Value, expected.Value]);
+                var isEqual = (bool)comparer.Method.Invoke(comparer.Target, [expected.Value, output.Value]);
 
                 passed = hasSameVariety && hasSameType && isEqual;
                 break;
             }
             case ComparedObjectVariety.Parameter:
-                throw new NotSupportedException("Something went wrong, parameter is not supposed to be asserted and converted before assertion.");
+                throw new NotSupportedException("Something went wrong, parameter is not supposed to be asserted and must be converted before assertion.");
             default:
                 throw new ArgumentOutOfRangeException();
         }

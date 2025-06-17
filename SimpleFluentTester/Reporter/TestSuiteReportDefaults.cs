@@ -16,7 +16,7 @@ public static class TestSuiteReportDefaults
         var someTestCasesNotPassed = testSuiteResult.TestCases
             .Any(x => x.Assert.Status != AssertStatus.Passed);
         var someTestCasesNotValid = testSuiteResult.TestCases
-            .Any(x => !x.IsValid);
+            .Any(x => !x.Validations.IsValid());
         
         if (someTestCasesNotPassed || someTestCasesNotValid || !testSuiteResult.IsValid)
             return LogLevel.Error;
@@ -68,7 +68,7 @@ public static class TestSuiteReportDefaults
         var notValidTestCaseNumbers = testCasesGroupedByAssert
             .Where(x => x.Key is AssertStatus.Ignored)
             .SelectMany(x => x)
-            .Where(x => !x.IsValid)
+            .Where(x => !x.Validations.IsValid())
             .Select(x => x.Number)
             .ToList();
         var notPassedTestCaseNumbers = executedTestCasesGroupedByAssert
@@ -126,10 +126,10 @@ public static class TestSuiteReportDefaults
     {
         var stringBuilder = new StringBuilder();
         
-        if (!testCase.IsValid)
+        if (!testCase.Validations.IsValid())
         {
             stringBuilder.AppendLine($"Test case [{testCase.Number}] not passed with a validation error:");
-            var validationResults = testCase.GetNonValid();
+            var validationResults = testCase.Validations.GetInvalid();
             foreach (var validationResult in validationResults)
                 AppendValidationResult(stringBuilder, validationResult);
         }
@@ -171,7 +171,7 @@ public static class TestSuiteReportDefaults
         AppendInput(testCase, stringBuilder);
         AppendExpected(testCase, stringBuilder);
 
-        if (testCase.IsValid)
+        if (testCase.Validations.IsValid())
         {
             if (testCase.Assert.Status != AssertStatus.NotPassedWithException)
                 stringBuilder.AppendLine($"\tOutput: '{testCase.Assert.Output}'");

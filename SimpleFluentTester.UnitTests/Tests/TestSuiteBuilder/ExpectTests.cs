@@ -1,14 +1,14 @@
 using System.Reflection;
 using Moq;
 using SimpleFluentTester.Helpers;
-using SimpleFluentTester.UnitTests.Extensions;
 using SimpleFluentTester.UnitTests.Helpers;
-using SimpleFluentTester.UnitTests.TestObjects;
+using SimpleFluentTester.UnitTests.Helpers.Extensions;
+using SimpleFluentTester.UnitTests.Helpers.TestObjects;
 using SimpleFluentTester.Validators.Core;
 
 namespace SimpleFluentTester.UnitTests.Tests.TestSuiteBuilder;
 
-public class ExpectTests
+public sealed class ExpectTests
 {
     [Fact]
     public void Expect_SetValidOperationWithValidExpectedValue_ShouldBePassed()
@@ -118,30 +118,6 @@ public class ExpectTests
     }
     
     [Fact]
-    public void Expect_OperationNotSetWithNotCorrectAssembly_AdderWithAttributeShouldNotBeSelected()
-    {
-        // Assign
-        var assemblyMock = new Mock<Assembly>();
-        assemblyMock
-            .Setup(x => x.GetTypes())
-            .Returns([]);
-        var entryAssemblyProviderMock = new Mock<IEntryAssemblyProvider>();
-        entryAssemblyProviderMock
-            .Setup(x => x.Get())
-            .Returns(assemblyMock.Object);
-        var container = TestSuiteFactory.CreateEmptyContextContainer(entryAssemblyProviderMock.Object);
-        var builder = new TestSuite.TestSuiteBuilder(container);
-        
-        // Act
-        var reporter = builder
-            .ExpectResult(2).WithInput(1, 1)
-            .Run();
-        
-        // Assert
-        reporter.AssertTestCaseExists(1).Validation.AssertInvalid(ValidationSubject.Operation, "Operation not specified");
-    }
-    
-    [Fact]
     public void Expect_WithCustomEquatableObject_ValidReturn()
     {
         // Assign
@@ -164,10 +140,9 @@ public class ExpectTests
     public void Expect_WithCustomEquatableObjectAndInvalidComparer_FailedReturn()
     {
         // Assign
-        var exceptionMessage = "Exception";
-        var exception = new CustomWithMessageException(exceptionMessage);
+        var innerMessage = "text";
         var builder = TestSuite.TestSuite.Sequential
-            .WithComparer<EquatableTestObject>((x, y) => throw exception)
+            .WithComparer<EquatableTestObject>((_, _) => throw new CustomWithMessageException("text"))
             .UseOperation((EquatableTestObject a, EquatableTestObject b) => new EquatableTestObject(a.Value + b.Value));
         
         // Act
@@ -178,7 +153,7 @@ public class ExpectTests
         // Assert
         reporter
             .AssertTestCaseExists(1)
-            .AssertFailed(exception, exceptionMessage);
+            .AssertFailed<CustomWithMessageException>("Comparer execution failed with an exception.", innerMessage);
     }
     
     [Fact]
@@ -195,7 +170,7 @@ public class ExpectTests
         
         // Assert
         var message = "Operation return type is not the same as used generic type.";
-        reporter.AssertTestCaseExists(1).Validation.AssertInvalid(ValidationSubject.Operation, message);
+        reporter.AssertTestCaseExists(1).AssertNonValid(ValidationSubject.Operation, message);
     }
     
     [Fact]
@@ -212,7 +187,7 @@ public class ExpectTests
         
         // Assert
         var message = "Operation return type is not the same as used generic type.";
-        reporter.AssertTestCaseExists(1).Validation.AssertInvalid(ValidationSubject.Operation, message);
+        reporter.AssertTestCaseExists(1).AssertNonValid(ValidationSubject.Operation, message);
     }
     
     [Fact]
@@ -228,6 +203,6 @@ public class ExpectTests
             .Run();
         
         // Assert
-        reporter.AssertTestCaseExists(1).Validation.AssertValid();
+        reporter.AssertTestCaseExists(1).AssertValid();
     }
 }

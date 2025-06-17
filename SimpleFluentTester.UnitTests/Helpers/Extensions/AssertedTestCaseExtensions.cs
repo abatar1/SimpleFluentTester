@@ -1,9 +1,10 @@
 using SimpleFluentTester.TestSuite.Case;
 using SimpleFluentTester.TestSuite.ComparedObject;
+using SimpleFluentTester.Validators.Core;
 
-namespace SimpleFluentTester.UnitTests.Extensions;
+namespace SimpleFluentTester.UnitTests.Helpers.Extensions;
 
-public static class CompletedTestCaseExtensions
+public static class AssertedTestCaseExtensions
 {
     public static void AssertPassed<TExpected>(
         this AssertedTestCase testCase,
@@ -11,28 +12,25 @@ public static class CompletedTestCaseExtensions
         object?[] inputs,
         Func<TExpected?, TExpected?, bool>? comparer = null)
     {
-        testCase.Validation.AssertValid();
-
+        testCase.AssertValid();
         Assert.Equal(AssertStatus.Passed, testCase.Assert.Status);
-        
         testCase.AssertOutput(expected, inputs, true, comparer);
     }
     
-    public static void AssertFailed(
+    public static void AssertFailed<TException>(
         this AssertedTestCase testCase,
-        Exception exception,
-        string message)
+        string validationMessage,
+        string innerMessage)
+    where TException : Exception
     {
-        testCase.Validation.AssertValid();
-
+        testCase.AssertFailed<TException>(ValidationSubject.Comparer, validationMessage, innerMessage);
         Assert.Equal(AssertStatus.Failed, testCase.Assert.Status);
-        
         Assert.NotNull(testCase.Assert.Output);
         Assert.NotNull(testCase.Expected);
         Assert.NotNull(testCase.Assert.Exception);
-        Assert.Equal(exception.GetType(), testCase.Assert.Exception.GetType());
+        Assert.Equal(typeof(TException), testCase.Assert.Exception.GetType());
         Assert.NotNull(testCase.Assert.Message);
-        Assert.Equal(message, testCase.Assert.Message);
+        Assert.Equal(innerMessage, testCase.Assert.Message);
     }
 
     public static void AssertNotPassed<TExpected>(
@@ -41,10 +39,8 @@ public static class CompletedTestCaseExtensions
         object?[] inputs,
         Func<TExpected?, TExpected?, bool>? comparer = null)
     {
-        testCase.Validation.AssertValid();
-
+        testCase.AssertValid();
         Assert.Equal(AssertStatus.NotPassed, testCase.Assert.Status);
-        
         testCase.AssertOutput(expected, inputs, false, comparer);
     }
 
@@ -55,7 +51,7 @@ public static class CompletedTestCaseExtensions
         Type exceptionType,
         Func<TExpected?, TExpected?, bool>? comparer = null)
     {
-        testCase.Validation.AssertValid();
+        testCase.AssertValid();
 
         Assert.Equal(AssertStatus.NotPassedWithException, testCase.Assert.Status);
 
@@ -71,8 +67,6 @@ public static class CompletedTestCaseExtensions
         object? expected,
         object?[] inputs)
     {
-        testCase.Validation.AssertValid();
-
         Assert.Equal(AssertStatus.Ignored, testCase.Assert.Status);
         
         testCase.AssertNullOutput();

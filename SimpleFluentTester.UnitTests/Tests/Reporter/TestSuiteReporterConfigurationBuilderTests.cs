@@ -1,8 +1,8 @@
 using Microsoft.Extensions.Logging;
 using Moq;
 using SimpleFluentTester.Reporter;
-using SimpleFluentTester.UnitTests.Extensions;
 using SimpleFluentTester.UnitTests.Helpers;
+using SimpleFluentTester.UnitTests.Helpers.Extensions;
 
 namespace SimpleFluentTester.UnitTests.Tests.Reporter;
 
@@ -14,11 +14,11 @@ public sealed class TestSuiteReporterConfigurationBuilderTests
         // Assign
         var builder = new TestSuiteReporterConfigurationBuilder();
         var container = TestSuiteFactory.CreateEmptyContextContainer();
-        var completedTestCase1 = TestCaseOperations.NotPassed.CompleteTestCase(container);
-        var completedTestCase2 = TestCaseOperations.Invalid.CompleteTestCase(container);
-        var completedTestCase3 = TestCaseOperations.NotPassedWithOperationException.CompleteTestCase(container);
-        var completedTestCase4 = TestCaseOperations.NotPassedWithComparerException.CompleteTestCase(container);
-        var completedTestCase5 = TestCaseOperations.Passed.CompleteTestCase(container);
+        var completedTestCase1 = TestCaseExamples.NotPassed.CompleteTestCase(container);
+        var completedTestCase2 = TestCaseExamples.Invalid.CompleteTestCase(container);
+        var completedTestCase3 = TestCaseExamples.NotPassedWithOperationException.CompleteTestCase(container);
+        var completedTestCase4 = TestCaseExamples.NotPassedWithComparerException.CompleteTestCase(container);
+        var completedTestCase5 = TestCaseExamples.Passed.CompleteTestCase(container);
 
         // Act
         var configuration = builder.Build();
@@ -63,10 +63,7 @@ public sealed class TestSuiteReporterConfigurationBuilderTests
 
         // Act
         var loggingBuilderMock = new Mock<ILoggingBuilder>();
-        builder.WithLoggingBuilder(loggingBuilder =>
-        {
-            var services = loggingBuilder.Services;
-        });
+        builder.WithLoggingBuilder(loggingBuilder => { _ = loggingBuilder.Services; });
 
         var configuration = builder.Build();
 
@@ -85,7 +82,7 @@ public sealed class TestSuiteReporterConfigurationBuilderTests
         // Assign
         var builder = new TestSuiteReporterConfigurationBuilder();
         var container = TestSuiteFactory.CreateEmptyContextContainer();
-        var completedTestCase = TestCaseOperations.Passed.CompleteTestCase(container);
+        var completedTestCase = TestCaseExamples.Passed.CompleteTestCase(container);
 
         // Act
         builder.WithPrintablePredicate(testCase => testCase == completedTestCase);
@@ -98,7 +95,7 @@ public sealed class TestSuiteReporterConfigurationBuilderTests
         Assert.NotNull(configuration.PrintablePredicate);
         
         Assert.True(configuration.PrintablePredicate.Invoke(completedTestCase));
-        var anotherCompletedTestCase = TestCaseOperations.Passed.CompleteTestCase(container);
+        var anotherCompletedTestCase = TestCaseExamples.Passed.CompleteTestCase(container);
         Assert.False(configuration.PrintablePredicate.Invoke(anotherCompletedTestCase));
     }
 }

@@ -1,6 +1,6 @@
 using SimpleFluentTester.TestSuite.ComparedObject;
 
-namespace SimpleFluentTester.UnitTests.Extensions;
+namespace SimpleFluentTester.UnitTests.Helpers.Extensions;
 
 public static class ComparedObjectExtensions
 {

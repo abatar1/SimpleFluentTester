@@ -3,7 +3,7 @@ using SimpleFluentTester.Examples;
 using SimpleFluentTester.TestSuite;
 using SimpleFluentTester.TestSuite.Case;
 
-TestSuite.Allow(8);
+//TestSuite.Allow(7);
 
 // Example 1.
 // Setup test suite with a default reporter (default output format).

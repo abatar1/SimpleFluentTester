@@ -3,7 +3,7 @@ using System;
 namespace SimpleFluentTester.TestSuite;
 
 /// <summary>
-/// Represents an attribute that is used to designate a method as a delegate
+/// Represents an attribute used to designate a method as a delegate
 /// for a test suite operation within the SimpleFluentTester framework.
 /// </summary>
 /// <remarks>
@@ -16,7 +16,7 @@ namespace SimpleFluentTester.TestSuite;
 /// the setup or execution of the test suite.
 /// </remarks>
 /// <example>
-/// This attribute is primarily utilized internally by the framework to identify
+/// The framework primarily uses this attribute internally to identify
 /// and link the methods within the entry assembly that provide test suite operations.
 /// Attempting to define multiple methods with this attribute in an entry assembly
 /// will result in an exception.

@@ -1,4 +1,4 @@
-namespace SimpleFluentTester.UnitTests.TestObjects;
+namespace SimpleFluentTester.UnitTests.Helpers.TestObjects;
 
 internal class CustomException : Exception;
 

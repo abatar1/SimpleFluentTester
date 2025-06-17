@@ -4,16 +4,8 @@ using SimpleFluentTester.TestSuite.ComparedObject;
 
 namespace SimpleFluentTester.UnitTests.Helpers;
 
-public static class TestCaseOperations
+public static class TestCaseExamples
 {
-    private static int Operation(int x, int y) => x + y;
-    
-    private static bool Comparer(int x, int y) => x == y;
-        
-    private static int ThrowOperation(int _, int __) => throw new Exception();
-    
-    private static bool ThrowComparer(int _, int __) => throw new Exception();
-
     public static ITestSuiteBuilder UseAdderOperation(this ITestSuiteBuilder builder)
     {
         return builder.UseOperation((int x, int y) => x + y);
@@ -24,7 +16,7 @@ public static class TestCaseOperations
         get
         {
             var expected = ComparedObjectFactory.Wrap(3);
-            return new DeferredTestCase(() => Operation, () => Comparer,ComparedObjectFactory.WrapMany([1, 2]), expected, 1);
+            return new DeferredTestCase(new Lazy<Delegate?>(() => Operation) , new Lazy<Delegate?>(() => Comparer),ComparedObjectFactory.WrapMany([1, 2]), expected, 1);
         }
     }
         
@@ -33,7 +25,7 @@ public static class TestCaseOperations
         get
         {
             var expected = ComparedObjectFactory.Wrap(4);
-            return new DeferredTestCase(() => Operation, () => Comparer,ComparedObjectFactory.WrapMany([1, 2]), expected, 1);
+            return new DeferredTestCase(new Lazy<Delegate?>(() => Operation), new Lazy<Delegate?>(() => Comparer),ComparedObjectFactory.WrapMany([1, 2]), expected, 1);
         }
     }
         
@@ -42,7 +34,7 @@ public static class TestCaseOperations
         get
         {
             var expected = ComparedObjectFactory.Wrap(3);
-            return new DeferredTestCase(() => ThrowOperation, () => Comparer,ComparedObjectFactory.WrapMany([1, 2]), expected, 1);
+            return new DeferredTestCase(new Lazy<Delegate?>(() => ThrowOperation), new Lazy<Delegate?>(() => Comparer),ComparedObjectFactory.WrapMany([1, 2]), expected, 1);
         }
     }
     
@@ -51,7 +43,7 @@ public static class TestCaseOperations
         get
         {
             var expected = ComparedObjectFactory.Wrap(3);
-            return new DeferredTestCase(() => Operation, () => ThrowComparer,ComparedObjectFactory.WrapMany([1, 2]), expected, 1);
+            return new DeferredTestCase(new Lazy<Delegate?>(() => Operation), new Lazy<Delegate?>(() => ThrowComparer),ComparedObjectFactory.WrapMany([1, 2]), expected, 1);
         }
     }
         
@@ -60,7 +52,7 @@ public static class TestCaseOperations
         get
         {
             var expected = ComparedObjectFactory.Wrap(4);
-            return new DeferredTestCase(() => Operation, () => Comparer,ComparedObjectFactory.WrapMany(["test", 2]), expected, 1);
+            return new DeferredTestCase(new Lazy<Delegate?>(() => Operation), new Lazy<Delegate?>(() => Comparer),ComparedObjectFactory.WrapMany(["test", 2]), expected, 1);
         }
     }
     
@@ -70,4 +62,12 @@ public static class TestCaseOperations
     {
         return number1 + number2;
     }
+    
+    private static int Operation(int x, int y) => x + y;
+    
+    private static bool Comparer(int x, int y) => x == y;
+    
+    private static int ThrowOperation(int _, int __) => throw new Exception();
+    
+    private static bool ThrowComparer(int _, int __) => throw new Exception();
 }

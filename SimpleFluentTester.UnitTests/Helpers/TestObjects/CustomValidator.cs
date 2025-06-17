@@ -1,6 +1,6 @@
 using SimpleFluentTester.Validators.Core;
 
-namespace SimpleFluentTester.UnitTests.Tests.Validators;
+namespace SimpleFluentTester.UnitTests.Helpers.TestObjects;
 
 internal sealed class CustomValidator(ValidationSubject validationSubject) 
     : BaseValidator<EmptyValidationContext, EmptyValidatedObject>

@@ -1,7 +1,8 @@
-using System.Diagnostics;
 using SimpleFluentTester.TestSuite.Case;
+using SimpleFluentTester.TestSuite.Context;
 using SimpleFluentTester.UnitTests.Helpers;
-using SimpleFluentTester.UnitTests.TestObjects;
+using SimpleFluentTester.UnitTests.Helpers.Extensions;
+using SimpleFluentTester.UnitTests.Helpers.TestObjects;
 
 namespace SimpleFluentTester.UnitTests.Tests;
 
@@ -16,15 +17,15 @@ public sealed class TestCaseExecutorTests
         
         var container = TestSuiteFactory.CreateEmptyContextContainer(operation: (int x, int y) => x + y);
         
-        var testCase = TestSuiteFactory.CreateAndAddTestCase(container, input, expectedResult);
-        var sw = new Stopwatch();
+        var testCase = TestSuiteFactory.CreateDeferredTestCase(container, input, expectedResult);
         
         // Act
-        var result = TestCaseExecutor.Execute(testCase, sw);
+        var executedTestCase = TestCaseExecutor.Execute(testCase);
 
         // Assert
+        Assert.NotNull(executedTestCase);
         Assert.Empty(testCase.Validations);
-        result.AssertValue(expectedResult);
+        executedTestCase.Result.AssertValue(expectedResult);
     }
     
     [Fact]
@@ -37,15 +38,15 @@ public sealed class TestCaseExecutorTests
             throw exception;
         });
 
-        var testCase = TestSuiteFactory.CreateAndAddTestCase(container, [1, 2], 3);
-        var sw = new Stopwatch();
+        var testCase = TestSuiteFactory.CreateDeferredTestCase(container, [1, 2], 3);
         
         // Act
-        var result = TestCaseExecutor.Execute(testCase, sw);
+        var executedTestCase = TestCaseExecutor.Execute(testCase);
 
         // Assert
+        Assert.NotNull(executedTestCase);
         Assert.Empty(testCase.Validations);
-        result.AssertException(exception);
+        executedTestCase.Result.AssertException(exception);
     }
     
     [Fact]
@@ -56,34 +57,31 @@ public sealed class TestCaseExecutorTests
         
         var container = TestSuiteFactory.CreateEmptyContextContainer(operation: (int x, int y) => x + y);
 
-        var testCase = TestSuiteFactory.CreateAndAddTestCase(container, input, 6);
-        var sw = new Stopwatch();
+        var testCase = TestSuiteFactory.CreateDeferredTestCase(container, input, 6);
         
         // Act
-        var result = TestCaseExecutor.Execute(testCase, sw);
+        var executedTestCase = TestCaseExecutor.Execute(testCase);
 
         // Assert
+        Assert.NotNull(executedTestCase);
         Assert.Single(testCase.Validations);
-        result.AssertException(new System.Reflection.TargetParameterCountException("Parameter count mismatch."));
+        executedTestCase.Result.AssertException(new System.Reflection.TargetParameterCountException("Parameter count mismatch."));
     }
     
     [Fact]
-    public void Execute_EmptyOperation_ShouldReturnNullWithValidation()
+    public void Execute_EmptyOperation_ShouldThrowException()
     {
         // Assign
         var input = new[] { 1, 2, 3 }.Cast<object?>().ToArray();
         
         var container = TestSuiteFactory.CreateEmptyContextContainer();
 
-        var testCase = TestSuiteFactory.CreateAndAddTestCase(container, input, 6);
-        var sw = new Stopwatch();
+        var testCase = TestSuiteFactory.CreateDeferredTestCase(container, input, 6);
         
         // Act
-        var result = TestCaseExecutor.Execute(testCase, sw);
+        var func = () => TestCaseExecutor.Execute(testCase);
 
         // Assert
-        Assert.NotNull(result);
-        Assert.Single(testCase.Validations);
-        result.AssertNull();
+        Assert.Throws<InvalidContextException>(func);
     }
 }

@@ -20,7 +20,7 @@ public sealed record ValidationResult
 
     public Exception? Exception { get; }
     
-    public static ValidationResult Failed(ValidationSubject subject, Exception exception, string message)
+    public static ValidationResult Failed(ValidationSubject subject, Exception? exception, string message)
     {
         return new ValidationResult(ValidationStatus.Failed, subject, message, exception);
     }

@@ -2,7 +2,7 @@ using SimpleFluentTester.UnitTests.Helpers;
 
 namespace SimpleFluentTester.UnitTests.Tests.TestSuiteBuilder;
 
-public class WithDisplayNameTests
+public sealed class WithDisplayNameTests
 {
     [Fact]
     public void WithDisplayName_NotEmptyString_TestSuiteShouldHaveCustomName()

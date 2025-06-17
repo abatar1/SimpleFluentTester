@@ -24,7 +24,7 @@ Based on my personal experience, I have created a library that allows you to set
 
 Use your preferred IDE or CLI to install the NuGet package `SimpleFluentTester`. You can also find the NuGet package at this [link](https://www.nuget.org/packages/SimpleFluentTester).
 
-I assume that you have a very complex function to cover with test cases, but let's say we have a very simple one of some sort:
+I assume that you have a very complex function to cover with test cases, but let's say we have a very simple one of some sorts:
     
 ```csharp
  int Adder(int number1, int number2)
@@ -49,24 +49,25 @@ TestSuite.Sequential
  ```
     
 And the output of this code will indicate that one out of the three test cases has not passed: 
-   
-```
-21:49:17.681 fail: Example of TestSuite[1]
-      Executing tests for target method [Int32 Adder(Int32, Int32)]
-      Total tests: 2
-      Tests to execute: 2
-      
-      Test case [2] not passed
+
+<pre>
+  <code>
+     21:49:17.681 <span style="background-color:indianred">fail</span>: Example of TestSuite[1]
+        Executing tests for target method [Int32 Adder(Int32, Int32)]
+        Total tests: 2
+        Tests to execute: 2
+
+     Test case [2] not passed
         Inputs: '-1', '-1'
         Expected: '-3'
         Output: '-2'
         Elapsed: 0,12530ms
       
-      1/2 test cases have been passed, 1 test case failed
-      Not passed test cases numbers: 2
-      Elapsed total: 0,1823ms; Avg: 0,0911ms; Max: 0,1253ms [Number 2]; Min: 0,0570ms [Number 1];
-
-```
+     1/2 test cases have been passed, 1 test case failed
+     Not passed test cases numbers: 2
+     Elapsed total: 0,1823ms; Avg: 0,0911ms; Max: 0,1253ms [Number 2]; Min: 0,0570ms [Number 1];
+  </code>
+</pre>
 
 Furthermore, for debugging purposes, for the next run it would be most convenient to select only the unsuccessful test cases:
 ```csharp
@@ -75,7 +76,7 @@ TestSuite.Sequential
     .Expect(2).WithInput(1, 1) 
     .Expect(-2).WithInput(-1, -1)
     .Expect(-3).WithInput(-1, -1)
-     // You should not comment on your test cases; just specify the iteration you want to test, every other iteration will be ignored.
+     // You should not comment your test cases; just specify the iteration you want to test, every other iteration will be ignored.
     .Run(3) 
     .Report();
  ```
@@ -96,7 +97,7 @@ TestSuite.Sequential
 ```
 
 If your project contains multiple test suites simultaneously, and you wish to debug only one of them, 
-you don't need to comment out the code; simply follow these steps:
+you don't need to comment on the code; simply follow these steps:
 ```csharp
 TestSuite.Sequential.Ignore // <- add Ignore here and this test run will be fully ignored.
     .UseOperation(Adder) 
@@ -105,7 +106,7 @@ TestSuite.Sequential.Ignore // <- add Ignore here and this test run will be full
     .Report();
 ```
 
-If you use non-standard object type in your function which is not assignable from IEquatable, you can define how the TestSuite should compare them yourself.
+If you use a non-standard object type in your function which is not assignable from IEquatable, you can define how the TestSuite should compare them yourself.
 ```csharp
 TestSuite.Sequential
     .WithComparer<CustomValue>((x, y) => x.Value == y.Value)
@@ -114,6 +115,8 @@ TestSuite.Sequential
     .Run()
     .Report();
 ```
+
+## But what if...?
 
 If you have any questions, you can find all these examples in [this project](/SimpleFluentTester.Examples) 
 or ask me directly via [email](mailto:evgenyhalzov@gmail.com?Subject=SimpleFluentTester)!
@@ -137,6 +140,6 @@ Released under [MIT](/LICENSE) by [@EvgenyHalzov](https://github.com/abatar1).
 
 - You can freely modify and reuse.
 - The _original license_ must be included with copies of this software.
-- Please _link back_ to this repo if you use a significant portion the source code.
+- Please _link back_ to this repo if you use a significant portion of the source code.
 
 

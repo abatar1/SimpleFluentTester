@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using SimpleFluentTester.TestSuite.ComparedObject;
 using SimpleFluentTester.Validators.Core;
 
@@ -33,16 +32,6 @@ public sealed class AssertedTestCase : ITestCase
     public IComparedObject Expected { get; }
 
     public IDictionary<ValidationSubject, IList<Lazy<ValidationResult>>> Validations { get; }
-
-    public bool IsValid => Validations.Values.SelectMany(x => x).All(x => x.Value.Status == ValidationStatus.Valid);
-    
-    public IReadOnlyCollection<ValidationResult> GetNonValid()
-    {
-        return Validations.Values.SelectMany(x => x)
-            .Select(x => x.Value)
-            .Where(x => x.Status != ValidationStatus.Valid)
-            .ToList();
-    }
     
     public static AssertedTestCase NotExecuted(ITestCase testCase)
     {

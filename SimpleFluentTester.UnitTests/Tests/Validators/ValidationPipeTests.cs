@@ -1,3 +1,5 @@
+using SimpleFluentTester.UnitTests.Helpers.Extensions;
+using SimpleFluentTester.UnitTests.Helpers.TestObjects;
 using SimpleFluentTester.Validators.Core;
 
 namespace SimpleFluentTester.UnitTests.Tests.Validators;
@@ -8,13 +10,14 @@ public sealed class ValidationPipeTests
     public void ValidatePacked_EmptyValidations_ShouldBeValid()
     {
         // Assign
-        var validated = new CustomValidatedObject(new Dictionary<ValidationSubject, IList<Func<ValidationResult>>>());
+        var validated = new CustomValidatedObject(new Dictionary<ValidationSubject, IList<Lazy<ValidationResult>>>());
 
         // Act
-        var packedValidation = ValidationPipe.ValidatePacked(validated);
+        var validationResult = validated.Validate();
 
         // Assert
-        packedValidation.AssertValid();
+        Assert.Equal(ValidationStatus.Valid, validationResult);
+        validated.AssertValid();
     }
     
     [Fact]
@@ -22,15 +25,16 @@ public sealed class ValidationPipeTests
     {
         // Assign
         const ValidationSubject subject = ValidationSubject.Operation;
-        var validationResults = new List<Func<ValidationResult>> { () => ValidationResult.Valid(subject) };
-        var validations = new Dictionary<ValidationSubject, IList<Func<ValidationResult>>> { { subject, validationResults } };
+        var validationResults = new List<Lazy<ValidationResult>> { new(() => ValidationResult.Valid(subject)) };
+        var validations = new Dictionary<ValidationSubject, IList<Lazy<ValidationResult>>> { { subject, validationResults } };
         var validated = new CustomValidatedObject(validations);
 
         // Act
-        var packedValidation = ValidationPipe.ValidatePacked(validated);
+        var validationResult = validated.Validate();
 
         // Assert
-        packedValidation.AssertValid();
+        Assert.Equal(ValidationStatus.Valid, validationResult);
+        validated.AssertValid();
     }
     
     [Fact]
@@ -39,19 +43,20 @@ public sealed class ValidationPipeTests
         // Assign
         const ValidationSubject subject = ValidationSubject.Operation;
         const string message = "ErrorMessage";
-        var validationResults = new List<Func<ValidationResult>>
+        var validationResults = new List<Lazy<ValidationResult>>
         {
-            () => ValidationResult.NonValid(subject, message), 
-            () => ValidationResult.Valid(subject)
+            new(() => ValidationResult.NonValid(subject, message)),
+            new(() => ValidationResult.Valid(subject))
         };
-        var validations = new Dictionary<ValidationSubject, IList<Func<ValidationResult>>> { { subject, validationResults } };
+        var validations = new Dictionary<ValidationSubject, IList<Lazy<ValidationResult>>> { { subject, validationResults } };
         var validated = new CustomValidatedObject(validations);
 
         // Act
-        var packedValidation = ValidationPipe.ValidatePacked(validated);
+        var validationResult = validated.Validate();
         
         // Assert
-        packedValidation.AssertInvalid(subject, message);
+        Assert.Equal(ValidationStatus.NonValid, validationResult);
+        validated.AssertNonValid(subject, message);
     }
     
     [Fact]
@@ -61,19 +66,20 @@ public sealed class ValidationPipeTests
         const ValidationSubject subject = ValidationSubject.Operation;
         const string message1 = "ErrorMessage1";
         const string message2 = "ErrorMessage2";
-        var validationResults = new List<Func<ValidationResult>>
-            { 
-                () => ValidationResult.NonValid(subject, message1), 
-                () => ValidationResult.NonValid(subject, message2) 
-            };
-        var validations = new Dictionary<ValidationSubject, IList<Func<ValidationResult>>> { { subject, validationResults } };
+        var validationResults = new List<Lazy<ValidationResult>>
+        {
+            new(() => ValidationResult.NonValid(subject, message1)),
+            new(() => ValidationResult.NonValid(subject, message2))
+        };
+        var validations = new Dictionary<ValidationSubject, IList<Lazy<ValidationResult>>> { { subject, validationResults } };
         var validated = new CustomValidatedObject(validations);
 
         // Act
-        var packedValidation = ValidationPipe.ValidatePacked(validated);
+        var validationResult = validated.Validate();
 
         // Assert
-        packedValidation.AssertInvalid(subject, string.Join(Environment.NewLine, [message1, message2]));
+        Assert.Equal(ValidationStatus.NonValid, validationResult);
+        validated.AssertNonValid(subject, message1, message2);
     }
     
     [Fact]
@@ -84,20 +90,21 @@ public sealed class ValidationPipeTests
         const string message1 = "ErrorMessage1";
         const string message2 = "ErrorMessage2";
         var exception = new InvalidDataException("Exception1");
-        
-        var validationResults = new List<Func<ValidationResult>>
-            { 
-                () => ValidationResult.NonValid(subject, message1), 
-                () => ValidationResult.Failed(subject, exception, message2),
-            };
-        var validations = new Dictionary<ValidationSubject, IList<Func<ValidationResult>>> { { subject, validationResults } };
+
+        var validationResults = new List<Lazy<ValidationResult>>
+        {
+            new(() => ValidationResult.NonValid(subject, message1)),
+            new(() => ValidationResult.Failed(subject, exception, message2))
+        };
+        var validations = new Dictionary<ValidationSubject, IList<Lazy<ValidationResult>>> { { subject, validationResults } };
         var validated = new CustomValidatedObject(validations);
 
         // Act
-        var packedValidation = ValidationPipe.ValidatePacked(validated);
+        var validationResult = validated.Validate();
 
         // Assert
-        var expectedMessage = string.Join(Environment.NewLine, [message1, message2]);
-        packedValidation.AssertFailed<InvalidDataException>(subject, expectedMessage);
+        Assert.Equal(ValidationStatus.Failed, validationResult);
+        Assert.Contains(validated.Validations[subject], x => x.Value is { Status: ValidationStatus.NonValid, Message: message1 });
+        Assert.Contains(validated.Validations[subject], x => x.Value is { Status: ValidationStatus.Failed, Message: message2 });
     }
 }

@@ -63,7 +63,7 @@ internal sealed class TestSuiteReporterConfigurationBuilder : ITestSuiteReporter
                 var notPassed = testCase.Assert.Status == AssertStatus.NotPassed;
                 var notPassedWithException = testCase.Assert.Status == AssertStatus.NotPassedWithException;
                 var failed = testCase.Assert.Status == AssertStatus.Failed;
-                var notValid = !testCase.IsValid;
+                var notValid = !testCase.Validations.IsValid();
                 return notPassed || notPassedWithException || notValid || failed;
             };
         }

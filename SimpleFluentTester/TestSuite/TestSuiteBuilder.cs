@@ -80,15 +80,8 @@ internal sealed class TestSuiteBuilder : ITestSuiteBuilder
         if (!CheckIfShouldBeExecuted())
             return ReturnNotExecutedTestReporter();
 
-        try
-        {
-            var testSuiteResult = ProcessContextToResult(testNumbers);
-            return new TestSuiteReporter(testSuiteResult);
-        }
-        catch (InvalidContextException e)
-        {
-            return ReturnNotExecutedTestReporter(e);
-        }
+        var testSuiteResult = ProcessContextToResult(testNumbers);
+        return new TestSuiteReporter(testSuiteResult);
     }
 
     /// <summary>
@@ -108,9 +101,10 @@ internal sealed class TestSuiteBuilder : ITestSuiteBuilder
     private TestSuiteRunResult ProcessContextToResult(IEnumerable<int> testNumbers)
     {
         var testNumbersHash = new SortedSet<int>(testNumbers);
-        
-        _contextContainer.TryToEnrichAttributeOperation();
         ValidateContext(testNumbersHash);
+        
+        var operationEnricher = new OperationEnricher(_contextContainer);
+        operationEnricher.TryToEnrichAttributeOperation();
         
         var completedTestCases = ExecuteTestCases(testNumbersHash);
         

@@ -50,9 +50,7 @@ public sealed class DefaultTestSuiteReportBuilderTests
     public void TestSuiteResultToString_NonValidContext_ReturnError()
     {
         // Assign
-        var testSuiteResult = TestSuiteFactory.CreateTestSuiteRunResult(
-            ValidationTestResults.NonValid,
-            TestCaseOperations.Passed);
+        var testSuiteResult = TestSuiteFactory.CreateTestSuiteRunResult(testCase: TestCaseExamples.Invalid);
         var reporter = new DefaultTestSuiteReportBuilder();
         var shouldPrintPredicateMock = new Mock<Func<AssertedTestCase, bool>>();
 
@@ -72,9 +70,7 @@ public sealed class DefaultTestSuiteReportBuilderTests
     public void TestSuiteResultToString_ValidContext_ReturnInformation()
     {
         // Assign
-        var testSuiteResult = TestSuiteFactory.CreateTestSuiteRunResult(
-            ValidationTestResults.Valid,
-            TestCaseOperations.Passed);
+        var testSuiteResult = TestSuiteFactory.CreateTestSuiteRunResult(testCase: TestCaseExamples.Passed);
         var reporter = new DefaultTestSuiteReportBuilder();
         var shouldPrintPredicateMock = new Mock<Func<AssertedTestCase, bool>>();
 
@@ -94,9 +90,7 @@ public sealed class DefaultTestSuiteReportBuilderTests
     public void TestSuiteResultToString_TestCaseNotPassedWithException_ReturnError()
     {
         // Assign
-        var testSuiteResult = TestSuiteFactory.CreateTestSuiteRunResult(
-            ValidationTestResults.Valid,
-            TestCaseOperations.Invalid);
+        var testSuiteResult = TestSuiteFactory.CreateTestSuiteRunResult(testCase: TestCaseExamples.Invalid);
         var reporter = new DefaultTestSuiteReportBuilder();
         var shouldPrintPredicateMock = new Mock<Func<AssertedTestCase, bool>>();
 
@@ -116,9 +110,7 @@ public sealed class DefaultTestSuiteReportBuilderTests
     public void TestSuiteResultToString_TestCaseNotPassed_ReturnError()
     {
         // Assign
-        var testSuiteResult = TestSuiteFactory.CreateTestSuiteRunResult(
-            ValidationTestResults.Valid,
-            TestCaseOperations.NotPassed);
+        var testSuiteResult = TestSuiteFactory.CreateTestSuiteRunResult(testCase: TestCaseExamples.NotPassed);
         var reporter = new DefaultTestSuiteReportBuilder();
         var shouldPrintPredicateMock = new Mock<Func<AssertedTestCase, bool>>();
 
@@ -138,9 +130,7 @@ public sealed class DefaultTestSuiteReportBuilderTests
     public void TestSuiteResultToString_TestCasePassed_ReturnInformation()
     {
         // Assign
-        var testSuiteResult = TestSuiteFactory.CreateTestSuiteRunResult(
-            ValidationTestResults.Valid,
-            TestCaseOperations.Passed);
+        var testSuiteResult = TestSuiteFactory.CreateTestSuiteRunResult(testCase: TestCaseExamples.Passed);
         var reporter = new DefaultTestSuiteReportBuilder();
         var shouldPrintPredicateMock = new Mock<Func<AssertedTestCase, bool>>();
 
@@ -160,10 +150,7 @@ public sealed class DefaultTestSuiteReportBuilderTests
     public void TestSuiteResultToString_TestCaseIgnored_ShouldBeError()
     {
         // Assign
-        var testSuiteResult = TestSuiteFactory.CreateTestSuiteRunResult(
-            ValidationTestResults.Valid,
-            TestCaseOperations.Passed,
-            testCaseToRun: 2);
+        var testSuiteResult = TestSuiteFactory.CreateTestSuiteRunResult(testCase: TestCaseExamples.Passed, testCaseToRun: 2);
         var reporter = new DefaultTestSuiteReportBuilder();
         var shouldPrintPredicateMock = new Mock<Func<AssertedTestCase, bool>>();
 

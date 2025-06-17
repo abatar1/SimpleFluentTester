@@ -5,7 +5,7 @@ namespace SimpleFluentTester.TestSuite.Case;
 
 /// <summary>
 /// Represents a pipeline for processing test cases within a test suite.
-/// Responsible for unpacking, validating, executing, and asserting test cases
+/// Responsible for unpacking, validating, executing, asserting test cases
 /// to produce a <see cref="AssertedTestCase"/> from a <see cref="DeferredTestCase"/>.
 /// </summary>
 /// <remarks>
@@ -15,14 +15,14 @@ namespace SimpleFluentTester.TestSuite.Case;
 internal sealed class TestCasePipeline(ISet<int> testNumbersHash)
 {
     /// <summary>
-    /// Unpack, execute and assert test cases. Produces <see cref="AssertedTestCase"/> from <see cref="DeferredTestCase"/>.
+    /// Unpack, execute, assert test cases. Produces <see cref="AssertedTestCase"/> from <see cref="DeferredTestCase"/>.
     /// </summary>
     public AssertedTestCase ToCompleted(DeferredTestCase deferredTestCase)
     {
         if (!ShouldBeExecuted(deferredTestCase))
             return AssertedTestCase.NotExecuted(deferredTestCase);
 
-        if (!deferredTestCase.Validate())
+        if (deferredTestCase.Validate() != ValidationStatus.Valid)
             return AssertedTestCase.NotExecuted(deferredTestCase);
         
         return TestCaseExecutor.Execute(deferredTestCase).Assert();

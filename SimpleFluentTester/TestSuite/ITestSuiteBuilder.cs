@@ -1,6 +1,7 @@
 using System;
 using SimpleFluentTester.Reporter;
 using SimpleFluentTester.TestSuite.Case;
+using SimpleFluentTester.TestSuite.Context;
 using SimpleFluentTester.TestSuite.Parameter;
 
 namespace SimpleFluentTester.TestSuite;
@@ -58,13 +59,13 @@ public interface ITestSuiteBuilder
     ITestSuiteBuilder WithDisplayName(string displayName);
 
     /// <summary>
-    /// Configures a custom comparer to be used for comparing expected and actual values during test evaluation.
+    /// Defines a custom comparison logic to evaluate the equality of expected and actual values during test execution.
     /// </summary>
-    /// <param name="comparer">A function that defines how two values of type <typeparamref name="TExpected"/> should be compared for equality.</param>
-    /// <typeparam name="TExpected">The type of values being compared by the custom comparer.</typeparam>
+    /// <param name="comparer">A delegate that provides the comparison logic between two values of the specified type.</param>
+    /// <typeparam name="TExpected">The type of the values being compared.</typeparam>
     /// <returns>An instance of <see cref="ITestSuiteBuilder"/> for further configuration of the test suite.</returns>
     ITestSuiteBuilder WithComparer<TExpected>(ComparerDelegate<TExpected> comparer);
-    
+
     /// <summary>
     /// Gets a builder instance configured to ignore the test suite execution.
     /// By calling this property, the builder will mark the entire test suite as ignored.
@@ -77,6 +78,7 @@ public interface ITestSuiteBuilder
     /// Executes the defined test suite using the specified test case numbers or all test cases if no numbers are provided.
     /// </summary>
     /// <param name="testNumbers">The specific test case numbers to run. If no numbers are passed, all test cases in the suite will be executed.</param>
+    /// <exception cref="InvalidContextException">Throws if testNumber are not correct or operation hasn't been set</exception>
     /// <returns>An instance of <see cref="ITestSuiteReporter"/> that contains the results of the test suite execution.</returns>
     ITestSuiteReporter Run(params int[] testNumbers);
 }

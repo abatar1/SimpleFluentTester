@@ -3,18 +3,17 @@ using SimpleFluentTester.TestSuite;
 using SimpleFluentTester.TestSuite.Case;
 using SimpleFluentTester.TestSuite.ComparedObject;
 using SimpleFluentTester.TestSuite.Context;
-using SimpleFluentTester.UnitTests.Extensions;
-using SimpleFluentTester.Validators.Core;
+using SimpleFluentTester.UnitTests.Helpers.Extensions;
 
 namespace SimpleFluentTester.UnitTests.Helpers;
 
 internal static class TestSuiteFactory
 {
-    public static DeferredTestCase CreateAndAddTestCase(ITestSuiteContextContainer container, object?[] inputs, object? expected)
+    public static DeferredTestCase CreateDeferredTestCase(ITestSuiteContextContainer container, object?[] inputs, object? expected)
     {
         var testCase = new DeferredTestCase(
-            () => container.Context.Operation,
-            () => container.Context.Comparer,
+            new Lazy<Delegate?>(() => container.Context.Operation),
+            new Lazy<Delegate?>(() => container.Context.Comparer),
             ComparedObjectFactory.WrapMany(inputs), 
             ComparedObjectFactory.Wrap(expected), 
             1);
@@ -39,13 +38,12 @@ internal static class TestSuiteFactory
             defaultContext.TestCases,
             operation,
             null,
-            defaultContext.Validations,
             shouldBeExecuted ?? defaultContext.ShouldBeExecuted);
         return new TestSuiteContextContainer(context);
     }
 
     public static TestSuiteRunResult CreateTestSuiteRunResult(
-        ValidationResult? validationResult = null,
+        Exception? exception = null,
         DeferredTestCase? testCase = null,
         int testCaseToRun = 1,
         bool shouldBeExecuted = true,
@@ -53,8 +51,6 @@ internal static class TestSuiteFactory
     {
         var contextContainer =
             CreateEmptyContextContainer(testSuiteNumber: testCaseNumber, shouldBeExecuted: shouldBeExecuted);
-        if (validationResult != null)
-            contextContainer.Context.AddValidation(validationResult);
 
         var completedTestCases = new List<AssertedTestCase>();
         if (testCase != null)
@@ -65,10 +61,10 @@ internal static class TestSuiteFactory
 
         return new TestSuiteRunResult(
             completedTestCases,
-            ValidationPipe.ValidatePacked(contextContainer.Context),
             contextContainer.Context.Operation,
             contextContainer.Context.Name,
             contextContainer.Context.Number,
+            exception,
             shouldBeExecuted);
     }
 }

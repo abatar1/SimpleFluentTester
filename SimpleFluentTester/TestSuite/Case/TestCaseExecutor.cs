@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using SimpleFluentTester.TestSuite.ComparedObject;
+using SimpleFluentTester.TestSuite.Context;
 using SimpleFluentTester.TestSuite.Parameter;
 using SimpleFluentTester.Validators.Core;
 
@@ -79,7 +80,7 @@ internal static class TestCaseExecutor
 
     private static Delegate GetOperation(DeferredTestCase testCase)
     {
-        return testCase.OperationFactory.Value ?? throw new ArgumentNullException(nameof(testCase.OperationFactory), "Operation factory is null after validation, seems like a bug.");
+        return testCase.OperationFactory.Value ?? throw new InvalidContextException("Operation factory is null after validation, seems like a bug.");
     }
 
     private static Type? GetExpectedType(DeferredTestCase testCase)
@@ -91,8 +92,6 @@ internal static class TestCaseExecutor
 
     private static Delegate GetEqualityDelegate(Type? type)
     {
-        
-        
         if (type == null)
             return new Func<object?, object?, bool>(Equals);
         

@@ -1,10 +1,10 @@
-using SimpleFluentTester.UnitTests.Extensions;
-using SimpleFluentTester.UnitTests.TestObjects;
+using SimpleFluentTester.UnitTests.Helpers.Extensions;
+using SimpleFluentTester.UnitTests.Helpers.TestObjects;
 using SimpleFluentTester.Validators.Core;
 
 namespace SimpleFluentTester.UnitTests.Tests.TestSuiteBuilder;
 
-public class ExpectExceptionTests
+public sealed class ExpectExceptionTests
 {
     [Fact]
     public void ExpectException_CustomExceptionWithoutMessage_ShouldBeValid()
@@ -50,7 +50,7 @@ public class ExpectExceptionTests
         
         // Assert
         var message = $"{typeof(CustomException).FullName} do not have public .ctor() with string parameter";
-        reporter.AssertTestCaseExists(1).Validation.AssertInvalid(ValidationSubject.Expect, message);
+        reporter.AssertTestCaseExists(1).AssertNonValid(ValidationSubject.Expect, message);
     }
     
     [Fact]

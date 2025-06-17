@@ -1,10 +1,10 @@
-using SimpleFluentTester.UnitTests.Extensions;
-using SimpleFluentTester.UnitTests.TestObjects;
+using SimpleFluentTester.UnitTests.Helpers.Extensions;
+using SimpleFluentTester.UnitTests.Helpers.TestObjects;
 using SimpleFluentTester.Validators.Core;
 
 namespace SimpleFluentTester.UnitTests.Tests.TestSuiteBuilder;
 
-public class WithComparerTests
+public sealed class WithComparerTests
 {
     [Fact]
     public void WithComparer_UseCustomObjectWithoutComparer_ShouldBeInvalid()
@@ -28,7 +28,8 @@ public class WithComparerTests
     {
         // Assign
         var setup = TestSuite.TestSuite.Sequential
-            .ExpectResult("test").WithInput("test");
+            .ExpectResult("test").WithInput("test")
+            .UseOperation((int x) => x);
         
         // Act
         var reporter = setup

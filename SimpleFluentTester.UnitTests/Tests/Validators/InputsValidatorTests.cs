@@ -1,55 +1,42 @@
-using SimpleFluentTester.UnitTests.Extensions;
 using SimpleFluentTester.UnitTests.Helpers;
+using SimpleFluentTester.UnitTests.Helpers.Extensions;
+using SimpleFluentTester.UnitTests.Helpers.TestObjects;
 using SimpleFluentTester.Validators;
 using SimpleFluentTester.Validators.Core;
 
 namespace SimpleFluentTester.UnitTests.Tests.Validators;
 
+// TODO add tests for parameters inputs
 public sealed class InputsValidatorTests
 {
-    [Fact]
-    public void InputsValidator_NotValidValidatedObjectType_ThrowException()
-    {
-        // Assign
-        var validator = new InputsValidator();
-        var container = TestSuiteFactory.CreateEmptyContextContainer();
-        
-        // Act
-        var func = () => validator.Validate(container.Context, new EmptyValidationContext());
-
-        // Assert
-        Assert.Throws<ValidationUnexpectedException>(func);
-    }
-    
     [Fact]
     public void InputsValidator_InvalidValidatedType_ShouldThrow()
     {
         // Assign
         var validator = new InputsValidator();
-        var customValidated = new CustomValidatedObject(new Dictionary<ValidationSubject, IList<Func<ValidationResult>>>());
-        var validationContext = new InputsValidationContext(() => true);
+        var customValidated = new CustomValidatedObject(new Dictionary<ValidationSubject, IList<Lazy<ValidationResult>>>());
         
         // Act
-        var func = () => validator.Validate(customValidated, validationContext);
+        var func = () => validator.Validate(customValidated, new EmptyValidationContext());
 
         // Assert
         Assert.Throws<ValidationUnexpectedException>(func);
     }
     
     [Fact]
-    public void InputsValidator_InvalidInputNumbers_ShouldBeInvalid()
+    public void InputsValidator_InvalidInputParametersCount_ShouldBeInvalid()
     {
         // Assign
         var validator = new InputsValidator();
         var container = TestSuiteFactory.CreateEmptyContextContainer();
-        var testCase = TestSuiteFactory.CreateAndAddTestCase(container, [1], "test");
-        var validationContext = new InputsValidationContext(() => true);
+        container.WithOperation((int x, int y) => x + y);
+        var testCase = TestSuiteFactory.CreateDeferredTestCase(container, [1], string.Empty);
         
         // Act
-        var validationResult = validator.Validate(testCase, validationContext);
+        var validationResult = validator.Validate(testCase, new EmptyValidationContext());
 
         // Assert
-        validationResult.AssertInvalid(ValidationSubject.Inputs, "Invalid inputs number, should be 0, but was 1.");
+        validationResult.AssertInvalid(ValidationSubject.Inputs, "Invalid inputs number, should have 2 parameters, but had 1: [1]");
     }
     
     [Fact]
@@ -58,11 +45,11 @@ public sealed class InputsValidatorTests
         // Assign
         var validator = new InputsValidator();
         var container = TestSuiteFactory.CreateEmptyContextContainer();
-        var testCase = TestSuiteFactory.CreateAndAddTestCase(container, ["test"], "test");
-        var validationContext = new InputsValidationContext((int _) => true);
+        container.WithOperation((int x) => x);
+        var testCase = TestSuiteFactory.CreateDeferredTestCase(container, ["test"], string.Empty);
         
         // Act
-        var validationResult = validator.Validate(testCase, validationContext);
+        var validationResult = validator.Validate(testCase, new EmptyValidationContext());
 
         // Assert
         validationResult.AssertInvalid(ValidationSubject.Inputs, "Passed parameters and expected operation parameters are not equal.");
@@ -74,11 +61,11 @@ public sealed class InputsValidatorTests
         // Assign
         var validator = new InputsValidator();
         var container = TestSuiteFactory.CreateEmptyContextContainer();
-        var testCase = TestSuiteFactory.CreateAndAddTestCase(container, ["test"], "test");
-        var validationContext = new InputsValidationContext((int? _) => true);
+        container.WithOperation((int? x) => x);
+        var testCase = TestSuiteFactory.CreateDeferredTestCase(container, ["test"], string.Empty);
         
         // Act
-        var validationResult = validator.Validate(testCase, validationContext);
+        var validationResult = validator.Validate(testCase, new EmptyValidationContext());
 
         // Assert
         validationResult.AssertInvalid(ValidationSubject.Inputs, "Passed parameters and expected operation parameters are not equal.");
@@ -90,11 +77,11 @@ public sealed class InputsValidatorTests
         // Assign
         var validator = new InputsValidator();
         var container = TestSuiteFactory.CreateEmptyContextContainer();
-        var testCase = TestSuiteFactory.CreateAndAddTestCase(container, [null], "test");
-        var validationContext = new InputsValidationContext((int? _) => true);
+        container.WithOperation((int? x) => x);
+        var testCase = TestSuiteFactory.CreateDeferredTestCase(container, [null], string.Empty);
         
         // Act
-        var validationResult = validator.Validate(testCase, validationContext);
+        var validationResult = validator.Validate(testCase, new EmptyValidationContext());
 
         // Assert
         validationResult.AssertValid();
@@ -106,11 +93,11 @@ public sealed class InputsValidatorTests
         // Assign
         var validator = new InputsValidator();
         var container = TestSuiteFactory.CreateEmptyContextContainer();
-        var testCase = TestSuiteFactory.CreateAndAddTestCase(container, [1], "test");
-        var validationContext = new InputsValidationContext((int _) => true);
+        container.WithOperation((int x, int y) => x + y);
+        var testCase = TestSuiteFactory.CreateDeferredTestCase(container, [1, 1], string.Empty);
         
         // Act
-        var validationResult = validator.Validate(testCase, validationContext);
+        var validationResult = validator.Validate(testCase, new EmptyValidationContext());
 
         // Assert
         validationResult.AssertValid();
@@ -122,11 +109,11 @@ public sealed class InputsValidatorTests
         // Assign
         var validator = new InputsValidator();
         var container = TestSuiteFactory.CreateEmptyContextContainer();
-        var testCase = TestSuiteFactory.CreateAndAddTestCase(container, [1], "test");
-        var validationContext = new InputsValidationContext((int? _) => true);
+        container.WithOperation((int? x, int? y) => x + y);
+        var testCase = TestSuiteFactory.CreateDeferredTestCase(container, [1, 1], string.Empty);
         
         // Act
-        var validationResult = validator.Validate(testCase, validationContext);
+        var validationResult = validator.Validate(testCase, new EmptyValidationContext());
 
         // Assert
         validationResult.AssertValid();
