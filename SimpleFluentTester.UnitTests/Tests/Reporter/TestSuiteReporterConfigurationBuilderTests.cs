@@ -1,6 +1,8 @@
 using Microsoft.Extensions.Logging;
 using Moq;
 using SimpleFluentTester.Reporter;
+using SimpleFluentTester.TestCase;
+using SimpleFluentTester.TestCase.Clause;
 using SimpleFluentTester.UnitTests.Helpers;
 using SimpleFluentTester.UnitTests.Helpers.Extensions;
 
@@ -29,11 +31,11 @@ public sealed class TestSuiteReporterConfigurationBuilderTests
         Assert.NotNull(configuration.LoggingBuilder);
         Assert.NotNull(configuration.PrintablePredicate);
         
-        Assert.True(configuration.PrintablePredicate.Invoke(completedTestCase1));
-        Assert.True(configuration.PrintablePredicate.Invoke(completedTestCase2));
-        Assert.True(configuration.PrintablePredicate.Invoke(completedTestCase3));
-        Assert.True(configuration.PrintablePredicate.Invoke(completedTestCase4));
-        Assert.False(configuration.PrintablePredicate.Invoke(completedTestCase5));
+        AssertPredicate(configuration, completedTestCase1, true);
+        AssertPredicate(configuration, completedTestCase2, true);
+        AssertPredicate(configuration, completedTestCase3, true);
+        AssertPredicate(configuration, completedTestCase4, true);
+        AssertPredicate(configuration, completedTestCase5, false);
     }
     
     [Fact]
@@ -85,7 +87,7 @@ public sealed class TestSuiteReporterConfigurationBuilderTests
         var completedTestCase = TestCaseExamples.Passed.CompleteTestCase(container);
 
         // Act
-        builder.WithPrintablePredicate(testCase => testCase == completedTestCase);
+        builder.WithPrintablePredicate((_, testCase) => testCase == completedTestCase);
         var configuration = builder.Build();
 
         // Assert
@@ -94,8 +96,14 @@ public sealed class TestSuiteReporterConfigurationBuilderTests
         Assert.NotNull(configuration.LoggingBuilder);
         Assert.NotNull(configuration.PrintablePredicate);
         
-        Assert.True(configuration.PrintablePredicate.Invoke(completedTestCase));
+        AssertPredicate(configuration, completedTestCase, true);
         var anotherCompletedTestCase = TestCaseExamples.Passed.CompleteTestCase(container);
-        Assert.False(configuration.PrintablePredicate.Invoke(anotherCompletedTestCase));
+        AssertPredicate(configuration, anotherCompletedTestCase, false);
+    }
+    
+    private static void AssertPredicate(ITestSuiteReporterConfiguration configuration, AssertedTestCase testCase, bool result)
+    {
+        var clause = testCase.Clauses.First();
+        Assert.Equal(configuration.PrintablePredicate?.Invoke((AssertedTestClause)clause, testCase), result);
     }
 }

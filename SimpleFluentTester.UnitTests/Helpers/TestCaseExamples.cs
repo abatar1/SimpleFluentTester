@@ -15,7 +15,7 @@ public static class TestCaseExamples
     {
         get
         {
-            var expected = ComparedObjectFactory.Wrap(3);
+            var expected = TestClauseFactory.DefineFromValue(3);
             return new DefinedTestCase(new Lazy<Delegate?>(() => Operation) , new Lazy<Delegate?>(() => Comparer),ComparedObjectFactory.WrapMany([1, 2]), expected, 1);
         }
     }
@@ -24,7 +24,7 @@ public static class TestCaseExamples
     {
         get
         {
-            var expected = ComparedObjectFactory.Wrap(4);
+            var expected = TestClauseFactory.DefineFromValue(4);
             return new DefinedTestCase(new Lazy<Delegate?>(() => Operation), new Lazy<Delegate?>(() => Comparer),ComparedObjectFactory.WrapMany([1, 2]), expected, 1);
         }
     }
@@ -33,7 +33,7 @@ public static class TestCaseExamples
     {
         get
         {
-            var expected = ComparedObjectFactory.Wrap(3);
+            var expected = TestClauseFactory.DefineFromValue(3);
             return new DefinedTestCase(new Lazy<Delegate?>(() => ThrowOperation), new Lazy<Delegate?>(() => Comparer),ComparedObjectFactory.WrapMany([1, 2]), expected, 1);
         }
     }
@@ -42,7 +42,7 @@ public static class TestCaseExamples
     {
         get
         {
-            var expected = ComparedObjectFactory.Wrap(3);
+            var expected = TestClauseFactory.DefineFromValue(3);
             return new DefinedTestCase(new Lazy<Delegate?>(() => Operation), new Lazy<Delegate?>(() => ThrowComparer),ComparedObjectFactory.WrapMany([1, 2]), expected, 1);
         }
     }
@@ -51,7 +51,7 @@ public static class TestCaseExamples
     {
         get
         {
-            var expected = ComparedObjectFactory.Wrap(4);
+            var expected = TestClauseFactory.DefineFromValue(3);
             return new DefinedTestCase(new Lazy<Delegate?>(() => Operation), new Lazy<Delegate?>(() => Comparer),ComparedObjectFactory.WrapMany(["test", 2]), expected, 1);
         }
     }

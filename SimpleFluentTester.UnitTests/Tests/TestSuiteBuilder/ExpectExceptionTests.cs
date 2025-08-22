@@ -1,6 +1,6 @@
 using SimpleFluentTester.UnitTests.Helpers.Extensions;
 using SimpleFluentTester.UnitTests.Helpers.TestObjects;
-using SimpleFluentTester.Validators.Core;
+using SimpleFluentTester.Validators.Models;
 
 namespace SimpleFluentTester.UnitTests.Tests.TestSuiteBuilder;
 

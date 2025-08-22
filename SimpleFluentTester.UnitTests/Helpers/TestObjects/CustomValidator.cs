@@ -1,4 +1,5 @@
-using SimpleFluentTester.Validators.Core;
+using SimpleFluentTester.Validators;
+using SimpleFluentTester.Validators.Models;
 
 namespace SimpleFluentTester.UnitTests.Helpers.TestObjects;
 
@@ -7,7 +8,7 @@ internal sealed class CustomValidator(ValidationSubject validationSubject)
 {
     public override ValidationSubject Subject => validationSubject;
 
-    protected override ValidationResult ValidateCore(EmptyValidatedObject validatedObject, EmptyValidationContext validationContext)
+    protected override SubjectValidation ValidateCore(EmptyValidatedObject validatedObject, EmptyValidationContext validationContext)
     {
         return Ok();
     }

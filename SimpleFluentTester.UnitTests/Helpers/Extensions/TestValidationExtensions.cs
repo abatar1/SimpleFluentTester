@@ -1,32 +1,41 @@
-using SimpleFluentTester.TestCase;
-using SimpleFluentTester.Validators.Core;
+using SimpleFluentTester.Validators;
+using SimpleFluentTester.Validators.Helpers;
+using SimpleFluentTester.Validators.Models;
 
 namespace SimpleFluentTester.UnitTests.Helpers.Extensions;
 
 public static class TestValidationExtensions
 {
-    public static void AssertNonValid(this IValidatedObject validated, ValidationSubject subject, params string[] messages)
-    {
-        Assert.NotNull(validated);
-
-        Assert.False(validated.Validations.IsValid());
-        
-        var validations = validated.Validations.GetInvalid().ToList();
-        Assert.NotEmpty(validations);
-        
-        for (var i = 0; i < validations.Count; i++)
-        {
-            Assert.NotNull(validations[i]);
-            Assert.Equal(subject, validations[i].Subject);
-            Assert.Equal(messages[i], validations[i].Message);
-        }
-      
-    }
-
     public static void AssertValid(this IValidatedObject validated)
     {
-        Assert.Empty(validated.Validations.GetInvalid());
-        Assert.True(validated.Validations.IsValid());
+        Assert.Empty(validated.GetNonValidValidations());
+        Assert.True(validated.IsValid());
+    }
+    
+    public static void AssertValid(this SubjectValidation subjectValidation)
+    {
+        Assert.Empty(subjectValidation.GetNonValidValidations());
+        Assert.True(subjectValidation.IsValid());
+    }
+    
+    public static void AssertNonValid(this IValidatedObject validated, ValidationSubject subject, string message)
+    {
+        Assert.NotNull(validated);
+        Assert.False(validated.IsValid());
+        
+        var validations = validated.GetNonValidValidations().ToList();
+        Assert.NotEmpty(validations);
+        
+        var checkingValidation = validations.FirstOrDefault(x => x.Subject == subject);
+        Assert.NotNull(checkingValidation);
+        Assert.Equal(ValidationStatus.NonValid, checkingValidation.Status);
+        Assert.Equal(message, checkingValidation.Message);
+        Assert.Equal(subject, checkingValidation.Subject);
+    }
+    
+    public static void AssertNonValid(this SubjectValidation subjectValidation, ValidationSubject subject, params string[] messages)
+    {
+        AssertNonValid(subjectValidation.Validations, subject, messages);
     }
     
     public static void AssertFailed<TException>(this IValidatedObject validated, ValidationSubject validationSubject, string validationMessage, string? innerMessage = null)
@@ -34,9 +43,9 @@ public static class TestValidationExtensions
     {
         Assert.NotNull(validated);
         
-        Assert.False(validated.Validations.IsValid());
+        Assert.False(validated.IsValid());
 
-        var validations = validated.Validations.GetInvalid();
+        var validations = validated.GetNonValidValidations();
         Assert.NotEmpty(validations);
         
         var validation = validations
@@ -46,15 +55,24 @@ public static class TestValidationExtensions
         validation.AssertFailed<TException>(validationSubject, validationMessage, innerMessage);
     }
     
-    public static void AssertInvalid(this ValidationResult validationResult, ValidationSubject validationSubject, string message)
+    public static void AssertFailed<TException>(this SubjectValidation subjectValidation, ValidationSubject validationSubject, string validationMessage, string? innerMessage = null)
+        where TException: Exception
     {
-        Assert.NotNull(validationResult);
-        Assert.Equal(ValidationStatus.NonValid, validationResult.Status);
-        Assert.Equal(validationSubject, validationResult.Subject);
-        Assert.Equal(message, validationResult.Message);
+        Assert.NotNull(subjectValidation);
+        
+        Assert.False(subjectValidation.IsValid());
+
+        var validations = subjectValidation.GetNonValidValidations();
+        Assert.NotEmpty(validations);
+        
+        var validation = validations
+            .FirstOrDefault(x => x.Subject == validationSubject);
+        Assert.NotNull(validation);
+        
+        validation.AssertFailed<TException>(validationSubject, validationMessage, innerMessage);
     }
     
-    public static void AssertFailed<TException>(this ValidationResult validationResult, ValidationSubject validationSubject, string validationMessage, string? innerMessage = null)
+    private static void AssertFailed<TException>(this ValidationResult validationResult, ValidationSubject validationSubject, string validationMessage, string? innerMessage = null)
         where TException: Exception
     {
         Assert.NotNull(validationResult);
@@ -66,8 +84,15 @@ public static class TestValidationExtensions
             Assert.Equal(innerMessage, exception.Message);
     }
     
-    public static void AssertValid(this ValidationResult validation)
+    private static void AssertNonValid(this IList<ValidationResult> validationResults, ValidationSubject subject, params string[] messages)
     {
-        Assert.Equal(ValidationStatus.Valid, validation.Status);
+        Assert.NotEmpty(validationResults);
+        
+        for (var i = 0; i < validationResults.Count; i++)
+        {
+            Assert.NotNull(validationResults[i]);
+            Assert.Equal(subject, validationResults[i].Subject);
+            Assert.Equal(messages[i], validationResults[i].Message);
+        }
     }
 }

@@ -14,18 +14,16 @@ public sealed class TestCaseExecutorTests
         // Assign
         const int expectedResult = 3;
         var input = new[] { 1, 2 }.Cast<object?>().ToArray();
-        
         var container = TestSuiteFactory.CreateEmptyContextContainer(operation: (int x, int y) => x + y);
-        
         var testCase = TestSuiteFactory.CreateDeferredTestCase(container, input, expectedResult);
         
         // Act
-        var executedTestCase = TestCaseExecutor.Execute(testCase);
+        var executedTestCase = testCase.Execute();
 
         // Assert
         Assert.NotNull(executedTestCase);
         Assert.Empty(testCase.Validations);
-        executedTestCase.Result.AssertValue(expectedResult);
+        executedTestCase.Clauses.AssertSingleValue(expectedResult);
     }
     
     [Fact]
@@ -33,20 +31,16 @@ public sealed class TestCaseExecutorTests
     {
         // Assign
         var exception = new CustomWithMessageException("Message");
-        var container = TestSuiteFactory.CreateEmptyContextContainer(operation: (int _, int _) =>
-        {
-            throw exception;
-        });
-
+        var container = TestSuiteFactory.CreateEmptyContextContainer(operation: (int _, int _) => { throw exception; });
         var testCase = TestSuiteFactory.CreateDeferredTestCase(container, [1, 2], 3);
         
         // Act
-        var executedTestCase = TestCaseExecutor.Execute(testCase);
+        var executedTestCase = testCase.Execute();
 
         // Assert
         Assert.NotNull(executedTestCase);
         Assert.Empty(testCase.Validations);
-        executedTestCase.Result.AssertException(exception);
+        executedTestCase.Clauses.AssertSingleException(exception);
     }
     
     [Fact]
@@ -54,18 +48,16 @@ public sealed class TestCaseExecutorTests
     {
         // Assign
         var input = new[] { 1, 2, 3 }.Cast<object?>().ToArray();
-        
         var container = TestSuiteFactory.CreateEmptyContextContainer(operation: (int x, int y) => x + y);
-
         var testCase = TestSuiteFactory.CreateDeferredTestCase(container, input, 6);
         
         // Act
-        var executedTestCase = TestCaseExecutor.Execute(testCase);
+        var executedTestCase = testCase.Execute();
 
         // Assert
         Assert.NotNull(executedTestCase);
         Assert.Single(testCase.Validations);
-        executedTestCase.Result.AssertException(new System.Reflection.TargetParameterCountException("Parameter count mismatch."));
+        executedTestCase.Clauses.AssertSingleException(new System.Reflection.TargetParameterCountException("Parameter count mismatch."));
     }
     
     [Fact]
@@ -73,13 +65,11 @@ public sealed class TestCaseExecutorTests
     {
         // Assign
         var input = new[] { 1, 2, 3 }.Cast<object?>().ToArray();
-        
         var container = TestSuiteFactory.CreateEmptyContextContainer();
-
         var testCase = TestSuiteFactory.CreateDeferredTestCase(container, input, 6);
         
         // Act
-        var func = () => TestCaseExecutor.Execute(testCase);
+        var func = () => testCase.Execute();
 
         // Assert
         Assert.Throws<InvalidContextException>(func);

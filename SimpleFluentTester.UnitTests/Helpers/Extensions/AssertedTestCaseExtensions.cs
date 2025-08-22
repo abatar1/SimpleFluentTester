@@ -1,7 +1,8 @@
 using SimpleFluentTester.TestCase;
+using SimpleFluentTester.TestCase.Clause;
 using SimpleFluentTester.TestSuite;
 using SimpleFluentTester.TestSuite.ComparedObject;
-using SimpleFluentTester.Validators.Core;
+using SimpleFluentTester.Validators.Models;
 
 namespace SimpleFluentTester.UnitTests.Helpers.Extensions;
 
@@ -14,7 +15,8 @@ public static class AssertedTestCaseExtensions
         Func<TExpected?, TExpected?, bool>? comparer = null)
     {
         testCase.AssertValid();
-        Assert.Equal(AssertStatus.Passed, testCase.Assert.Status);
+        var testClause = (AssertedTestClause)testCase.Clauses.First();
+        Assert.Equal(AssertStatus.Passed, testClause.Assert.Status);
         testCase.AssertOutput(expected, inputs, true, comparer);
     }
     
@@ -25,13 +27,15 @@ public static class AssertedTestCaseExtensions
     where TException : Exception
     {
         testCase.AssertFailed<TException>(ValidationSubject.Comparer, validationMessage, innerMessage);
-        Assert.Equal(AssertStatus.Failed, testCase.Assert.Status);
-        Assert.NotNull(testCase.Assert.Output);
-        Assert.NotNull(testCase.Expected);
-        Assert.NotNull(testCase.Assert.Exception);
-        Assert.Equal(typeof(TException), testCase.Assert.Exception.GetType());
-        Assert.NotNull(testCase.Assert.Message);
-        Assert.Equal(innerMessage, testCase.Assert.Message);
+        
+        var testClause = (AssertedTestClause)testCase.Clauses.First();
+        Assert.Equal(AssertStatus.Failed, testClause.Assert.Status);
+        Assert.NotNull(testClause.Result);
+        Assert.NotNull(testClause.Expected);
+        Assert.NotNull(testClause.Assert.Exception);
+        Assert.Equal(typeof(TException), testClause.Assert.Exception.GetType());
+        Assert.NotNull(testClause.Assert.Message);
+        Assert.Equal(innerMessage, testClause.Assert.Message);
     }
 
     public static void AssertNotPassed<TExpected>(
@@ -41,8 +45,10 @@ public static class AssertedTestCaseExtensions
         Func<TExpected?, TExpected?, bool>? comparer = null)
     {
         testCase.AssertValid();
-        Assert.Equal(AssertStatus.NotPassed, testCase.Assert.Status);
         testCase.AssertOutput(expected, inputs, false, comparer);
+        
+        var testClause = (AssertedTestClause)testCase.Clauses.First();
+        Assert.Equal(AssertStatus.NotPassed, testClause.Assert.Status);
     }
 
     public static void AssertNotPassedWithException<TExpected>(
@@ -53,14 +59,13 @@ public static class AssertedTestCaseExtensions
         Func<TExpected?, TExpected?, bool>? comparer = null)
     {
         testCase.AssertValid();
-
-        Assert.Equal(AssertStatus.NotPassedWithException, testCase.Assert.Status);
-
-        Assert.Equal(ComparedObjectVariety.Exception, testCase.Assert.Output.Variety);
-        Assert.Equal(exceptionType, testCase.Assert.Output.Type);
-        Assert.Equal(exceptionType, testCase.Assert.Output.Value?.GetType());
-
         testCase.AssertOutput(expected, inputs, false, comparer);
+        
+        var testClause = (AssertedTestClause)testCase.Clauses.First();
+        Assert.Equal(AssertStatus.NotPassedWithException, testClause.Assert.Status);
+        Assert.Equal(ComparedObjectVariety.Exception, testClause.Result.Variety);
+        Assert.Equal(exceptionType, testClause.Result.Type);
+        Assert.Equal(exceptionType, testClause.Result.Value?.GetType());
     }
     
     public static void AssertSkippedTestResult(
@@ -68,11 +73,13 @@ public static class AssertedTestCaseExtensions
         object? expected,
         object?[] inputs)
     {
-        Assert.Equal(AssertStatus.Ignored, testCase.Assert.Status);
-        
-        testCase.AssertNullOutput();
-        
-        Assert.Equal(expected, testCase.Expected.Value);
+        var testClause = (AssertedTestClause)testCase.Clauses.First();
+        Assert.NotNull(testClause.Result);
+        Assert.Null(testClause.Result.Value);
+        Assert.Null(testClause.Result.Type);
+        Assert.Equal(ComparedObjectVariety.Null, testClause.Result.Variety);
+        Assert.Equal(AssertStatus.Ignored, testClause.Assert.Status);
+        Assert.Equal(expected, testClause.Expected.Value);
         Assert.Equal(inputs, testCase.Inputs.Select(x => x.Value));
     }
 
@@ -83,16 +90,17 @@ public static class AssertedTestCaseExtensions
         bool shouldBeEqual,
         Func<TExpected?, TExpected?, bool>? comparer)
     {
-        Assert.NotNull(testCase.Assert.Output);
-        if (testCase.Assert.Output.Variety != ComparedObjectVariety.Null)
-            Assert.NotNull(testCase.Assert.Output.Value);
+        var testClause = (AssertedTestClause)testCase.Clauses.First();
+        Assert.NotNull(testClause.Result);
+        if (testClause.Result.Variety != ComparedObjectVariety.Null)
+            Assert.NotNull(testClause.Result.Value);
         
-        if (testCase.Assert.Output.Variety == ComparedObjectVariety.Null && testCase.Expected.Variety == ComparedObjectVariety.Null)
+        if (testClause.Result.Variety == ComparedObjectVariety.Null && testClause.Expected.Variety == ComparedObjectVariety.Null)
             return;
         
-        if (testCase.Expected.Value is Exception expectedException)
+        if (testClause.Expected.Value is Exception expectedException)
         {
-            if (testCase.Assert.Output.Value is not Exception outputException)
+            if (testClause.Result.Value is not Exception outputException)
             {
                 Assert.Fail("Output is not Exception, however the expected is.");
                 return;
@@ -105,21 +113,13 @@ public static class AssertedTestCaseExtensions
         
         if (comparer == null)
         {
-            Assert.Equal(shouldBeEqual, expectedResult?.Equals(testCase.Assert.Output.Value));
-            Assert.Equal(shouldBeEqual, testCase.Expected.Value?.Equals(testCase.Assert.Output.Value));
+            Assert.Equal(shouldBeEqual, expectedResult?.Equals(testClause.Result.Value));
+            Assert.Equal(shouldBeEqual, testClause.Expected.Value?.Equals(testClause.Result.Value));
             Assert.Equal(expectedInputs, testCase.Inputs.Select(x => x.Value));
             return;
         }
 
-        Assert.Equal(shouldBeEqual, comparer.Invoke((TExpected?)testCase.Assert.Output.Value, (TExpected?)testCase.Expected.Value));
-        Assert.Equal(shouldBeEqual, comparer.Invoke(expectedResult, (TExpected?)testCase.Assert.Output.Value));
-    }
-    
-    private static void AssertNullOutput(this AssertedTestCase testCase)
-    {
-        Assert.NotNull(testCase.Assert.Output);
-        Assert.Null(testCase.Assert.Output.Value);
-        Assert.Null(testCase.Assert.Output.Type);
-        Assert.Equal(ComparedObjectVariety.Null, testCase.Assert.Output.Variety);
+        Assert.Equal(shouldBeEqual, comparer.Invoke((TExpected?)testClause.Result.Value, (TExpected?)testClause.Expected.Value));
+        Assert.Equal(shouldBeEqual, comparer.Invoke(expectedResult, (TExpected?)testClause.Result.Value));
     }
 }

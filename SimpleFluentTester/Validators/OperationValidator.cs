@@ -4,7 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 using SimpleFluentTester.TestCase;
 using SimpleFluentTester.TestCase.Clause;
 using SimpleFluentTester.TestSuite.ComparedObject;
-using SimpleFluentTester.Validators.Core;
+using SimpleFluentTester.Validators.Models;
 
 namespace SimpleFluentTester.Validators;
 
@@ -19,11 +19,11 @@ internal sealed class OperationValidator : BaseValidator<EmptyValidationContext,
         var operation = testCase.OperationFactory.Value;
 
         if (operation == null)
-            return new SubjectValidation(new List<ValidationResult> { NonValid("Operation not specified") });
+            return NonValid("Operation not specified");
         
         var returnParameterType = operation.Method.ReturnParameter?.ParameterType;
         
-        var validationResults = new List<ValidationResult>();
+        var validationResults = new List<SubjectValidation>();
         foreach (var clause in testCase.Clauses)
         {
             validationResults.Add(ValidateInternalSingle(clause, returnParameterType));
@@ -31,7 +31,7 @@ internal sealed class OperationValidator : BaseValidator<EmptyValidationContext,
         return new SubjectValidation(validationResults);
     }
 
-    private ValidationResult ValidateInternalSingle(ITestClause testClause, Type? returnParameterType)
+    private SubjectValidation ValidateInternalSingle(ITestClause testClause, Type? returnParameterType)
     {
         switch (testClause.Expected.Variety)
         {
@@ -41,15 +41,15 @@ internal sealed class OperationValidator : BaseValidator<EmptyValidationContext,
                 var (isNullable, underlyingReturnType) = GetUnderlyingReturnType(returnParameterType);
                 if (isNullable || underlyingReturnType == testClause.Expected.Type)
                     return Ok();
-                return ValidationResult.NonValid(ValidationSubject.Operation, "Operation return type is not the same as used generic type.");
+                return NonValid("Operation return type is not the same as used generic type.");
             
             case ComparedObjectVariety.Value:
                 if (CheckIfReturnIsVoid(returnParameterType))
                     return NonValid("Operation must have return type to be testable");
-                (var _, underlyingReturnType) = GetUnderlyingReturnType(returnParameterType);
+                (_, underlyingReturnType) = GetUnderlyingReturnType(returnParameterType);
                 if (underlyingReturnType == testClause.Expected.Type)
                     return Ok();
-                return ValidationResult.NonValid(ValidationSubject.Operation, "Operation return type is not the same as used generic type.");
+                return NonValid("Operation return type is not the same as used generic type.");
             
             case ComparedObjectVariety.Exception:
                 // Operation type is always ok for exceptions, we can't validate an expected result here.

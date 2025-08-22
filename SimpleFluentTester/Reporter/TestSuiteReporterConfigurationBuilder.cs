@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging.Console;
 using SimpleFluentTester.TestCase;
 using SimpleFluentTester.TestCase.Clause;
 using SimpleFluentTester.TestSuite;
+using SimpleFluentTester.Validators.Helpers;
 
 namespace SimpleFluentTester.Reporter;
 

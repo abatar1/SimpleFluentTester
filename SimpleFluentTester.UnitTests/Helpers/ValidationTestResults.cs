@@ -1,4 +1,5 @@
-using SimpleFluentTester.Validators.Core;
+using SimpleFluentTester.Validators;
+using SimpleFluentTester.Validators.Models;
 
 namespace SimpleFluentTester.UnitTests.Helpers;
 

@@ -5,7 +5,7 @@ using SimpleFluentTester.TestSuite;
 using SimpleFluentTester.TestSuite.ComparedObject;
 using SimpleFluentTester.TestSuite.Context;
 using SimpleFluentTester.Validators;
-using SimpleFluentTester.Validators.Core;
+using SimpleFluentTester.Validators.Helpers;
 
 namespace SimpleFluentTester.TestCase;
 

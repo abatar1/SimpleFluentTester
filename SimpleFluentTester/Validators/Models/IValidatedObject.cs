@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace SimpleFluentTester.Validators.Core;
+namespace SimpleFluentTester.Validators.Models;
 
 /// <summary>
 /// Defines a contract for objects that support validation logic through a collection of validation operations.

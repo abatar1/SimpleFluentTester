@@ -72,9 +72,9 @@ public sealed class TestSuiteReportDefaultsTests
         
         // Assert
         var lines = SeparateToLines(footerString);
-        Assert.Equal("0/1 test cases have been passed, 1 test case failed", lines[0]);
-        Assert.Equal("Non-valid test cases numbers: 1", lines[1]);
-        Assert.Equal(2, lines.Count);
+        Assert.Equal("Passed: 0, Not passed: 0, Failed: 1", lines[0]);
+        Assert.Equal("Failed numbers: 1", lines[1]);
+        Assert.Equal(3, lines.Count);
     }
     
     [Fact]
@@ -88,8 +88,8 @@ public sealed class TestSuiteReportDefaultsTests
         
         // Assert
         var lines = SeparateToLines(footerString);
-        Assert.Equal("0/1 test cases have been passed, 1 test case failed", lines[0]);
-        Assert.Equal("Not passed test cases numbers: 1", lines[1]);
+        Assert.Equal("Passed: 0, Not passed: 1, Failed: 0", lines[0]);
+        Assert.Equal("Not passed numbers: 1", lines[1]);
         Assert.Equal(3, lines.Count);
     }
     
@@ -104,8 +104,8 @@ public sealed class TestSuiteReportDefaultsTests
         
         // Assert
         var lines = SeparateToLines(footerString);
-        Assert.Equal("0/1 test cases have been passed, 1 test case failed", lines[0]);
-        Assert.Equal("Failed test cases with exceptions numbers: 1", lines[1]);
+        Assert.Equal("Passed: 0, Not passed: 1, Failed: 0", lines[0]);
+        Assert.Equal("Not passed with exception numbers: 1", lines[1]);
         Assert.Equal(3, lines.Count);
     }
 
@@ -120,13 +120,7 @@ public sealed class TestSuiteReportDefaultsTests
         var formattedString = completedTestCase.ToFormattedString();
 
         // Assert
-        var lines = SeparateToLines(formattedString);
-        Assert.Equal("Test case [1] passed", lines[0]);
-        Assert.Equal("\tInputs: '1', '2'", lines[1]);
-        Assert.Equal("\tExpected: '3'", lines[2]);
-        Assert.Equal("\tOutput: '3'", lines[3]);
-        Assert.Contains("\tElapsed: ", lines[4]);
-        Assert.Equal(5, lines.Count);
+        Assert.Empty(formattedString);
     }
     
     [Fact]
@@ -141,12 +135,13 @@ public sealed class TestSuiteReportDefaultsTests
 
         // Assert
         var lines = SeparateToLines(formattedString);
-        Assert.Equal("Test case [1] not passed", lines[0]);
-        Assert.Equal("\tInputs: '1', '2'", lines[1]);
-        Assert.Equal("\tExpected: '4'", lines[2]);
-        Assert.Equal("\tOutput: '3'", lines[3]);
-        Assert.Contains("\tElapsed: ", lines[4]);
-        Assert.Equal(5, lines.Count);
+        Assert.Equal("Test case [1] was not successful", lines[0]);
+        Assert.Contains("Reason: Test case not passed", lines[1]);
+        Assert.Contains("Inputs: '1', '2'", lines[2]);
+        Assert.Contains("Expected: '4'", lines[3]);
+        Assert.Contains("Result: '3'", lines[4]);
+        Assert.Contains("Elapsed: ", lines[5]);
+        Assert.Equal(6, lines.Count);
     }
     
     [Fact]
@@ -161,12 +156,13 @@ public sealed class TestSuiteReportDefaultsTests
 
         // Assert
         var lines = SeparateToLines(formattedString);
-        Assert.Equal("Test case [1] not passed with an exception", lines[0]);
-        Assert.Equal("Exception: Exception of type 'System.Exception' was thrown.", lines[1]);
-        Assert.Equal("\tInputs: '1', '2'", lines[2]);
-        Assert.Equal("\tExpected: '3'", lines[3]);
-        Assert.Contains("\tElapsed: ", lines[4]);
-        Assert.Equal(5, lines.Count);
+        Assert.Equal("Test case [1] was not successful", lines[0]);
+        Assert.Contains("Reason: Test case not passed with an exception", lines[1]);
+        Assert.Contains("Exception: Exception of type 'System.Exception' was thrown.", lines[2]);
+        Assert.Contains("Inputs: '1', '2'", lines[3]);
+        Assert.Contains("Expected: '3'", lines[4]);
+        Assert.Contains("Elapsed: ", lines[5]);
+        Assert.Equal(6, lines.Count);
     }
     
     [Fact]
@@ -182,12 +178,15 @@ public sealed class TestSuiteReportDefaultsTests
         // Assert
         var lines = SeparateToLines(formattedString);
         Assert.Equal("Test case [1] not passed with a validation error:", lines[0]);
-        Assert.Equal("\t-Validation subject: Inputs", lines[1]);
-        Assert.Equal("\tError message: Passed parameters and expected operation parameters are not equal.", lines[2]);
-        Assert.Equal("Test case [1] not calculated", lines[3]);
-        Assert.Equal("\tInputs: 'test', '2'", lines[4]);
-        Assert.Equal("\tExpected: '4'", lines[5]);
-        Assert.Equal(6, lines.Count);
+        Assert.Contains("Validation subject: Inputs", lines[1]);
+        Assert.Contains("Error message: Passed parameters and expected operation parameters are not equal.", lines[2]);
+        Assert.Equal("Test case [1] was not successful", lines[3]);
+        Assert.Contains("Reason: Test case assertion has failed with an exception", lines[4]);
+        Assert.Contains("Inputs: 'test', '2'", lines[5]);
+        Assert.Contains("Expected: '3'", lines[6]);
+        Assert.Contains("Result: 'null'", lines[7]);
+        Assert.Contains("Elapsed", lines[8]);
+        Assert.Equal(9, lines.Count);
     }
 
     private static List<string> SeparateToLines(string str)

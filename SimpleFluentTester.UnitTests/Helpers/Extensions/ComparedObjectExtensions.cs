@@ -1,10 +1,18 @@
+using SimpleFluentTester.TestCase.Clause;
 using SimpleFluentTester.TestSuite.ComparedObject;
 
 namespace SimpleFluentTester.UnitTests.Helpers.Extensions;
 
 public static class ComparedObjectExtensions
 {
-    public static void AssertValue(this IComparedObject comparedObject, object expectedValue)
+    public static void AssertSingleValue(this IList<ITestClause> testClauses, object expectedValue)
+    {
+        Assert.Single(testClauses);
+        var comparedObject = testClauses.TryGetResult();
+        comparedObject.AssertSingleValue(expectedValue);
+    }
+    
+    public static void AssertSingleValue(this IComparedObject comparedObject, object expectedValue)
     {
         Assert.NotNull(comparedObject);
         Assert.NotNull(comparedObject.Value);
@@ -15,7 +23,15 @@ public static class ComparedObjectExtensions
         Assert.Equal(comparedObject.Value.ToString(), comparedObject.ToString());
     }
     
-    public static void AssertException<TException>(this IComparedObject comparedObject, TException expectedException)
+    public static void AssertSingleException<TException>(this IList<ITestClause> testClauses, TException expectedException)
+        where TException : Exception
+    {
+        Assert.Single(testClauses);
+        var comparedObject = testClauses.TryGetResult();
+        comparedObject.AssertSingleException(expectedException);
+    }
+    
+    public static void AssertSingleException<TException>(this IComparedObject comparedObject, TException expectedException)
         where TException : Exception
     {
         if (comparedObject is not ExceptionObject exceptionObject)
@@ -42,5 +58,18 @@ public static class ComparedObjectExtensions
         Assert.Null(comparedObject.Type);
         Assert.Equal(ComparedObjectVariety.Null, comparedObject.Variety);
         Assert.Equal("null", comparedObject.ToString());
+    }
+    
+    private static IComparedObject TryGetResult(this IList<ITestClause> testClauses)
+    {
+        var clause = testClauses.First();
+        
+        if (clause is ExecutedTestClause executedTestClause)
+            return executedTestClause.Result;
+        if (clause is AssertedTestClause assertedTestClause)
+            return assertedTestClause.Result;
+        
+        Assert.Fail("Test clause is not an ExecutedTestClause or AssertedTestClause");
+        throw new InvalidOperationException();
     }
 }

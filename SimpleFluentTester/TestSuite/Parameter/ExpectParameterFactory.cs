@@ -13,17 +13,19 @@ internal static class ExpectParameterFactory
 
     public static DeferredOperationParameter Create(ITestSuiteContextContainer container, string parameterName)
     {
+        if (container.Context.Operation?.Method.Name == null)
+            throw new InvalidOperationException("Operation delegate accessed before initialization, seems like a bug");
         var lazyParameterInfo = ParametersInfoMap.GetOrAdd(container.Context.Operation.Method.Name, 
             _ => new Lazy<OperationParametersInfo>(() => CreateOperationParametersInfo(container.Context.Operation)));
-
         return new DeferredOperationParameter(new Lazy<ParameterInfo>(() => lazyParameterInfo.Value.ParametersByName[parameterName]));
     }
     
     public static DeferredOperationParameter Create(ITestSuiteContextContainer container, int parameterPosition)
     {
+        if (container.Context.Operation?.Method.Name == null)
+            throw new InvalidOperationException("Operation delegate accessed before initialization, seems like a bug");
         var lazyParameterInfo = ParametersInfoMap.GetOrAdd(container.Context.Operation.Method.Name, 
             _ => new Lazy<OperationParametersInfo>(() => CreateOperationParametersInfo(container.Context.Operation)));
-
         return new DeferredOperationParameter(new Lazy<ParameterInfo>(() => lazyParameterInfo.Value.ParametersByPosition[parameterPosition]));
     }
 

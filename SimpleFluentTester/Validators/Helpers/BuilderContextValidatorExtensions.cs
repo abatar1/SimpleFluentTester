@@ -1,8 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using SimpleFluentTester.Validators.Models;
 
-namespace SimpleFluentTester.Validators.Core;
+namespace SimpleFluentTester.Validators.Helpers;
 
 internal static class BuilderContextValidatorExtensions
 {

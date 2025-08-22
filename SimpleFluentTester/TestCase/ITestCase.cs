@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using SimpleFluentTester.TestCase.Clause;
 using SimpleFluentTester.TestSuite.ComparedObject;
-using SimpleFluentTester.Validators.Core;
+using SimpleFluentTester.Validators.Models;
 
 namespace SimpleFluentTester.TestCase;
 

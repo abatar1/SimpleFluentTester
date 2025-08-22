@@ -2,7 +2,7 @@ using SimpleFluentTester.UnitTests.Helpers;
 using SimpleFluentTester.UnitTests.Helpers.Extensions;
 using SimpleFluentTester.UnitTests.Helpers.TestObjects;
 using SimpleFluentTester.Validators;
-using SimpleFluentTester.Validators.Core;
+using SimpleFluentTester.Validators.Models;
 
 namespace SimpleFluentTester.UnitTests.Tests.Validators;
 
@@ -14,7 +14,7 @@ public sealed class InputsValidatorTests
     {
         // Assign
         var validator = new InputsValidator();
-        var customValidated = new CustomValidatedObject(new Dictionary<ValidationSubject, IList<Lazy<ValidationResult>>>());
+        var customValidated = new CustomValidatedObject(new Dictionary<ValidationSubject, IList<Lazy<SubjectValidation>>>());
         
         // Act
         var func = () => validator.Validate(customValidated, new EmptyValidationContext());
@@ -36,7 +36,7 @@ public sealed class InputsValidatorTests
         var validationResult = validator.Validate(testCase, new EmptyValidationContext());
 
         // Assert
-        validationResult.AssertInvalid(ValidationSubject.Inputs, "Invalid inputs number, should have 2 parameters, but had 1: [1]");
+        validationResult.AssertNonValid(ValidationSubject.Inputs, "Invalid inputs number, should have 2 parameters, but had 1: [1]");
     }
     
     [Fact]
@@ -52,7 +52,7 @@ public sealed class InputsValidatorTests
         var validationResult = validator.Validate(testCase, new EmptyValidationContext());
 
         // Assert
-        validationResult.AssertInvalid(ValidationSubject.Inputs, "Passed parameters and expected operation parameters are not equal.");
+        validationResult.AssertNonValid(ValidationSubject.Inputs, "Passed parameters and expected operation parameters are not equal.");
     }
     
     [Fact]
@@ -68,7 +68,7 @@ public sealed class InputsValidatorTests
         var validationResult = validator.Validate(testCase, new EmptyValidationContext());
 
         // Assert
-        validationResult.AssertInvalid(ValidationSubject.Inputs, "Passed parameters and expected operation parameters are not equal.");
+        validationResult.AssertNonValid(ValidationSubject.Inputs, "Passed parameters and expected operation parameters are not equal.");
     }
     
     [Fact]

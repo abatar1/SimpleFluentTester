@@ -132,7 +132,7 @@ internal sealed class SequentialTestSuiteBuilder : ITestSuiteBuilder
     private ITestSuiteReporter ReturnNotExecutedTestReporter(Exception? exception = null)
     {
         var testCases = _contextContainer.Context.TestCases
-            .Select(ITestCase (x) => x.AsIgnored().AsIgnored())
+            .Select(x=> x.AsNotExecuted().AsIgnored())
             .ToList();
         
         var testSuiteRunResult = GetTestSuiteRunResult(_contextContainer.Context, testCases, false, exception);
@@ -155,7 +155,7 @@ internal sealed class SequentialTestSuiteBuilder : ITestSuiteBuilder
     /// </summary>
     /// <param name="testNumbersHash">A set of integers representing the hash of the test numbers to be executed.</param>
     /// <returns>A list of completed test cases after processing through the pipeline.</returns>
-    private IList<ITestCase> ExecuteTestCases(ISet<int> testNumbersHash)
+    private IList<AssertedTestCase> ExecuteTestCases(ISet<int> testNumbersHash)
     {
         var testCasePipeline = new TestCasePipeline(testNumbersHash);
         return _contextContainer.Context.TestCases
@@ -168,7 +168,7 @@ internal sealed class SequentialTestSuiteBuilder : ITestSuiteBuilder
     /// </summary>
     private static TestSuiteRunResult GetTestSuiteRunResult(
         ITestSuiteContext context,
-        IList<ITestCase> completedTestCases,
+        IList<AssertedTestCase> completedTestCases,
         bool shouldBeExecuted,
         Exception? exception = null)
     {

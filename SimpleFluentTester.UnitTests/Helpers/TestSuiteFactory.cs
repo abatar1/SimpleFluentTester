@@ -15,7 +15,7 @@ internal static class TestSuiteFactory
             new Lazy<Delegate?>(() => container.Context.Operation),
             new Lazy<Delegate?>(() => container.Context.Comparer),
             ComparedObjectFactory.WrapMany(inputs), 
-            ComparedObjectFactory.Wrap(expected), 
+            TestClauseFactory.DefineFromValue(expected), 
             1);
         container.Context.TestCases.Add(testCase);
         return testCase;

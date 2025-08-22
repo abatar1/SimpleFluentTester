@@ -1,4 +1,7 @@
-namespace SimpleFluentTester.Validators.Core;
+using System.Collections.Generic;
+using SimpleFluentTester.Validators.Models;
+
+namespace SimpleFluentTester.Validators;
 
 internal abstract class BaseValidator<TValidationContext, TValidatedObject> : IValidator
     where TValidationContext : IValidationContext
@@ -22,14 +25,14 @@ internal abstract class BaseValidator<TValidationContext, TValidatedObject> : IV
 
     protected abstract SubjectValidation ValidateCore(TValidatedObject validated, TValidationContext validationContext);
 
-    protected ValidationResult Ok()
+    protected SubjectValidation Ok()
     {
-        return ValidationResult.Valid(Subject);
+        return new SubjectValidation(new List<ValidationResult> { ValidationResult.Valid(Subject) });
     }
     
-    protected ValidationResult NonValid(string message)
+    protected SubjectValidation NonValid(string message)
     {
-        return ValidationResult.NonValid(Subject, message);
+        return new SubjectValidation(new List<ValidationResult> { ValidationResult.NonValid(Subject, message) });
     }
     
     private static TValidatedObject CastValidatedObject(IValidatedObject validated)

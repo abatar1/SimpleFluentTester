@@ -9,7 +9,7 @@ namespace SimpleFluentTester.TestSuite;
 /// validations performed, and additional metadata about the test suite.
 /// </summary>
 public sealed class TestSuiteRunResult(
-    IList<ITestCase> validatedTestCases,
+    IList<AssertedTestCase> assertedTestCases,
     Delegate? operation,
     string? displayName,
     int number,
@@ -22,7 +22,7 @@ public sealed class TestSuiteRunResult(
 
     public Exception? Exception { get; } = exception;
     
-    public IList<ITestCase> TestCases { get; } = validatedTestCases;
+    public IList<AssertedTestCase> TestCases { get; } = assertedTestCases;
 
     public Delegate? Operation { get; } = operation;
 

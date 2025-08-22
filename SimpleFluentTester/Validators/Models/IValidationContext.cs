@@ -1,4 +1,4 @@
-namespace SimpleFluentTester.Validators.Core;
+namespace SimpleFluentTester.Validators.Models;
 
 /// <summary>
 /// Represents a context for validation operations within the validation framework.

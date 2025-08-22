@@ -1,6 +1,8 @@
 using SimpleFluentTester.UnitTests.Helpers.Extensions;
 using SimpleFluentTester.UnitTests.Helpers.TestObjects;
-using SimpleFluentTester.Validators.Core;
+using SimpleFluentTester.Validators;
+using SimpleFluentTester.Validators.Helpers;
+using SimpleFluentTester.Validators.Models;
 
 namespace SimpleFluentTester.UnitTests.Tests.Validators;
 
@@ -10,7 +12,7 @@ public sealed class ValidationPipeTests
     public void ValidatePacked_EmptyValidations_ShouldBeValid()
     {
         // Assign
-        var validated = new CustomValidatedObject(new Dictionary<ValidationSubject, IList<Lazy<ValidationResult>>>());
+        var validated = new CustomValidatedObject(new Dictionary<ValidationSubject, IList<Lazy<SubjectValidation>>>());
 
         // Act
         var validationResult = validated.Validate();
@@ -25,8 +27,10 @@ public sealed class ValidationPipeTests
     {
         // Assign
         const ValidationSubject subject = ValidationSubject.Operation;
-        var validationResults = new List<Lazy<ValidationResult>> { new(() => ValidationResult.Valid(subject)) };
-        var validations = new Dictionary<ValidationSubject, IList<Lazy<ValidationResult>>> { { subject, validationResults } };
+        
+        var validationResults = PrepareSubjectValidation(ValidationResult.Valid(subject));
+        
+        var validations = new Dictionary<ValidationSubject, IList<Lazy<SubjectValidation>>> { { subject, validationResults } };
         var validated = new CustomValidatedObject(validations);
 
         // Act
@@ -43,12 +47,10 @@ public sealed class ValidationPipeTests
         // Assign
         const ValidationSubject subject = ValidationSubject.Operation;
         const string message = "ErrorMessage";
-        var validationResults = new List<Lazy<ValidationResult>>
-        {
-            new(() => ValidationResult.NonValid(subject, message)),
-            new(() => ValidationResult.Valid(subject))
-        };
-        var validations = new Dictionary<ValidationSubject, IList<Lazy<ValidationResult>>> { { subject, validationResults } };
+        
+        var validationResults = PrepareSubjectValidation(ValidationResult.NonValid(subject, message), ValidationResult.Valid(subject));
+        
+        var validations = new Dictionary<ValidationSubject, IList<Lazy<SubjectValidation>>> { { subject, validationResults } };
         var validated = new CustomValidatedObject(validations);
 
         // Act
@@ -63,15 +65,16 @@ public sealed class ValidationPipeTests
     public void ValidatePacked_MultipleNonValidValidation_ShouldBeNonValidAndAggregated()
     {
         // Assign
-        const ValidationSubject subject = ValidationSubject.Operation;
+        const ValidationSubject subject1 = ValidationSubject.Operation;
         const string message1 = "ErrorMessage1";
+        const ValidationSubject subject2 = ValidationSubject.Comparer;
         const string message2 = "ErrorMessage2";
-        var validationResults = new List<Lazy<ValidationResult>>
+        
+        var validations = new Dictionary<ValidationSubject, IList<Lazy<SubjectValidation>>>
         {
-            new(() => ValidationResult.NonValid(subject, message1)),
-            new(() => ValidationResult.NonValid(subject, message2))
+            { subject1, PrepareSubjectValidation(ValidationResult.NonValid(subject1, message1)) },
+            { subject2, PrepareSubjectValidation(ValidationResult.NonValid(subject2, message2)) },
         };
-        var validations = new Dictionary<ValidationSubject, IList<Lazy<ValidationResult>>> { { subject, validationResults } };
         var validated = new CustomValidatedObject(validations);
 
         // Act
@@ -79,7 +82,8 @@ public sealed class ValidationPipeTests
 
         // Assert
         Assert.Equal(ValidationStatus.NonValid, validationResult);
-        validated.AssertNonValid(subject, message1, message2);
+        validated.AssertNonValid(subject1, message1);
+        validated.AssertNonValid(subject2, message2);
     }
     
     [Fact]
@@ -91,12 +95,9 @@ public sealed class ValidationPipeTests
         const string message2 = "ErrorMessage2";
         var exception = new InvalidDataException("Exception1");
 
-        var validationResults = new List<Lazy<ValidationResult>>
-        {
-            new(() => ValidationResult.NonValid(subject, message1)),
-            new(() => ValidationResult.Failed(subject, exception, message2))
-        };
-        var validations = new Dictionary<ValidationSubject, IList<Lazy<ValidationResult>>> { { subject, validationResults } };
+        var validationResults = PrepareSubjectValidation(ValidationResult.NonValid(subject, message1), ValidationResult.Failed(subject, exception, message2));
+    
+        var validations = new Dictionary<ValidationSubject, IList<Lazy<SubjectValidation>>> { { subject, validationResults } };
         var validated = new CustomValidatedObject(validations);
 
         // Act
@@ -104,7 +105,12 @@ public sealed class ValidationPipeTests
 
         // Assert
         Assert.Equal(ValidationStatus.Failed, validationResult);
-        Assert.Contains(validated.Validations[subject], x => x.Value is { Status: ValidationStatus.NonValid, Message: message1 });
-        Assert.Contains(validated.Validations[subject], x => x.Value is { Status: ValidationStatus.Failed, Message: message2 });
+        Assert.Contains(validated.Validations[subject], x => x.Value.Validations.Any(y => y is { Status: ValidationStatus.NonValid, Message: message1 }));
+        Assert.Contains(validated.Validations[subject], x => x.Value.Validations.Any(y => y is { Status: ValidationStatus.Failed, Message: message2 }));
+    }
+
+    private List<Lazy<SubjectValidation>> PrepareSubjectValidation(params ValidationResult[] results)
+    {
+        return [new(() => new SubjectValidation(results))];
     }
 }

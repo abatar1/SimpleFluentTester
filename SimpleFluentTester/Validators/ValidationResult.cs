@@ -1,6 +1,7 @@
 using System;
+using SimpleFluentTester.Validators.Models;
 
-namespace SimpleFluentTester.Validators.Core;
+namespace SimpleFluentTester.Validators;
 
 public sealed record ValidationResult
 {

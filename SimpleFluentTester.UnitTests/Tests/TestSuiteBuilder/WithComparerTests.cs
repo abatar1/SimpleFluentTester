@@ -1,6 +1,6 @@
 using SimpleFluentTester.UnitTests.Helpers.Extensions;
 using SimpleFluentTester.UnitTests.Helpers.TestObjects;
-using SimpleFluentTester.Validators.Core;
+using SimpleFluentTester.Validators.Models;
 
 namespace SimpleFluentTester.UnitTests.Tests.TestSuiteBuilder;
 
@@ -20,7 +20,7 @@ public sealed class WithComparerTests
 
         // Assert
         var message = $"{typeof(NotEquatableTestObject).FullName} type should be assignable from {typeof(IEquatable<>).Name} or comparer should be defined";
-        reporter.AssertInvalid(ValidationSubject.Comparer, message);
+        reporter.AssertNonValid(ValidationSubject.Comparer, message);
     }
     
     [Fact]
@@ -38,7 +38,7 @@ public sealed class WithComparerTests
 
         // Assert
         var message = "Test case type was System.String, but comparer type is System.Int32";
-        reporter.AssertInvalid(ValidationSubject.Comparer, message);
+        reporter.AssertNonValid(ValidationSubject.Comparer, message);
     }
     
     [Fact]
@@ -73,6 +73,6 @@ public sealed class WithComparerTests
 
         // Assert
         var message = "Test case type was System.Int32, but comparer type is System.String";
-        reporter.AssertInvalid(ValidationSubject.Comparer, message);
+        reporter.AssertNonValid(ValidationSubject.Comparer, message);
     }
 }

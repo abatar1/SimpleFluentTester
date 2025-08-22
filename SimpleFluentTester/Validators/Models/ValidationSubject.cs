@@ -1,4 +1,4 @@
-namespace SimpleFluentTester.Validators.Core;
+namespace SimpleFluentTester.Validators.Models;
 
 public enum ValidationSubject
 {

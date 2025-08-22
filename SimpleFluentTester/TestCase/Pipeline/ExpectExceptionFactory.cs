@@ -4,7 +4,8 @@ using System.Linq;
 using System.Reflection;
 using SimpleFluentTester.TestSuite.ComparedObject;
 using SimpleFluentTester.TestSuite.Context;
-using SimpleFluentTester.Validators.Core;
+using SimpleFluentTester.Validators;
+using SimpleFluentTester.Validators.Models;
 
 namespace SimpleFluentTester.TestCase.Pipeline;
 

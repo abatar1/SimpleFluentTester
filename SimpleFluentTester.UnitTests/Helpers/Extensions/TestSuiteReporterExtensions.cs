@@ -1,6 +1,6 @@
 using SimpleFluentTester.Reporter;
 using SimpleFluentTester.TestCase;
-using SimpleFluentTester.Validators.Core;
+using SimpleFluentTester.Validators.Models;
 
 namespace SimpleFluentTester.UnitTests.Helpers.Extensions;
 
@@ -18,7 +18,7 @@ public static class TestSuiteReporterExtensions
         return testCase;
     }
     
-    public static ITestSuiteReporter AssertInvalid(this ITestSuiteReporter testSuiteReporter, ValidationSubject validationSubject, string message)
+    public static ITestSuiteReporter AssertNonValid(this ITestSuiteReporter testSuiteReporter, ValidationSubject validationSubject, string message)
     {
         foreach (var testCase in testSuiteReporter.TestSuiteRunResult.TestCases)
             testCase.AssertNonValid(validationSubject, message);

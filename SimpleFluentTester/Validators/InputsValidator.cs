@@ -6,7 +6,7 @@ using SimpleFluentTester.TestCase;
 using SimpleFluentTester.TestCase.Clause;
 using SimpleFluentTester.TestSuite.ComparedObject;
 using SimpleFluentTester.TestSuite.Parameter;
-using SimpleFluentTester.Validators.Core;
+using SimpleFluentTester.Validators.Models;
 
 namespace SimpleFluentTester.Validators;
 
@@ -24,16 +24,16 @@ internal sealed class InputsValidator : BaseValidator<EmptyValidationContext, De
         if (inputs.Count != operationParameterInfos?.Count)
         {
             var formattedInputs = string.Join(", ", inputs.Select(x => x.ToString()));
-            return new SubjectValidation(new List<ValidationResult> { NonValid($"Invalid inputs number, should have {operationParameterInfos?.Count} parameters, but had {inputs.Count}: [{formattedInputs}]") });
+            return NonValid($"Invalid inputs number, should have {operationParameterInfos?.Count} parameters, but had {inputs.Count}: [{formattedInputs}]");
         }
 
         var parametersTypesAreValid = inputs
             .Zip(operationParameterInfos, (input, parameter) => (input, parameter))
             .All(x => ValidateInputType(x.input, x.parameter.ParameterType));
         if (!parametersTypesAreValid)
-            return new SubjectValidation(new List<ValidationResult> { NonValid("Passed parameters and expected operation parameters are not equal.") });
+            return NonValid("Passed parameters and expected operation parameters are not equal.");
 
-        var validationResults = new List<ValidationResult>();
+        var validationResults = new List<SubjectValidation>();
         foreach (var clause in testCase.Clauses)
         {
             validationResults.Add(ValidateInternalSingle(clause, operationParameterInfos));
@@ -41,7 +41,7 @@ internal sealed class InputsValidator : BaseValidator<EmptyValidationContext, De
         return new SubjectValidation(validationResults);
     }
     
-    private ValidationResult ValidateInternalSingle(ITestClause testClause, List<ParameterInfo> operationParameterInfos)
+    private SubjectValidation ValidateInternalSingle(ITestClause testClause, List<ParameterInfo> operationParameterInfos)
     {
         if (testClause.Expected.Variety == ComparedObjectVariety.Parameter)
         {

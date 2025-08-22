@@ -8,7 +8,9 @@ using SimpleFluentTester.TestCase.Clause;
 using SimpleFluentTester.TestSuite.ComparedObject;
 using SimpleFluentTester.TestSuite.Context;
 using SimpleFluentTester.TestSuite.Parameter;
-using SimpleFluentTester.Validators.Core;
+using SimpleFluentTester.Validators;
+using SimpleFluentTester.Validators.Helpers;
+using SimpleFluentTester.Validators.Models;
 
 namespace SimpleFluentTester.TestCase.Pipeline;
 
@@ -59,7 +61,7 @@ internal static class TestCaseExecutor
     /// </summary>
     /// <param name="testCase">The <see cref="DefinedTestCase"/> to be marked as ignored.</param>
     /// <returns>An <see cref="ExecutedTestCase"/> instance representing the ignored test case with no execution performed.</returns>
-    public static ExecutedTestCase AsIgnored(this DefinedTestCase testCase)
+    public static ExecutedTestCase AsNotExecuted(this DefinedTestCase testCase)
     {
         var clauses = testCase.Clauses
             .Select(clause => new ExecutedTestClause(EmptyDelegate, clause.Expected, ComparedObjectFactory.Null()))

@@ -22,7 +22,7 @@ internal sealed class CustomTestSuiteReportBuilder : ITestSuiteReportBuilder
         return new PrintableTestSuiteResult(LogLevel.Information, testSuiteRunResult.Number, stringBuilder.ToString());
     }
 
-    private int CountPassedTests(IList<ITestCase> testCases)
+    private int CountPassedTests(IList<AssertedTestCase> testCases)
     {
         return testCases
             .Count(x => x.Clauses

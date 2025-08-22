@@ -6,7 +6,7 @@ using SimpleFluentTester.TestCase;
 using SimpleFluentTester.TestCase.Clause;
 using SimpleFluentTester.TestSuite.ComparedObject;
 using SimpleFluentTester.TestSuite.Parameter;
-using SimpleFluentTester.Validators.Core;
+using SimpleFluentTester.Validators.Models;
 
 namespace SimpleFluentTester.Validators;
 
@@ -18,7 +18,7 @@ internal sealed class ComparerValidator : BaseValidator<EmptyValidationContext, 
         DefinedTestCase testCase, 
         EmptyValidationContext _)
     {
-        var validationResults = new List<ValidationResult>();
+        var validationResults = new List<SubjectValidation>();
         foreach (var clause in testCase.Clauses)
         {
             validationResults.Add(ValidateInternalSingle(testCase, clause));
@@ -26,7 +26,7 @@ internal sealed class ComparerValidator : BaseValidator<EmptyValidationContext, 
         return new SubjectValidation(validationResults);
     }
     
-    private ValidationResult ValidateInternalSingle(DefinedTestCase testCase, ITestClause testClause)
+    private SubjectValidation ValidateInternalSingle(DefinedTestCase testCase, ITestClause testClause)
     {
         var testCaseExpectedObjectType = GetExpectedObjectType(testClause);
 

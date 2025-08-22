@@ -1,6 +1,4 @@
-using System.Collections.Generic;
-
-namespace SimpleFluentTester.Validators.Core;
+namespace SimpleFluentTester.Validators.Models;
 
 public interface IValidator
 {

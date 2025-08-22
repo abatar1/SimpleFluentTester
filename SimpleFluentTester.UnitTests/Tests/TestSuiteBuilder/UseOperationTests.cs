@@ -1,8 +1,9 @@
+using SimpleFluentTester.TestCase.Clause;
 using SimpleFluentTester.TestSuite.Context;
 using SimpleFluentTester.UnitTests.Helpers;
 using SimpleFluentTester.UnitTests.Helpers.Extensions;
 using SimpleFluentTester.UnitTests.Helpers.TestObjects;
-using SimpleFluentTester.Validators.Core;
+using SimpleFluentTester.Validators.Models;
 
 namespace SimpleFluentTester.UnitTests.Tests.TestSuiteBuilder;
 
@@ -82,7 +83,7 @@ public sealed class UseOperationTests
     {
         // Assign
         var container = TestSuiteFactory.CreateEmptyContextContainer();
-        var builder = new TestSuite.SequentialTestSuiteBuilder(container);
+        var builder = new TestSuite.SequentialTestSuiteBuilder(container, new List<DefinedTestClause>());
         
         // Act
         var reporter = builder

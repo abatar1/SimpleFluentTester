@@ -6,7 +6,9 @@ using SimpleFluentTester.TestCase.Clause;
 using SimpleFluentTester.TestSuite;
 using SimpleFluentTester.TestSuite.ComparedObject;
 using SimpleFluentTester.TestSuite.Parameter;
-using SimpleFluentTester.Validators.Core;
+using SimpleFluentTester.Validators;
+using SimpleFluentTester.Validators.Helpers;
+using SimpleFluentTester.Validators.Models;
 
 namespace SimpleFluentTester.TestCase.Pipeline;
 
@@ -34,6 +36,20 @@ internal static class TestCaseAsserter
         return new AssertedTestCase(clauses, executedTestCase);
     }
 
+    /// <summary>
+    /// Marks the given <see cref="ExecutedTestCase"/> as failed by creating corresponding failed
+    /// assertions for each clause and encapsulating them in a new <see cref="AssertedTestCase"/>.
+    /// </summary>
+    /// <param name="executedTestCase">The test case that has been executed and is to be marked as failed.</param>
+    /// <returns>A new <see cref="AssertedTestCase"/> containing the failed assertions for all clauses.</returns>
+    public static AssertedTestCase AsFailed(this ExecutedTestCase executedTestCase)
+    {
+        var clauses = executedTestCase.Clauses
+            .Select(clause  => new AssertedTestClause(clause.Expected, ComparedObjectFactory.Null(), new AssertResult(AssertStatus.Failed)))
+            .ToList();
+        return new AssertedTestCase(clauses, executedTestCase);
+    }
+
     private static AssertedTestCase AssertInternal(ExecutedTestCase executedTestCase)
     {
         var executedTestClauses = new List<AssertedTestClause>();
@@ -42,8 +58,8 @@ internal static class TestCaseAsserter
         {
             try
             {
-                var assertStatus = AssertSingleInternal(clause);
-                var assertResult = new AssertResult(assertStatus);
+                var resultAssertStatus = AssertResultSingleInternal(clause);
+                var assertResult = new AssertResult(resultAssertStatus);
                 executedTestClauses.Add(new AssertedTestClause(clause.Expected, clause.Result, assertResult));
             }
             catch (TargetInvocationException e)
@@ -63,7 +79,7 @@ internal static class TestCaseAsserter
         return new AssertedTestCase(executedTestClauses, executedTestCase);
     }
     
-    private static AssertStatus AssertSingleInternal(ExecutedTestClause clause)
+    private static AssertStatus AssertResultSingleInternal(ExecutedTestClause clause)
     {
         bool passed;
         switch (clause.Expected.Variety)
@@ -71,8 +87,6 @@ internal static class TestCaseAsserter
             case ComparedObjectVariety.Null:
                 passed = clause.Expected.Variety == ComparedObjectVariety.Null;
                 break;
-            case ComparedObjectVariety.Exception when clause.Expected.Variety != ComparedObjectVariety.Exception:
-                return AssertStatus.NotPassedWithException;
             case ComparedObjectVariety.Exception:
             {
                 var expectedException = (Exception?) clause.Expected.Value;
@@ -86,6 +100,9 @@ internal static class TestCaseAsserter
             }
             case ComparedObjectVariety.Value:
             {
+                if (clause.Result.Variety == ComparedObjectVariety.Exception)
+                    return AssertStatus.NotPassedWithException;
+                
                 var hasSameVariety = clause.Result.Variety == clause.Expected.Variety;
                 var hasSameType = clause.Result.Type == clause.Expected.Type;
                 var isEqual = (bool)clause.Comparer.Method.Invoke(clause.Comparer.Target, [clause.Expected.Value, clause.Result.Value]);

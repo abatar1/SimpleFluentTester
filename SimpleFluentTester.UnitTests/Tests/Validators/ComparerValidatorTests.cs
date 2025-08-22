@@ -2,7 +2,7 @@ using SimpleFluentTester.UnitTests.Helpers;
 using SimpleFluentTester.UnitTests.Helpers.Extensions;
 using SimpleFluentTester.UnitTests.Helpers.TestObjects;
 using SimpleFluentTester.Validators;
-using SimpleFluentTester.Validators.Core;
+using SimpleFluentTester.Validators.Models;
 
 namespace SimpleFluentTester.UnitTests.Tests.Validators;
 
@@ -36,7 +36,7 @@ public sealed class ComparerValidatorTests
         var validationResult = validator.Validate(testCase, new EmptyValidationContext());
 
         // Assert
-        validationResult.AssertInvalid(ValidationSubject.Comparer, $"{typeof(NotEquatableTestObject).FullName} type should be assignable from IEquatable`1 or comparer should be defined");
+        validationResult.AssertNonValid(ValidationSubject.Comparer, $"{typeof(NotEquatableTestObject).FullName} type should be assignable from IEquatable`1 or comparer should be defined");
     }
     
     [Fact]
@@ -68,6 +68,6 @@ public sealed class ComparerValidatorTests
         var validationResult = validator.Validate(testCase, new EmptyValidationContext());
 
         // Assert
-        validationResult.AssertInvalid(ValidationSubject.Comparer, $"Test case type was {typeof(NotEquatableTestObject).FullName}, but comparer type is System.Int32");
+        validationResult.AssertNonValid(ValidationSubject.Comparer, $"Test case type was {typeof(NotEquatableTestObject).FullName}, but comparer type is System.Int32");
     }
 }

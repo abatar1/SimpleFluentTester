@@ -3,7 +3,7 @@ using SimpleFluentTester.Examples;
 using SimpleFluentTester.TestSuite;
 
 // Uncomment the following line to allow only specific test cases or ignore specific tests.
-// TestSuite.Allow(8);
+// TestSuite.Allow(7);
 // TestSuite.Ignore(1, 2);
 
 // Example 1.

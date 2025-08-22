@@ -2,7 +2,7 @@ using SimpleFluentTester.TestCase;
 using SimpleFluentTester.TestCase.Pipeline;
 using SimpleFluentTester.TestSuite.Context;
 using SimpleFluentTester.Validators;
-using SimpleFluentTester.Validators.Core;
+using SimpleFluentTester.Validators.Helpers;
 
 namespace SimpleFluentTester.UnitTests.Helpers.Extensions;
 

@@ -1,3 +1,3 @@
-namespace SimpleFluentTester.Validators.Core;
+namespace SimpleFluentTester.Validators.Models;
 
 public sealed class EmptyValidationContext : IValidationContext;

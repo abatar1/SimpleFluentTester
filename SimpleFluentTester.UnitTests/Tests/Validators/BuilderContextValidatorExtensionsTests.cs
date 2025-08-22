@@ -2,7 +2,8 @@ using SimpleFluentTester.UnitTests.Helpers;
 using SimpleFluentTester.UnitTests.Helpers.Extensions;
 using SimpleFluentTester.UnitTests.Helpers.TestObjects;
 using SimpleFluentTester.Validators;
-using SimpleFluentTester.Validators.Core;
+using SimpleFluentTester.Validators.Helpers;
+using SimpleFluentTester.Validators.Models;
 
 namespace SimpleFluentTester.UnitTests.Tests.Validators;
 
@@ -26,7 +27,7 @@ public sealed class BuilderContextValidatorExtensionsTests
     public void AddValidation_AddSingleValidation_ShouldBeSingle()
     {
         // Assign
-        var validated = new CustomValidatedObject(new Dictionary<ValidationSubject, IList<Lazy<ValidationResult>>>());
+        var validated = new CustomValidatedObject(new Dictionary<ValidationSubject, IList<Lazy<SubjectValidation>>>());
         
         // Act
         validated.AddReadyValidation(ValidationTestResults.Valid);
@@ -40,7 +41,7 @@ public sealed class BuilderContextValidatorExtensionsTests
     public void AddValidation_AddTwoValidations_ShouldBeValid()
     {
         // Assign
-        var validated = new CustomValidatedObject(new Dictionary<ValidationSubject, IList<Lazy<ValidationResult>>>());
+        var validated = new CustomValidatedObject(new Dictionary<ValidationSubject, IList<Lazy<SubjectValidation>>>());
         
         // Act
         validated.AddReadyValidation(ValidationTestResults.Valid);
@@ -55,7 +56,7 @@ public sealed class BuilderContextValidatorExtensionsTests
     public void RegisterValidation_InvalidValidator_ShouldThrowException()
     {
         // Assign
-        var validated = new CustomValidatedObject(new Dictionary<ValidationSubject, IList<Lazy<ValidationResult>>>());
+        var validated = new CustomValidatedObject(new Dictionary<ValidationSubject, IList<Lazy<SubjectValidation>>>());
         
         // Act
         var func = () => validated.RegisterFutureValidation<CustomValidator>();

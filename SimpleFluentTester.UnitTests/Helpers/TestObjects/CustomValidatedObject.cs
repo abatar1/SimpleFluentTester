@@ -1,9 +1,9 @@
-using SimpleFluentTester.Validators.Core;
+using SimpleFluentTester.Validators.Models;
 
 namespace SimpleFluentTester.UnitTests.Helpers.TestObjects;
 
-public sealed class CustomValidatedObject(IDictionary<ValidationSubject, IList<Lazy<ValidationResult>>> validations)
+public sealed class CustomValidatedObject(IDictionary<ValidationSubject, IList<Lazy<SubjectValidation>>> validations)
     : IValidatedObject
 {
-    public IDictionary<ValidationSubject, IList<Lazy<ValidationResult>>> Validations { get; } = validations;
+    public IDictionary<ValidationSubject, IList<Lazy<SubjectValidation>>> Validations { get; } = validations;
 }

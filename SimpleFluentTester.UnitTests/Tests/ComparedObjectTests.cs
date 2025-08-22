@@ -29,7 +29,7 @@ public sealed class ComparedObjectFactoryTests
         var comparedObject = ComparedObjectFactory.Wrap(obj);
 
         // Assert
-        comparedObject.AssertValue(obj);
+        comparedObject.AssertSingleValue(obj);
     }
     
     [Fact]
@@ -42,7 +42,7 @@ public sealed class ComparedObjectFactoryTests
         var comparedObject = ComparedObjectFactory.Wrap(obj);
 
         // Assert
-        comparedObject.AssertException(obj);
+        comparedObject.AssertSingleException(obj);
         Assert.NotNull(comparedObject);
         Assert.Equal(obj, comparedObject.Value);
         Assert.Equal(obj.GetType(), comparedObject.Type);

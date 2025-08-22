@@ -1,5 +1,6 @@
 using System.Collections.Generic;
-using SimpleFluentTester.Validators.Core;
+using SimpleFluentTester.Validators.Helpers;
+using SimpleFluentTester.Validators.Models;
 
 namespace SimpleFluentTester.TestCase.Pipeline;
 
@@ -17,10 +18,13 @@ internal sealed class TestCasePipeline(ISet<int> testNumbersHash)
     /// <summary>
     /// Unpack, execute, assert test cases. 
     /// </summary>
-    public ITestCase ToCompleted(DefinedTestCase deferredTestCase)
+    public AssertedTestCase ToCompleted(DefinedTestCase deferredTestCase)
     {
-        if (!ShouldBeExecuted(deferredTestCase) || deferredTestCase.Validate() != ValidationStatus.Valid)
-            return deferredTestCase.AsIgnored().AsIgnored();
+        if (!ShouldBeExecuted(deferredTestCase))
+            return deferredTestCase.AsNotExecuted().AsIgnored();
+        
+        if (deferredTestCase.Validate() != ValidationStatus.Valid)
+            return deferredTestCase.AsNotExecuted().AsFailed();
         
         return deferredTestCase.Execute().Assert();
     }

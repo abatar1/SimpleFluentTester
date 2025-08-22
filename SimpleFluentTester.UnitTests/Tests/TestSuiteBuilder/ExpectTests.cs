@@ -1,10 +1,11 @@
 using System.Reflection;
 using Moq;
 using SimpleFluentTester.Helpers;
+using SimpleFluentTester.TestCase.Clause;
 using SimpleFluentTester.UnitTests.Helpers;
 using SimpleFluentTester.UnitTests.Helpers.Extensions;
 using SimpleFluentTester.UnitTests.Helpers.TestObjects;
-using SimpleFluentTester.Validators.Core;
+using SimpleFluentTester.Validators.Models;
 
 namespace SimpleFluentTester.UnitTests.Tests.TestSuiteBuilder;
 
@@ -84,9 +85,9 @@ public sealed class ExpectTests
     public void Expect_TestingOperationThrowsExceptionAndExpectNumber_TestCaseHasException()
     {
         // Assign
-        Func<int, int, int> comparer = (_, _) => throw new CustomException();
+        Func<int, int, int> operation = (_, _) => throw new CustomException();
         var builder = TestSuite.TestSuite.Sequential
-            .UseOperation(comparer);
+            .UseOperation(operation);
         
         // Act
         var reporter = builder
@@ -106,7 +107,7 @@ public sealed class ExpectTests
             .Setup(x => x.Get())
             .Returns(Assembly.GetAssembly(typeof(ExpectTests)));
         var container = TestSuiteFactory.CreateEmptyContextContainer(entryAssemblyProviderMock.Object);
-        var builder = new TestSuite.SequentialTestSuiteBuilder(container);
+        var builder = new TestSuite.SequentialTestSuiteBuilder(container, new List<DefinedTestClause>());
         
         // Act
         var reporter = builder
