@@ -1,4 +1,6 @@
-namespace SimpleFluentTester.TestSuite.Case;
+using SimpleFluentTester.TestSuite;
+
+namespace SimpleFluentTester.TestCase;
 
 /// <summary>
 /// Defines an interface for building test cases in a fluent manner.

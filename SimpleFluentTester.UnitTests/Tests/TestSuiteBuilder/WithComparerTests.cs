@@ -11,7 +11,7 @@ public sealed class WithComparerTests
     {
         // Assign
         var setup = TestSuite.TestSuite.Sequential
-            .ExpectResult(new NotEquatableTestObject(1)).WithInput(new NotEquatableTestObject(1))
+            .ExpectReturn(new NotEquatableTestObject(1)).WithInput(new NotEquatableTestObject(1))
             .UseOperation((NotEquatableTestObject x) => x);
         
         // Act
@@ -28,7 +28,7 @@ public sealed class WithComparerTests
     {
         // Assign
         var setup = TestSuite.TestSuite.Sequential
-            .ExpectResult("test").WithInput("test")
+            .ExpectReturn("test").WithInput("test")
             .UseOperation((int x) => x);
         
         // Act
@@ -47,7 +47,7 @@ public sealed class WithComparerTests
         // Assign
         var setup = TestSuite.TestSuite.Sequential
             .UseOperation((int x) => x)
-            .ExpectResult(1).WithInput(1);
+            .ExpectReturn(1).WithInput(1);
         
         // Act
         var reporter = setup
@@ -64,7 +64,7 @@ public sealed class WithComparerTests
         // Assign
         var setup = TestSuite.TestSuite.Sequential
             .UseOperation((int x) => x)
-            .ExpectResult(1).WithInput(1);
+            .ExpectReturn(1).WithInput(1);
         
         // Act
         var reporter = setup

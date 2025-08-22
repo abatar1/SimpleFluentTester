@@ -44,7 +44,7 @@ public sealed class OperationEnricherTests
 
         // Assert
         const string message =
-            $"You should specify an operation first with an {nameof(TestSuiteDelegateAttribute)} attribute or using {nameof(SimpleFluentTester.TestSuite.TestSuiteBuilder.UseOperation)} method.";
+            $"You should specify an operation first with an {nameof(TestSuiteDelegateAttribute)} attribute or using {nameof(SimpleFluentTester.TestSuite.SequentialTestSuiteBuilder.UseOperation)} method.";
         TestHelpers.AssertWithMessage<InvalidContextException>(func, message);
         Assert.Null(container.Context.Operation);
     }

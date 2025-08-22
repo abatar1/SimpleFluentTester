@@ -1,4 +1,4 @@
-using SimpleFluentTester.TestSuite.Case;
+using SimpleFluentTester.TestCase.Pipeline;
 using SimpleFluentTester.TestSuite.Context;
 using SimpleFluentTester.UnitTests.Helpers;
 using SimpleFluentTester.UnitTests.Helpers.Extensions;

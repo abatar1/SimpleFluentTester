@@ -1,6 +1,7 @@
 using System;
 using Microsoft.Extensions.Logging;
-using SimpleFluentTester.TestSuite.Case;
+using SimpleFluentTester.TestCase;
+using SimpleFluentTester.TestCase.Clause;
 
 namespace SimpleFluentTester.Reporter;
 
@@ -10,7 +11,7 @@ public interface ITestSuiteReporterConfigurationBuilder
 
     ITestSuiteReporterConfigurationBuilder WithLoggingBuilder(Action<ILoggingBuilder> loggingBuilder);
 
-    ITestSuiteReporterConfigurationBuilder WithPrintablePredicate(Func<AssertedTestCase, bool> printablePredicate);
+    ITestSuiteReporterConfigurationBuilder WithPrintablePredicate(Func<AssertedTestClause, AssertedTestCase, bool> printablePredicate);
 
     ITestSuiteReporterConfiguration Build();
 }

@@ -15,5 +15,5 @@ namespace SimpleFluentTester.Validators.Core;
 /// </remarks>
 public interface IValidatedObject
 {
-    IDictionary<ValidationSubject, IList<Lazy<ValidationResult>>> Validations { get; }
+    IDictionary<ValidationSubject, IList<Lazy<SubjectValidation>>> Validations { get; }
 }

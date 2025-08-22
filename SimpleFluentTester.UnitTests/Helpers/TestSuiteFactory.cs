@@ -1,6 +1,6 @@
 using SimpleFluentTester.Helpers;
+using SimpleFluentTester.TestCase;
 using SimpleFluentTester.TestSuite;
-using SimpleFluentTester.TestSuite.Case;
 using SimpleFluentTester.TestSuite.ComparedObject;
 using SimpleFluentTester.TestSuite.Context;
 using SimpleFluentTester.UnitTests.Helpers.Extensions;
@@ -9,9 +9,9 @@ namespace SimpleFluentTester.UnitTests.Helpers;
 
 internal static class TestSuiteFactory
 {
-    public static DeferredTestCase CreateDeferredTestCase(ITestSuiteContextContainer container, object?[] inputs, object? expected)
+    public static DefinedTestCase CreateDeferredTestCase(ITestSuiteContextContainer container, object?[] inputs, object? expected)
     {
-        var testCase = new DeferredTestCase(
+        var testCase = new DefinedTestCase(
             new Lazy<Delegate?>(() => container.Context.Operation),
             new Lazy<Delegate?>(() => container.Context.Comparer),
             ComparedObjectFactory.WrapMany(inputs), 
@@ -44,7 +44,7 @@ internal static class TestSuiteFactory
 
     public static TestSuiteRunResult CreateTestSuiteRunResult(
         Exception? exception = null,
-        DeferredTestCase? testCase = null,
+        DefinedTestCase? testCase = null,
         int testCaseToRun = 1,
         bool shouldBeExecuted = true,
         int testCaseNumber = 1)

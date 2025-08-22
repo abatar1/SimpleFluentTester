@@ -6,7 +6,7 @@ using SimpleFluentTester.TestSuite.ComparedObject;
 using SimpleFluentTester.TestSuite.Context;
 using SimpleFluentTester.Validators.Core;
 
-namespace SimpleFluentTester.TestSuite.Case;
+namespace SimpleFluentTester.TestCase.Pipeline;
 
 internal static class ExpectExceptionFactory
 {

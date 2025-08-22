@@ -2,68 +2,82 @@
 using System.Collections.Generic;
 using System.Linq;
 using SimpleFluentTester.Reporter;
-using SimpleFluentTester.TestSuite.Case;
+using SimpleFluentTester.TestCase;
+using SimpleFluentTester.TestCase.Clause;
+using SimpleFluentTester.TestCase.Pipeline;
 using SimpleFluentTester.TestSuite.ComparedObject;
 using SimpleFluentTester.TestSuite.Context;
 using SimpleFluentTester.TestSuite.Parameter;
 
 namespace SimpleFluentTester.TestSuite;
 
-internal sealed class TestSuiteBuilder : ITestSuiteBuilder
+internal sealed class SequentialTestSuiteBuilder : ITestSuiteBuilder
 {
     private readonly ITestSuiteContextContainer _contextContainer;
+    private readonly List<DefinedTestClause> _testClauses;
     
-    internal TestSuiteBuilder(ITestSuiteContextContainer contextContainer)
+    internal SequentialTestSuiteBuilder(ITestSuiteContextContainer contextContainer, List<DefinedTestClause> testClauses)
     {
         _contextContainer = contextContainer;
+        _testClauses = testClauses;
     }
 
-    private TestSuiteBuilder(TestSuiteBuilder builder)
+    private SequentialTestSuiteBuilder(SequentialTestSuiteBuilder builder)
     {
         _contextContainer = builder._contextContainer;
+        _testClauses = new List<DefinedTestClause>();
     }
     
-    public ITestCaseBuilder ExpectResult(object? expected)
+    public ITestCaseBuilder ExpectReturn(object? expected)
     {
         var comparedObj = ComparedObjectFactory.Wrap(expected);
-        return new TestCaseBuilder(_contextContainer, comparedObj);
+        
+        var testClause = new DefinedTestClause(comparedObj);
+        _testClauses.Add(testClause);
+        
+        return new TestCaseBuilder(_contextContainer, _testClauses);
     }
     
     public ITestCaseBuilder ExpectException<TException>(string? message = null)
         where TException : Exception
     {
         var validatedException = ExpectExceptionFactory.Create(_contextContainer, typeof(TException), message);
-        return new TestCaseBuilder(_contextContainer, validatedException.Object, validatedException.ValidationResult);
+        
+        var testClause = new DefinedTestClause(validatedException.Object);
+        _testClauses.Add(testClause);
+        
+        return new TestCaseBuilder(_contextContainer, _testClauses, validatedException.ValidationResult);
     }
 
     public IParameterExpectationBuilder ExpectParameter(string parameterName)
     {
         var validatedParameter = ExpectParameterFactory.Create(_contextContainer, parameterName);
-        return new ParameterExpectationBuilder(_contextContainer, validatedParameter);
+        
+        return new ParameterExpectationBuilder(_contextContainer, validatedParameter, _testClauses);
     }
 
     public IParameterExpectationBuilder ExpectParameter(int parameterPosition)
     {
         var validatedParameter = ExpectParameterFactory.Create(_contextContainer, parameterPosition);
-        return new ParameterExpectationBuilder(_contextContainer, validatedParameter);
+        return new ParameterExpectationBuilder(_contextContainer, validatedParameter, _testClauses);
     }
 
     public ITestSuiteBuilder UseOperation(Delegate operation)
     {
         _contextContainer.WithOperation(operation);
-        return new TestSuiteBuilder(this);
+        return new SequentialTestSuiteBuilder(this);
     }
     
     public ITestSuiteBuilder WithDisplayName(string displayName)
     {
         _contextContainer.WithDisplayName(displayName);
-        return new TestSuiteBuilder(this);
+        return new SequentialTestSuiteBuilder(this);
     }
     
     public ITestSuiteBuilder WithComparer<TExpected>(ComparerDelegate<TExpected> comparer)
     {
         _contextContainer.WithComparer(comparer);
-        return new TestSuiteBuilder(this);
+        return new SequentialTestSuiteBuilder(this);
     }
 
     public ITestSuiteBuilder Ignore
@@ -71,7 +85,7 @@ internal sealed class TestSuiteBuilder : ITestSuiteBuilder
         get
         {
             _contextContainer.DoNotExecute();
-            return new TestSuiteBuilder(this);
+            return new SequentialTestSuiteBuilder(this);
         }
     }
     
@@ -118,7 +132,7 @@ internal sealed class TestSuiteBuilder : ITestSuiteBuilder
     private ITestSuiteReporter ReturnNotExecutedTestReporter(Exception? exception = null)
     {
         var testCases = _contextContainer.Context.TestCases
-            .Select(AssertedTestCase.NotExecuted)
+            .Select(ITestCase (x) => x.AsIgnored().AsIgnored())
             .ToList();
         
         var testSuiteRunResult = GetTestSuiteRunResult(_contextContainer.Context, testCases, false, exception);
@@ -141,7 +155,7 @@ internal sealed class TestSuiteBuilder : ITestSuiteBuilder
     /// </summary>
     /// <param name="testNumbersHash">A set of integers representing the hash of the test numbers to be executed.</param>
     /// <returns>A list of completed test cases after processing through the pipeline.</returns>
-    private IList<AssertedTestCase> ExecuteTestCases(ISet<int> testNumbersHash)
+    private IList<ITestCase> ExecuteTestCases(ISet<int> testNumbersHash)
     {
         var testCasePipeline = new TestCasePipeline(testNumbersHash);
         return _contextContainer.Context.TestCases
@@ -154,7 +168,7 @@ internal sealed class TestSuiteBuilder : ITestSuiteBuilder
     /// </summary>
     private static TestSuiteRunResult GetTestSuiteRunResult(
         ITestSuiteContext context,
-        IList<AssertedTestCase> completedTestCases,
+        IList<ITestCase> completedTestCases,
         bool shouldBeExecuted,
         Exception? exception = null)
     {

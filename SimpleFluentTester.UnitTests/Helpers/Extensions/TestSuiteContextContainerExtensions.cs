@@ -1,4 +1,5 @@
-using SimpleFluentTester.TestSuite.Case;
+using SimpleFluentTester.TestCase;
+using SimpleFluentTester.TestCase.Pipeline;
 using SimpleFluentTester.TestSuite.Context;
 using SimpleFluentTester.Validators;
 using SimpleFluentTester.Validators.Core;
@@ -8,7 +9,7 @@ namespace SimpleFluentTester.UnitTests.Helpers.Extensions;
 internal static class TestSuiteContextContainerExtensions
 {
     public static AssertedTestCase CompleteTestCase(
-        this DeferredTestCase testCase,
+        this DefinedTestCase testCase,
         ITestSuiteContextContainer contextContainer,
         params int[] testCasesToRun)
     {

@@ -1,6 +1,6 @@
 using System;
 using SimpleFluentTester.Reporter;
-using SimpleFluentTester.TestSuite.Case;
+using SimpleFluentTester.TestCase;
 using SimpleFluentTester.TestSuite.Context;
 using SimpleFluentTester.TestSuite.Parameter;
 
@@ -13,13 +13,13 @@ namespace SimpleFluentTester.TestSuite;
 /// </summary>
 public interface ITestSuiteBuilder
 {
-    /// <inheritdoc cref="TestSuiteBuilder.ExpectResult"/>
+    /// <inheritdoc cref="SequentialTestSuiteBuilder.ExpectReturn"/>
     /// <summary>
     /// Specifies the expected value resulting from the execution of this test case.
     /// </summary>
     /// <param name="expected">The value expected as the result of executing the test case.</param>
     /// <returns>An instance of <see cref="ITestCaseBuilder"/> for further configuration of the test case.</returns>
-    ITestCaseBuilder ExpectResult(object? expected);
+    ITestCaseBuilder ExpectReturn(object? expected);
 
     /// <summary>
     /// Specifies the expected exception type and optional message that should be thrown during the execution of the test case.

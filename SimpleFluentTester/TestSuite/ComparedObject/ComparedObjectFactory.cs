@@ -37,7 +37,7 @@ internal static class ComparedObjectFactory
     /// <param name="obj">The object to wrap.</param>
     /// <param name="parameter">The deferred operation parameter associated with the object.</param>
     /// <returns>A <see cref="ParameterObject"/> that encapsulates the object and its parameter.</returns>
-    public static ParameterObject WrapParameter<T>(T? obj, DeferredOperationParameter parameter)
+    public static IComparedObject WrapParameter<T>(T? obj, DeferredOperationParameter parameter)
     {
         return new ParameterObject(Wrap(obj), parameter);
     }
@@ -53,4 +53,11 @@ internal static class ComparedObjectFactory
     {
         return objects.Select(Wrap).ToArray();
     }
+
+    /// <summary>
+    /// Returns a new instance of <see cref="NullObject"/> that represents a null value.
+    /// This encapsulates the concept of a null object within the <see cref="IComparedObject"/> system.
+    /// </summary>
+    /// <returns>An instance of <see cref="NullObject"/> representing a null value.</returns>
+    public static IComparedObject Null() => new NullObject();
 }

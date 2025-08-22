@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Moq;
 using SimpleFluentTester.Reporter;
-using SimpleFluentTester.TestSuite.Case;
+using SimpleFluentTester.TestCase;
 using SimpleFluentTester.UnitTests.Helpers;
 
 namespace SimpleFluentTester.UnitTests.Tests.Reporter;

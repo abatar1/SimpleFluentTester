@@ -3,33 +3,54 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Microsoft.Extensions.Logging;
+using SimpleFluentTester.TestCase;
+using SimpleFluentTester.TestCase.Clause;
 using SimpleFluentTester.TestSuite;
-using SimpleFluentTester.TestSuite.Case;
 using SimpleFluentTester.Validators.Core;
 
 namespace SimpleFluentTester.Reporter;
 
+/// <summary>
+/// Provides default utility methods for generating reports and determining log levels for test suite run results.
+/// </summary>
 public static class TestSuiteReportDefaults
 {
+    /// <summary>
+    /// Determines the appropriate logging level based on the provided test suite run result.
+    /// </summary>
+    /// <param name="testSuiteResult">The result of the test suite run, containing details about the test cases and their statuses.</param>
+    /// <returns>The log level indicating the outcome of the test suite run. Returns <see cref="LogLevel.Error"/> if any test case is invalid, not passed, or the test suite itself is invalid. Otherwise, returns <see cref="LogLevel.Information"/>.</returns>
     public static LogLevel DetermineLogLevel(this TestSuiteRunResult testSuiteResult)
     {
         var someTestCasesNotPassed = testSuiteResult.TestCases
+            .SelectMany(x => x.Clauses)
+            .Cast<AssertedTestClause>()
             .Any(x => x.Assert.Status != AssertStatus.Passed);
         var someTestCasesNotValid = testSuiteResult.TestCases
-            .Any(x => !x.Validations.IsValid());
+            .Any(x => !x.IsValid());
         
         if (someTestCasesNotPassed || someTestCasesNotValid || !testSuiteResult.IsValid)
             return LogLevel.Error;
         return LogLevel.Information;
     }
-    
+
+    /// <summary>
+    /// Converts the test suite run result into a header string containing an overview of the test suite execution details.
+    /// </summary>
+    /// <param name="testSuiteResult">The result of the test suite run, containing information about the executed test cases, target operation, and validation status.</param>
+    /// <returns>A formatted string representing the header section of the test suite report, including the target method, total number of tests, the number of tests marked for execution, and validation status details.</returns>
     public static string ToHeaderString(this TestSuiteRunResult testSuiteResult)
     {
         var stringBuilder = new StringBuilder();
         stringBuilder.AppendLine($"Executing tests for target method [{testSuiteResult.Operation?.Method}]");
         stringBuilder.Append($"Total tests: {testSuiteResult.TestCases.Count};");
         var executedTestCaseCount = testSuiteResult.TestCases
-            .Count(x => x.Assert.Status != AssertStatus.Ignored);
+            .Count(testCase =>
+            {
+                return testCase.Clauses
+                    .Cast<AssertedTestClause>()
+                    .All(clause => clause.Assert.Status != AssertStatus.Ignored);
+            });
         stringBuilder.AppendLine($" Tests to execute: {executedTestCaseCount}");
 
         if (!testSuiteResult.IsValid)
@@ -39,162 +60,172 @@ public static class TestSuiteReportDefaults
         }
         return stringBuilder.ToString();
     }
-    
+
+    /// <summary>
+    /// Converts the test suite run result into a formatted footer string providing summary information
+    /// about the execution and validation of the test cases within the suite.
+    /// </summary>
+    /// <param name="testSuiteResult">The result of the test suite run, containing details about test case executions, their validation statuses, and overall outcomes.</param>
+    /// <returns>A string that summarizes the results of the test suite, including passed and failed test case counts and additional statistics.</returns>
     public static string ToFooterString(this TestSuiteRunResult testSuiteResult)
     {
         var stringBuilder = new StringBuilder();
-        stringBuilder.AppendLine();
-
-        var testCasesGroupedByAssert = testSuiteResult.TestCases
-            .ToLookup(x => x.Assert.Status);
-        var executedTestCasesGroupedByAssert = testCasesGroupedByAssert
-            .Where(x => x.Key is not AssertStatus.Ignored)
-            .ToList();
-        var executedTestCases = executedTestCasesGroupedByAssert
-            .SelectMany(x => x)
-            .ToList();
         
-        var passedTestCaseNumbers = executedTestCasesGroupedByAssert
-            .Where(x => x.Key is AssertStatus.Passed)
-            .SelectMany(x => x.Select(y => y.Number))
+        var passedTestCaseNumbers = testSuiteResult.TestCases
+            .Where(testCase => testCase.IsValid())
+            .Where(testCase => testCase.Clauses.Cast<AssertedTestClause>().All(clause => clause.Assert.Status is AssertStatus.Passed))
+            .Select(testCase => testCase.Number)
             .ToList();
+
+        var assertedTestCases = testSuiteResult.TestCases.Cast<AssertedTestCase>().ToList();
+        
         if (passedTestCaseNumbers.Count == testSuiteResult.TestCases.Count)
         {
-            stringBuilder.AppendLine($"{passedTestCaseNumbers.Count}/{executedTestCases.Count} tests passed!");
-            AppendStatisticsString(stringBuilder, executedTestCases);
+            stringBuilder.AppendLine($"{passedTestCaseNumbers.Count}/{passedTestCaseNumbers.Count} tests passed!");
+            AppendStatisticsString(stringBuilder, assertedTestCases);
             return stringBuilder.ToString();
         }
 
-        var notValidTestCaseNumbers = testCasesGroupedByAssert
-            .Where(x => x.Key is AssertStatus.Ignored)
-            .SelectMany(x => x)
-            .Where(x => !x.Validations.IsValid())
-            .Select(x => x.Number)
-            .ToList();
-        var notPassedTestCaseNumbers = executedTestCasesGroupedByAssert
-            .Where(x => x.Key is AssertStatus.NotPassed)
-            .SelectMany(x => x.Select(y => y.Number))
-            .ToList();
-        var notPassedWithExceptionTestCaseNumbers = executedTestCasesGroupedByAssert
-            .Where(x => x.Key is AssertStatus.NotPassedWithException)
-            .SelectMany(x => x.Select(y => y.Number))
-            .ToList();
-        var failedTestCaseNumbers = executedTestCasesGroupedByAssert
-            .Where(x => x.Key is AssertStatus.Failed)
-            .SelectMany(x => x.Select(y => y.Number))
-            .ToList();
+        var ignoredTestCaseCount = testSuiteResult.TestCases
+            .Count(testCase => testCase.Clauses.Cast<AssertedTestClause>().All(clause => clause.Assert.Status is AssertStatus.Ignored));
+        
+        stringBuilder.AppendLine($"{passedTestCaseNumbers.Count} test cases have been passed, {testSuiteResult.TestCases.Count - passedTestCaseNumbers.Count} test case failed, {ignoredTestCaseCount} ignored");
             
-        var totalFailedTestCasesCount = notValidTestCaseNumbers.Count +
-                                        notPassedTestCaseNumbers.Count +
-                                        notPassedWithExceptionTestCaseNumbers.Count +
-                                        failedTestCaseNumbers.Count;
-        stringBuilder.Append(executedTestCases.Count - totalFailedTestCasesCount + notValidTestCaseNumbers.Count);
-        stringBuilder.Append('/');
-        stringBuilder.Append(executedTestCases.Count + notValidTestCaseNumbers.Count);
-        stringBuilder.AppendLine($" test cases have been passed, {totalFailedTestCasesCount} test case failed");
-            
+        var notPassedTestCaseNumbers = testSuiteResult.TestCases
+            .Where(testCase => testCase.Clauses.Cast<AssertedTestClause>().Any(clause => clause.Assert.Status is AssertStatus.NotPassed))
+            .Select(testCase => testCase.Number)
+            .ToList();
         if (notPassedTestCaseNumbers.Any())
         {
             stringBuilder.Append("Not passed test cases numbers: ");
             stringBuilder.AppendLine(string.Join(", ", notPassedTestCaseNumbers));
         }
             
+        var notPassedWithExceptionTestCaseNumbers = testSuiteResult.TestCases
+            .Where(testCase => testCase.Clauses.Cast<AssertedTestClause>().Any(clause => clause.Assert.Status is AssertStatus.NotPassedWithException))
+            .Select(testCase => testCase.Number)
+            .ToList();
         if (notPassedWithExceptionTestCaseNumbers.Any())
         {
             stringBuilder.Append("Failed test cases with exceptions numbers: ");
             stringBuilder.AppendLine(string.Join(", ", notPassedWithExceptionTestCaseNumbers));
         }
             
+        var notValidTestCaseNumbers = testSuiteResult.TestCases
+            .Where(x => !x.IsValid())
+            .Select(x => x.Number)
+            .ToList();
         if (notValidTestCaseNumbers.Any())
         {
             stringBuilder.Append("Non-valid test cases numbers: ");
             stringBuilder.AppendLine(string.Join(", ", notValidTestCaseNumbers));
         }
             
+        var failedTestCaseNumbers = testSuiteResult.TestCases
+            .Where(testCase => testCase.Clauses.Cast<AssertedTestClause>().Any(clause => clause.Assert.Status is AssertStatus.Failed))
+            .Select(testCase => testCase.Number)
+            .ToList();
         if (failedTestCaseNumbers.Any())
         {
             stringBuilder.Append("Test cases numbers with failed assertion: ");
             stringBuilder.AppendLine(string.Join(", ", failedTestCaseNumbers));
         }
 
-        AppendStatisticsString(stringBuilder, executedTestCases);
+        AppendStatisticsString(stringBuilder, assertedTestCases);
 
         return stringBuilder.ToString();
     }
-    
+
+    /// <summary>
+    /// Converts the specified <see cref="AssertedTestCase"/> instance into a formatted string representation,
+    /// detailing the test case number, status, inputs, expected output, and any exceptions encountered.
+    /// </summary>
+    /// <param name="testCase">The asserted test case instance containing details about the test case execution and validation results.</param>
+    /// <returns>A string representation of the test case, including its status, inputs, expected output, and any errors or exceptions.
+    /// Throws an <see cref="ArgumentOutOfRangeException"/> if an unsupported assertion status is encountered.</returns>
     public static string ToFormattedString(this AssertedTestCase testCase)
     {
         var stringBuilder = new StringBuilder();
-        
-        if (!testCase.Validations.IsValid())
+
+        if (!testCase.IsValid())
         {
             stringBuilder.AppendLine($"Test case [{testCase.Number}] not passed with a validation error:");
             var validationResults = testCase.Validations.GetInvalid();
             foreach (var validationResult in validationResults)
-                AppendValidationResult(stringBuilder, validationResult);
+                AppendValidationResult(1, stringBuilder, validationResult);
         }
+        
+        var assertedClauses = testCase.Clauses.Cast<AssertedTestClause>().ToList();
 
-        if (testCase.Assert.Status == AssertStatus.Ignored)
+        if (assertedClauses.Any(clause => clause.Assert.Status == AssertStatus.Ignored))
         {
             stringBuilder.AppendLine($"Test case [{testCase.Number}] not calculated");
-            AppendInput(testCase, stringBuilder);
-            AppendExpected(testCase, stringBuilder);
             return stringBuilder.ToString();
         }
 
-        switch (testCase.Assert.Status)
+        var failedClause = assertedClauses
+            .FirstOrDefault(clause => clause.Assert.Status != AssertStatus.Passed && clause.Assert.Status != AssertStatus.Ignored);
+        if (failedClause == null)
+            return stringBuilder.ToString();
+        
+        AppendStatus($"Test case [{testCase.Number}]", 0, failedClause, stringBuilder);
+
+        if (assertedClauses.Count == 1)
         {
-            case AssertStatus.NotPassedWithException:
-                stringBuilder.AppendLine($"Test case [{testCase.Number}] not passed with an exception");
-                if (testCase.Assert.Output.Value is not Exception exception)
-                    break;
-                stringBuilder.AppendLine($"Exception: {exception.Message}");
-                break;
-            case AssertStatus.Passed:
-                stringBuilder.AppendLine($"Test case [{testCase.Number}] passed");
-                break;
-            case AssertStatus.NotPassed:
-                stringBuilder.AppendLine($"Test case [{testCase.Number}] not passed");
-                break;
-            case AssertStatus.Ignored:
-                break;
-            case AssertStatus.Failed:
-                stringBuilder.AppendLine($"Test case [{testCase.Number}] assertion has failed with an exception");
-                if (!string.IsNullOrWhiteSpace(testCase.Assert.Message))
-                    stringBuilder.AppendLine($"Exception: {testCase.Assert.Message}");
-                stringBuilder.AppendLine($"Exception: {testCase.Assert.Exception}");
-                break;
-            default:
-                throw new ArgumentOutOfRangeException();
+            AppendInput(1, testCase, stringBuilder);
+            AppendExpected(1, failedClause, stringBuilder);
+            AppendResult(1, failedClause, stringBuilder);
+            AppendElapsed(1, testCase, stringBuilder);
+            return stringBuilder.ToString();
         }
-
-        AppendInput(testCase, stringBuilder);
-        AppendExpected(testCase, stringBuilder);
-
-        if (testCase.Validations.IsValid())
+        
+        AppendInput(1, testCase, stringBuilder);
+        AppendElapsed(1, testCase, stringBuilder);
+        for (var i = 0; i < assertedClauses.Count; i++)
         {
-            if (testCase.Assert.Status != AssertStatus.NotPassedWithException)
-                stringBuilder.AppendLine($"\tOutput: '{testCase.Assert.Output}'");
-            stringBuilder.Append($"\tElapsed: {testCase.ElapsedTime.TotalMilliseconds:F5}ms");
+            AppendStatus($"Clause {i + 1}", 1, assertedClauses[i], stringBuilder);
+            AppendExpected(2, assertedClauses[i], stringBuilder);
+            AppendResult(2, assertedClauses[i], stringBuilder);;
         }
 
         return stringBuilder.ToString();
     }
-    
-    private static void AppendValidationResult(StringBuilder stringBuilder, ValidationResult validationResult)
+
+    private static void AppendStatus(string prefix, int numberOfMargins, AssertedTestClause clause, StringBuilder stringBuilder)
     {
-        stringBuilder.AppendLine("\t-Validation subject: " + validationResult.Subject);
-        stringBuilder.AppendLine("\tError message: " + validationResult.Message);
+        switch (clause.Assert.Status)
+        {
+            case AssertStatus.NotPassedWithException:
+                stringBuilder.AppendLine($"{GetTabMargin(numberOfMargins)}{prefix} not passed with an exception");
+                if (clause.Result.Value is not Exception exception)
+                    break;
+                stringBuilder.AppendLine($"{GetTabMargin(numberOfMargins)}Exception: {exception.Message}");
+                break;
+            case AssertStatus.Passed:
+                stringBuilder.AppendLine($"{GetTabMargin(numberOfMargins)}{prefix} passed");
+                break;
+            case AssertStatus.NotPassed:
+                stringBuilder.AppendLine($"{GetTabMargin(numberOfMargins)}{prefix} not passed");
+                break;
+            case AssertStatus.Failed:
+                stringBuilder.AppendLine($"{GetTabMargin(numberOfMargins)}{prefix} assertion has failed with an exception");
+                if (!string.IsNullOrWhiteSpace(clause.Assert.Message))
+                    stringBuilder.AppendLine($"Exception: {clause.Assert.Message}");
+                stringBuilder.AppendLine($"Exception: {clause.Assert.Exception}");
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
     }
 
-    private static void AppendStatisticsString(StringBuilder stringBuilder, ICollection<AssertedTestCase> executedTestCases)
+    private static void AppendStatisticsString(StringBuilder stringBuilder, IList<AssertedTestCase> assertedTestCases)
     {
-        if (executedTestCases.Count == 0)
+        if (assertedTestCases.Count == 0)
             return;
         
-        var totalElapsedMs = executedTestCases.Sum(x => x.ElapsedTime.TotalMilliseconds);
-        var avgElapsedMs = totalElapsedMs / executedTestCases.Count;
-        var orderedByElapsedTime = executedTestCases
+        var totalElapsedMs = assertedTestCases.Sum(x => x.ElapsedTime.TotalMilliseconds);
+        var avgElapsedMs = totalElapsedMs / assertedTestCases.Count;
+        var orderedByElapsedTime = assertedTestCases
             .OrderByDescending(x => x.ElapsedTime)
             .ToList();
         var maxElapsedTest = orderedByElapsedTime.First();
@@ -207,17 +238,39 @@ public static class TestSuiteReportDefaults
         statisticsBuilder.Append($" Min: {minElapsedTest.ElapsedTime.TotalMilliseconds:F4}ms [Number {minElapsedTest.Number}];");
         stringBuilder.Append(statisticsBuilder);
     }
-
-    private static void AppendInput(AssertedTestCase testCase, StringBuilder stringBuilder)
+    
+    private static void AppendValidationResult(int numberOfMargins, StringBuilder stringBuilder, ValidationResult validationResult)
     {
-        if (testCase.Inputs.Length == 1)
-            stringBuilder.AppendLine($"\tInput: '{testCase.Inputs}'");
+        stringBuilder.AppendLine($"{GetTabMargin(numberOfMargins)}Validation subject: " + validationResult.Subject);
+        stringBuilder.AppendLine($"{GetTabMargin(numberOfMargins + 1)}Error message: " + validationResult.Message);
+    }
+
+    private static void AppendInput(int numberOfMargins, AssertedTestCase testCase, StringBuilder stringBuilder)
+    {
+        if (testCase.Inputs.Count == 1)
+            stringBuilder.AppendLine($"{GetTabMargin(numberOfMargins)}Input: '{testCase.Inputs}'");
         else
-            stringBuilder.AppendLine($"\tInputs: {string.Join(", ", testCase.Inputs.Select(x => $"'{x}'"))}");
+            stringBuilder.AppendLine($"{GetTabMargin(numberOfMargins)}Inputs: {string.Join(", ", testCase.Inputs.Select(x => $"'{x}'"))}");
+    }
+
+    private static void AppendElapsed(int numberOfMargins, AssertedTestCase testCase, StringBuilder stringBuilder)
+    {
+        stringBuilder.AppendLine($"{GetTabMargin(numberOfMargins)}Elapsed: {testCase.ElapsedTime.TotalMilliseconds:F5}ms");
     }
     
-    private static void AppendExpected(AssertedTestCase testCase, StringBuilder stringBuilder)
+    private static void AppendExpected(int numberOfMargins, AssertedTestClause clause, StringBuilder stringBuilder)
     {
-        stringBuilder.AppendLine($"\tExpected: '{testCase.Expected}'");
+        stringBuilder.AppendLine($"{GetTabMargin(numberOfMargins)}Expected: '{clause.Expected}'");
+    }
+
+    private static void AppendResult(int numberOfMargins, AssertedTestClause clause, StringBuilder stringBuilder)
+    {
+        if (clause.Assert.Status != AssertStatus.NotPassedWithException)
+            stringBuilder.AppendLine($"{GetTabMargin(numberOfMargins)}Result: '{clause.Result}'");
+    }
+    
+    private static string GetTabMargin(int numberOfMargins)
+    {
+        return string.Join("", Enumerable.Repeat("  ", numberOfMargins));
     }
 }

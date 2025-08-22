@@ -1,5 +1,5 @@
+using SimpleFluentTester.TestCase;
 using SimpleFluentTester.TestSuite;
-using SimpleFluentTester.TestSuite.Case;
 using SimpleFluentTester.TestSuite.ComparedObject;
 
 namespace SimpleFluentTester.UnitTests.Helpers;
@@ -11,48 +11,48 @@ public static class TestCaseExamples
         return builder.UseOperation((int x, int y) => x + y);
     }
         
-    public static DeferredTestCase Passed
+    public static DefinedTestCase Passed
     {
         get
         {
             var expected = ComparedObjectFactory.Wrap(3);
-            return new DeferredTestCase(new Lazy<Delegate?>(() => Operation) , new Lazy<Delegate?>(() => Comparer),ComparedObjectFactory.WrapMany([1, 2]), expected, 1);
+            return new DefinedTestCase(new Lazy<Delegate?>(() => Operation) , new Lazy<Delegate?>(() => Comparer),ComparedObjectFactory.WrapMany([1, 2]), expected, 1);
         }
     }
         
-    public static DeferredTestCase NotPassed
+    public static DefinedTestCase NotPassed
     {
         get
         {
             var expected = ComparedObjectFactory.Wrap(4);
-            return new DeferredTestCase(new Lazy<Delegate?>(() => Operation), new Lazy<Delegate?>(() => Comparer),ComparedObjectFactory.WrapMany([1, 2]), expected, 1);
+            return new DefinedTestCase(new Lazy<Delegate?>(() => Operation), new Lazy<Delegate?>(() => Comparer),ComparedObjectFactory.WrapMany([1, 2]), expected, 1);
         }
     }
         
-    public static DeferredTestCase NotPassedWithOperationException
+    public static DefinedTestCase NotPassedWithOperationException
     {
         get
         {
             var expected = ComparedObjectFactory.Wrap(3);
-            return new DeferredTestCase(new Lazy<Delegate?>(() => ThrowOperation), new Lazy<Delegate?>(() => Comparer),ComparedObjectFactory.WrapMany([1, 2]), expected, 1);
+            return new DefinedTestCase(new Lazy<Delegate?>(() => ThrowOperation), new Lazy<Delegate?>(() => Comparer),ComparedObjectFactory.WrapMany([1, 2]), expected, 1);
         }
     }
     
-    public static DeferredTestCase NotPassedWithComparerException
+    public static DefinedTestCase NotPassedWithComparerException
     {
         get
         {
             var expected = ComparedObjectFactory.Wrap(3);
-            return new DeferredTestCase(new Lazy<Delegate?>(() => Operation), new Lazy<Delegate?>(() => ThrowComparer),ComparedObjectFactory.WrapMany([1, 2]), expected, 1);
+            return new DefinedTestCase(new Lazy<Delegate?>(() => Operation), new Lazy<Delegate?>(() => ThrowComparer),ComparedObjectFactory.WrapMany([1, 2]), expected, 1);
         }
     }
         
-    public static DeferredTestCase Invalid
+    public static DefinedTestCase Invalid
     {
         get
         {
             var expected = ComparedObjectFactory.Wrap(4);
-            return new DeferredTestCase(new Lazy<Delegate?>(() => Operation), new Lazy<Delegate?>(() => Comparer),ComparedObjectFactory.WrapMany(["test", 2]), expected, 1);
+            return new DefinedTestCase(new Lazy<Delegate?>(() => Operation), new Lazy<Delegate?>(() => Comparer),ComparedObjectFactory.WrapMany(["test", 2]), expected, 1);
         }
     }
     

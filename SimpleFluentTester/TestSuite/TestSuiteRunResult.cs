@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using SimpleFluentTester.TestSuite.Case;
+using SimpleFluentTester.TestCase;
 
 namespace SimpleFluentTester.TestSuite;
 
@@ -9,7 +9,7 @@ namespace SimpleFluentTester.TestSuite;
 /// validations performed, and additional metadata about the test suite.
 /// </summary>
 public sealed class TestSuiteRunResult(
-    IList<AssertedTestCase> validatedTestCases,
+    IList<ITestCase> validatedTestCases,
     Delegate? operation,
     string? displayName,
     int number,
@@ -22,7 +22,7 @@ public sealed class TestSuiteRunResult(
 
     public Exception? Exception { get; } = exception;
     
-    public IList<AssertedTestCase> TestCases { get; } = validatedTestCases;
+    public IList<ITestCase> TestCases { get; } = validatedTestCases;
 
     public Delegate? Operation { get; } = operation;
 

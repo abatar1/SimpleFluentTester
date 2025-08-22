@@ -1,6 +1,7 @@
 using System;
+using SimpleFluentTester.TestCase;
+using SimpleFluentTester.TestCase.Clause;
 using SimpleFluentTester.TestSuite;
-using SimpleFluentTester.TestSuite.Case;
 
 namespace SimpleFluentTester.Reporter;
 
@@ -11,5 +12,5 @@ public interface ITestSuiteReportBuilder
 {
     PrintableTestSuiteResult? TestSuiteResultToString(
         TestSuiteRunResult testSuiteRunResult,
-        Func<AssertedTestCase, bool>? shouldPrintPredicate);
+        Func<AssertedTestClause, AssertedTestCase, bool>? shouldPrintPredicate);
 }

@@ -1,4 +1,5 @@
-using SimpleFluentTester.TestSuite.Case;
+using SimpleFluentTester.TestCase;
+using SimpleFluentTester.TestSuite;
 using SimpleFluentTester.TestSuite.ComparedObject;
 using SimpleFluentTester.Validators.Core;
 

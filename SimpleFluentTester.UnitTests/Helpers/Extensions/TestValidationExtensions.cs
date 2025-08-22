@@ -1,4 +1,4 @@
-using SimpleFluentTester.TestSuite.Case;
+using SimpleFluentTester.TestCase;
 using SimpleFluentTester.Validators.Core;
 
 namespace SimpleFluentTester.UnitTests.Helpers.Extensions;

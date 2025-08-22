@@ -1,10 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Microsoft.Extensions.Logging;
+using SimpleFluentTester.TestCase;
+using SimpleFluentTester.TestCase.Clause;
 using SimpleFluentTester.TestSuite;
-using SimpleFluentTester.TestSuite.Case;
 
 namespace SimpleFluentTester.Reporter;
 
@@ -12,7 +12,7 @@ internal sealed class DefaultTestSuiteReportBuilder : ITestSuiteReportBuilder
 {
     public PrintableTestSuiteResult? TestSuiteResultToString(
         TestSuiteRunResult testSuiteRunResult,
-        Func<AssertedTestCase, bool>? shouldPrintPredicate)
+        Func<AssertedTestClause, AssertedTestCase, bool>? shouldPrintPredicate)
     {
         if (!testSuiteRunResult.ShouldBeExecuted)
             return null;
@@ -24,10 +24,18 @@ internal sealed class DefaultTestSuiteReportBuilder : ITestSuiteReportBuilder
 
         stringBuilder.AppendLine(testSuiteRunResult.ToHeaderString());
 
-        IEnumerable<AssertedTestCase> testCaseEnumerable = testSuiteRunResult.TestCases;
+        var testCases = testSuiteRunResult.TestCases.Cast<AssertedTestCase>();
         if (shouldPrintPredicate != null)
-            testCaseEnumerable = testCaseEnumerable.Where(shouldPrintPredicate);
-        var printableTestCases = testCaseEnumerable.ToList();
+        {
+            testCases = testCases.Where(testCase =>
+            {
+                return testCase.Clauses
+                    .Cast<AssertedTestClause>()
+                    .Select(testClause => shouldPrintPredicate.Invoke(testClause, testCase))
+                    .Any(x => x);
+            });
+        }
+        var printableTestCases = testCases.ToList();
 
         foreach (var printableTestCase in printableTestCases)
             stringBuilder.AppendLine(printableTestCase.ToFormattedString());

@@ -1,4 +1,4 @@
-using SimpleFluentTester.TestSuite.Case;
+using SimpleFluentTester.TestCase;
 
 namespace SimpleFluentTester.TestSuite.Parameter;
 

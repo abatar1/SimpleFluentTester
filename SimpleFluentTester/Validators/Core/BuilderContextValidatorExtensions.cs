@@ -17,9 +17,9 @@ internal static class BuilderContextValidatorExtensions
             .Select(x =>
             {
                 var validationResults = x.Value
-                    .Select(y => y.Value)
+                    .SelectMany(y => y.Value.Validations)
                     .ToList();
-                
+
                 var currentValidationStatus = ValidationStatus.Valid;
                 var notValid = validationResults
                     .Any(y => y.Status == ValidationStatus.NonValid);
@@ -29,7 +29,7 @@ internal static class BuilderContextValidatorExtensions
                     if (generalStatus == ValidationStatus.Valid)
                         generalStatus = ValidationStatus.NonValid;
                 }
-                   
+
                 var failed = validationResults
                     .Any(y => y.Status == ValidationStatus.Failed);
                 if (failed)
@@ -37,7 +37,7 @@ internal static class BuilderContextValidatorExtensions
                     currentValidationStatus = ValidationStatus.Failed;
                     generalStatus = ValidationStatus.Failed;
                 }
-                
+
                 var message = GetAggregatedMessage(validationResults);
                 var aggregateException = GetAggregateException(validationResults);
                 return ValidationResult.FromStatus(currentValidationStatus, x.Key, message, aggregateException);
@@ -56,7 +56,7 @@ internal static class BuilderContextValidatorExtensions
         this IValidatedObject validated,
         ValidationResult validationResult)
     {
-        return AddValidation(validated, validationResult.Subject, () => validationResult);
+        return AddValidation(validated, validationResult.Subject, () => new SubjectValidation(new List<ValidationResult> { validationResult }));
     }
 
     /// <summary>
@@ -87,7 +87,7 @@ internal static class BuilderContextValidatorExtensions
         return validated;
     }
 
-    private static ValidationResult RunValidation(
+    private static SubjectValidation RunValidation(
         IValidator validator, 
         IValidatedObject validated, 
         Func<IValidationContext>? validationContextFactory = null)
@@ -100,19 +100,19 @@ internal static class BuilderContextValidatorExtensions
         catch (Exception e)
         {
             var message = $"Failed to validate {validated.GetType()} with {validator.GetType()} validator.";
-            return ValidationResult.Failed(validator.Subject, e, message);
+            return new SubjectValidation(new List<ValidationResult> { ValidationResult.Failed(validator.Subject, e, message) });
         }
     }
     
     private static IValidatedObject AddValidation(
         IValidatedObject validated,
         ValidationSubject subject,
-        Func<ValidationResult> validationFactory)
+        Func<SubjectValidation> validationFactory)
     {
         if (validated.Validations.ContainsKey(subject))
-            validated.Validations[subject].Add(new Lazy<ValidationResult>(validationFactory));
+            validated.Validations[subject].Add(new Lazy<SubjectValidation>(validationFactory));
         else
-            validated.Validations[subject] = new List<Lazy<ValidationResult>> { new(validationFactory) };
+            validated.Validations[subject] = new List<Lazy<SubjectValidation>> { new(validationFactory) };
         return validated;
     }
     

@@ -11,8 +11,8 @@ public sealed class IgnoredTests
         // Assign
         var builder = TestSuite.TestSuite.Sequential.Ignore
             .UseAdderOperation()
-            .ExpectResult(2).WithInput(1, 1, 1)
-            .ExpectResult(3).WithInput(1, 1, 1);
+            .ExpectReturn(2).WithInput(1, 1, 1)
+            .ExpectReturn(3).WithInput(1, 1, 1);
             
         // Act    
         var reporter = builder.Run();

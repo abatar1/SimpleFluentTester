@@ -2,22 +2,33 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using SimpleFluentTester.TestSuite.Case;
+using SimpleFluentTester.TestCase;
+using SimpleFluentTester.TestCase.Clause;
 using SimpleFluentTester.TestSuite.ComparedObject;
 using SimpleFluentTester.TestSuite.Parameter;
 using SimpleFluentTester.Validators.Core;
 
 namespace SimpleFluentTester.Validators;
 
-internal sealed class ComparerValidator : BaseValidator<EmptyValidationContext, DeferredTestCase>
+internal sealed class ComparerValidator : BaseValidator<EmptyValidationContext, DefinedTestCase>
 {
     public override ValidationSubject Subject => ValidationSubject.Comparer;
 
-    protected override ValidationResult ValidateCore(
-        DeferredTestCase testCase, 
+    protected override SubjectValidation ValidateCore(
+        DefinedTestCase testCase, 
         EmptyValidationContext _)
     {
-        var testCaseExpectedObjectType = GetExpectedObjectType(testCase);
+        var validationResults = new List<ValidationResult>();
+        foreach (var clause in testCase.Clauses)
+        {
+            validationResults.Add(ValidateInternalSingle(testCase, clause));
+        }
+        return new SubjectValidation(validationResults);
+    }
+    
+    private ValidationResult ValidateInternalSingle(DefinedTestCase testCase, ITestClause testClause)
+    {
+        var testCaseExpectedObjectType = GetExpectedObjectType(testClause);
 
         if (testCaseExpectedObjectType == null)
             return Ok();
@@ -76,14 +87,14 @@ internal sealed class ComparerValidator : BaseValidator<EmptyValidationContext, 
         return enumerableInterface?.GetGenericArguments().FirstOrDefault();
     }
 
-    private Type? GetExpectedObjectType(ITestCase testCase)
+    private Type? GetExpectedObjectType(ITestClause testClause)
     {
-        return testCase.Expected.Variety switch
+        return testClause.Expected.Variety switch
         {
             ComparedObjectVariety.Null => null,
             ComparedObjectVariety.Exception => null,
-            ComparedObjectVariety.Value => testCase.Expected.Type,
-            ComparedObjectVariety.Parameter => ObjectParameterExtractor.ExtractExpectedParameterType(testCase),
+            ComparedObjectVariety.Value => testClause.Expected.Type,
+            ComparedObjectVariety.Parameter => ObjectParameterExtractor.ExtractExpectedParameterType(testClause),
             _ => throw new ArgumentOutOfRangeException()
         };
     }

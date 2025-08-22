@@ -34,7 +34,7 @@ public sealed class UseOperationTests
         // Act
         var reporter = setup
             .UseOperation((NotEquatableTestObject a, NotEquatableTestObject b) => new NotEquatableTestObject(a.Value + b.Value))
-            .ExpectResult(new NotEquatableTestObject(2)).WithInput([new NotEquatableTestObject(1), new NotEquatableTestObject(1)])
+            .ExpectReturn(new NotEquatableTestObject(2)).WithInput([new NotEquatableTestObject(1), new NotEquatableTestObject(1)])
             .Run();
 
         // Assert
@@ -52,7 +52,7 @@ public sealed class UseOperationTests
         
         // Act
         var reporter = setup
-            .ExpectResult(2).WithInput(1, 1)
+            .ExpectReturn(2).WithInput(1, 1)
             .UseOperation((int _, int _) => { })
             .Run();
 
@@ -82,11 +82,11 @@ public sealed class UseOperationTests
     {
         // Assign
         var container = TestSuiteFactory.CreateEmptyContextContainer();
-        var builder = new TestSuite.TestSuiteBuilder(container);
+        var builder = new TestSuite.SequentialTestSuiteBuilder(container);
         
         // Act
         var reporter = builder
-            .ExpectResult(2).WithInput(1, 1)
+            .ExpectReturn(2).WithInput(1, 1)
             .UseOperation((int _, int _) => "test")
             .Run();
         

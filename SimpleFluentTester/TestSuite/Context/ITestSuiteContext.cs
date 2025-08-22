@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using SimpleFluentTester.Helpers;
-using SimpleFluentTester.TestSuite.Case;
+using SimpleFluentTester.TestCase;
 
 namespace SimpleFluentTester.TestSuite.Context;
 
@@ -17,7 +17,7 @@ internal interface ITestSuiteContext
 
     IActivator Activator { get; }
 
-    IList<DeferredTestCase> TestCases { get; }
+    IList<DefinedTestCase> TestCases { get; }
 
     Delegate? Operation { get; }
     

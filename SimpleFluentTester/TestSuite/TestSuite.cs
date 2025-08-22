@@ -1,4 +1,6 @@
-﻿using SimpleFluentTester.TestSuite.Context;
+﻿using System.Collections.Generic;
+using SimpleFluentTester.TestCase.Clause;
+using SimpleFluentTester.TestSuite.Context;
 
 namespace SimpleFluentTester.TestSuite;
 
@@ -55,7 +57,7 @@ public static class TestSuite
         {
             _testSuiteNumber += 1;
             var container = TestSuiteContextContainer.Default(_testSuiteNumber);
-            return new TestSuiteBuilder(container);
+            return new SequentialTestSuiteBuilder(container, new List<DefinedTestClause>());
         }
     }
 }

@@ -19,7 +19,7 @@ public sealed class ExpectTests
             
         // Act    
         var reporter = builder
-            .ExpectResult(2).WithInput(1, 1)
+            .ExpectReturn(2).WithInput(1, 1)
             .Run();
         
         // Assert
@@ -35,7 +35,7 @@ public sealed class ExpectTests
             
         // Act    
         var reporter = builder
-            .ExpectResult(null).WithInput(null, 1)
+            .ExpectReturn(null).WithInput(null, 1)
             .Run();
         
         // Assert
@@ -51,8 +51,8 @@ public sealed class ExpectTests
             
         // Act    
         var reporter = builder
-            .ExpectResult(2).WithInput(1, 1)
-            .ExpectResult(3).WithInput(1, 1)
+            .ExpectReturn(2).WithInput(1, 1)
+            .ExpectReturn(3).WithInput(1, 1)
             .Run();
         
         // Assert
@@ -69,9 +69,9 @@ public sealed class ExpectTests
             
         // Act    
         var reporter = builder
-            .ExpectResult(2).WithInput(1, 1)
-            .ExpectResult(2).WithInput(2, 1)
-            .ExpectResult(3).WithInput(2, 1)
+            .ExpectReturn(2).WithInput(1, 1)
+            .ExpectReturn(2).WithInput(2, 1)
+            .ExpectReturn(3).WithInput(2, 1)
             .Run(1, 2);
 
         // Assert
@@ -90,7 +90,7 @@ public sealed class ExpectTests
         
         // Act
         var reporter = builder
-            .ExpectResult(2).WithInput(1, 1)
+            .ExpectReturn(2).WithInput(1, 1)
             .Run();
         
         // Assert
@@ -106,11 +106,11 @@ public sealed class ExpectTests
             .Setup(x => x.Get())
             .Returns(Assembly.GetAssembly(typeof(ExpectTests)));
         var container = TestSuiteFactory.CreateEmptyContextContainer(entryAssemblyProviderMock.Object);
-        var builder = new TestSuite.TestSuiteBuilder(container);
+        var builder = new TestSuite.SequentialTestSuiteBuilder(container);
         
         // Act
         var reporter = builder
-            .ExpectResult(2).WithInput(1, 1)
+            .ExpectReturn(2).WithInput(1, 1)
             .Run();
         
         // Assert
@@ -127,7 +127,7 @@ public sealed class ExpectTests
         
         // Act
         var reporter = builder
-            .ExpectResult(new EquatableTestObject(2)).WithInput(new EquatableTestObject(1), new EquatableTestObject(1))
+            .ExpectReturn(new EquatableTestObject(2)).WithInput(new EquatableTestObject(1), new EquatableTestObject(1))
             .Run();
         
         // Assert
@@ -147,7 +147,7 @@ public sealed class ExpectTests
         
         // Act
         var reporter = builder
-            .ExpectResult(new EquatableTestObject(2)).WithInput(new EquatableTestObject(1), new EquatableTestObject(1))
+            .ExpectReturn(new EquatableTestObject(2)).WithInput(new EquatableTestObject(1), new EquatableTestObject(1))
             .Run();
         
         // Assert
@@ -165,7 +165,7 @@ public sealed class ExpectTests
             
         // Act    
         var reporter = builder
-            .ExpectResult("123").WithInput(1, 1)
+            .ExpectReturn("123").WithInput(1, 1)
             .Run();
         
         // Assert
@@ -182,7 +182,7 @@ public sealed class ExpectTests
             
         // Act    
         var reporter = builder
-            .ExpectResult(null).WithInput(1, 1)
+            .ExpectReturn(null).WithInput(1, 1)
             .Run();
         
         // Assert
@@ -199,7 +199,7 @@ public sealed class ExpectTests
             
         // Act    
         var reporter = builder
-            .ExpectResult(2).WithInput(1, 1)
+            .ExpectReturn(2).WithInput(1, 1)
             .Run();
         
         // Assert

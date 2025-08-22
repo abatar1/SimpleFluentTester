@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace SimpleFluentTester.Validators.Core;
 
 public interface IValidator
@@ -6,5 +8,5 @@ public interface IValidator
     
     ValidationSubject Subject { get; }
     
-    ValidationResult Validate(IValidatedObject validated, IValidationContext validationContext);
+    SubjectValidation Validate(IValidatedObject validated, IValidationContext validationContext);
 }

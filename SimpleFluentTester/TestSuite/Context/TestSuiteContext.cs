@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using SimpleFluentTester.Helpers;
-using SimpleFluentTester.TestSuite.Case;
+using SimpleFluentTester.TestCase;
 
 namespace SimpleFluentTester.TestSuite.Context;
 
@@ -10,7 +10,7 @@ internal sealed class TestSuiteContext(
     string name,
     IEntryAssemblyProvider entryAssemblyProvider,
     IActivator activator,
-    IList<DeferredTestCase> testCases,
+    IList<DefinedTestCase> testCases,
     Delegate? operation,
     Delegate? comparer,
     bool shouldBeExecuted) : ITestSuiteContext
@@ -25,7 +25,7 @@ internal sealed class TestSuiteContext(
 
     public IActivator Activator { get; } = activator;
 
-    public IList<DeferredTestCase> TestCases { get; } = testCases;
+    public IList<DefinedTestCase> TestCases { get; } = testCases;
     
     public Delegate? Operation { get; } = operation;
     

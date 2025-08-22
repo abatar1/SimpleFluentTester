@@ -102,7 +102,7 @@ internal class OperationEnricher(ITestSuiteContextContainer container)
         switch (operationMembers.Count)
         {
             case 0:
-                throw new InvalidContextException($"You should specify an operation first with an {nameof(TestSuiteDelegateAttribute)} attribute or using {nameof(TestSuiteBuilder.UseOperation)} method.");
+                throw new InvalidContextException($"You should specify an operation first with an {nameof(TestSuiteDelegateAttribute)} attribute or using {nameof(SequentialTestSuiteBuilder.UseOperation)} method.");
             case > 1:
                 throw new InvalidContextException($"You defined more than one method with {nameof(TestSuiteDelegateAttribute)}.");
         }

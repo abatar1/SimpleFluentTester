@@ -13,6 +13,6 @@ namespace SimpleFluentTester.Validators.Core;
 /// </remarks>
 public sealed class EmptyValidatedObject : IValidatedObject
 {
-    public IDictionary<ValidationSubject, IList<Lazy<ValidationResult>>> Validations { get; } =
-        new Dictionary<ValidationSubject, IList<Lazy<ValidationResult>>>();
+    public IDictionary<ValidationSubject, IList<Lazy<SubjectValidation>>> Validations { get; } =
+        new Dictionary<ValidationSubject, IList<Lazy<SubjectValidation>>>();
 }

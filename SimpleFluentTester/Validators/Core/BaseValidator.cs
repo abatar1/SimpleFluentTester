@@ -13,14 +13,14 @@ internal abstract class BaseValidator<TValidationContext, TValidatedObject> : IV
     
     public abstract ValidationSubject Subject { get; }
 
-    public ValidationResult Validate(IValidatedObject validated, IValidationContext validationContext)
+    public SubjectValidation Validate(IValidatedObject validated, IValidationContext validationContext)
     {
         var castedContext = CastValidationContext(validationContext);
         var castedValidated = CastValidatedObject(validated);
         return ValidateCore(castedValidated, castedContext);
     }
 
-    protected abstract ValidationResult ValidateCore(TValidatedObject validated, TValidationContext validationContext);
+    protected abstract SubjectValidation ValidateCore(TValidatedObject validated, TValidationContext validationContext);
 
     protected ValidationResult Ok()
     {

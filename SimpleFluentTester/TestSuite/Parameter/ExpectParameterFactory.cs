@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -8,29 +9,22 @@ namespace SimpleFluentTester.TestSuite.Parameter;
 
 internal static class ExpectParameterFactory
 {
-    private static Lazy<OperationParametersInfo> _parametersInfo = new();
-    private static bool Initialized { get; set; }
+    private static readonly ConcurrentDictionary<string, Lazy<OperationParametersInfo>> ParametersInfoMap = new();
 
     public static DeferredOperationParameter Create(ITestSuiteContextContainer container, string parameterName)
     {
-        TryInitParameters(container);
-        return new DeferredOperationParameter(new Lazy<ParameterInfo>(() => _parametersInfo.Value.ParametersByName[parameterName]));
+        var lazyParameterInfo = ParametersInfoMap.GetOrAdd(container.Context.Operation.Method.Name, 
+            _ => new Lazy<OperationParametersInfo>(() => CreateOperationParametersInfo(container.Context.Operation)));
+
+        return new DeferredOperationParameter(new Lazy<ParameterInfo>(() => lazyParameterInfo.Value.ParametersByName[parameterName]));
     }
     
     public static DeferredOperationParameter Create(ITestSuiteContextContainer container, int parameterPosition)
     {
-        TryInitParameters(container);
-        return new DeferredOperationParameter(new Lazy<ParameterInfo>(() => _parametersInfo.Value.ParametersByPosition[parameterPosition]));
-    }
+        var lazyParameterInfo = ParametersInfoMap.GetOrAdd(container.Context.Operation.Method.Name, 
+            _ => new Lazy<OperationParametersInfo>(() => CreateOperationParametersInfo(container.Context.Operation)));
 
-    private static void TryInitParameters(ITestSuiteContextContainer container)
-    {
-        if (Initialized)
-            return;
-
-        _parametersInfo = new Lazy<OperationParametersInfo>(() => CreateOperationParametersInfo(container.Context.Operation));
-
-        Initialized = true;
+        return new DeferredOperationParameter(new Lazy<ParameterInfo>(() => lazyParameterInfo.Value.ParametersByPosition[parameterPosition]));
     }
 
     private static OperationParametersInfo CreateOperationParametersInfo(Delegate? operation)
@@ -52,6 +46,7 @@ internal static class ExpectParameterFactory
         IDictionary<int, ParameterInfo> ParametersByPosition)
     {
         public IDictionary<string, ParameterInfo> ParametersByName { get; } = ParametersByName;
+        
         public IDictionary<int, ParameterInfo> ParametersByPosition { get; } = ParametersByPosition;
     }
 }

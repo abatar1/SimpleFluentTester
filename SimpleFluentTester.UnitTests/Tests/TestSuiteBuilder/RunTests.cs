@@ -16,10 +16,10 @@ public sealed class TestNumbersTests
         
         // Act
         Action fun1 = () => builder1
-            .ExpectResult(2).WithInput(1, 1)
+            .ExpectReturn(2).WithInput(1, 1)
             .Run(2);
         Action fun2 = () => builder2
-            .ExpectResult(2).WithInput(1, 1)
+            .ExpectReturn(2).WithInput(1, 1)
             .Run(1, 2);
         
         // Assert
@@ -37,7 +37,7 @@ public sealed class TestNumbersTests
         
         // Act
         var result = builder
-            .ExpectResult(2).WithInput(1, 1)
+            .ExpectReturn(2).WithInput(1, 1)
             .Run(1);
         
         // Assert

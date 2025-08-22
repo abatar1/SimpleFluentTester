@@ -22,7 +22,7 @@ public sealed class ExpectExceptionTests
         // Act    
         var reporter = builder
             .ExpectException<CustomException>().WithInput(1, 1)
-            .ExpectResult(3).WithInput(1, 2)
+            .ExpectReturn(3).WithInput(1, 2)
             .Run();
         
         // Assert
@@ -45,7 +45,7 @@ public sealed class ExpectExceptionTests
         // Act    
         var reporter = builder
             .ExpectException<CustomException>("Test").WithInput(1, 1)
-            .ExpectResult(3).WithInput(1, 2)
+            .ExpectReturn(3).WithInput(1, 2)
             .Run();
         
         // Assert
@@ -70,7 +70,7 @@ public sealed class ExpectExceptionTests
         // Act    
         var reporter = builder
             .ExpectException<CustomWithMessageException>(exceptionMessage).WithInput(1, 1)
-            .ExpectResult(3).WithInput(1, 2)
+            .ExpectReturn(3).WithInput(1, 2)
             .Run();
         
         // Assert

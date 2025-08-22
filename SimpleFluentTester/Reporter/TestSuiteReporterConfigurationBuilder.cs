@@ -1,7 +1,9 @@
 using System;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Console;
-using SimpleFluentTester.TestSuite.Case;
+using SimpleFluentTester.TestCase;
+using SimpleFluentTester.TestCase.Clause;
+using SimpleFluentTester.TestSuite;
 
 namespace SimpleFluentTester.Reporter;
 
@@ -21,7 +23,7 @@ internal sealed class TestSuiteReporterConfigurationBuilder : ITestSuiteReporter
         return this;
     }
 
-    public ITestSuiteReporterConfigurationBuilder WithPrintablePredicate(Func<AssertedTestCase, bool> printablePredicate)
+    public ITestSuiteReporterConfigurationBuilder WithPrintablePredicate(Func<AssertedTestClause, AssertedTestCase, bool> printablePredicate)
     {
         _configuration.PrintablePredicate = printablePredicate;
         return this;
@@ -54,16 +56,16 @@ internal sealed class TestSuiteReporterConfigurationBuilder : ITestSuiteReporter
     }
     
 
-    private static Func<AssertedTestCase, bool> DefaultPrintablePredicate
+    private static Func<AssertedTestClause, AssertedTestCase, bool> DefaultPrintablePredicate
     {
         get
         {
-            return testCase =>
+            return (clause, testCase) =>
             {
-                var notPassed = testCase.Assert.Status == AssertStatus.NotPassed;
-                var notPassedWithException = testCase.Assert.Status == AssertStatus.NotPassedWithException;
-                var failed = testCase.Assert.Status == AssertStatus.Failed;
-                var notValid = !testCase.Validations.IsValid();
+                var notPassed = clause.Assert.Status == AssertStatus.NotPassed;
+                var notPassedWithException = clause.Assert.Status == AssertStatus.NotPassedWithException;
+                var failed = clause.Assert.Status == AssertStatus.Failed;
+                var notValid = !testCase.IsValid();
                 return notPassed || notPassedWithException || notValid || failed;
             };
         }

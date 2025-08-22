@@ -1,4 +1,4 @@
-namespace SimpleFluentTester.TestSuite.Case;
+namespace SimpleFluentTester.TestSuite;
 
 public enum AssertStatus
 {
