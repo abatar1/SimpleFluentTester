@@ -29,7 +29,9 @@ public sealed class ExpectParameterTests
             .Run();
         
         // Assert
+#pragma warning disable CS8604 // Possible null reference argument.
         Func<int[]?, int[]?, bool> comparer = (x, y) => x.SequenceEqual(y);
+#pragma warning restore CS8604 // Possible null reference argument.
         reporter.AssertTestCaseExists(1).AssertPassed([4, 6], [new[] {1, 2}, new[] {3, 4}], comparer);
         reporter.AssertTestCaseExists(2).AssertPassed([3, 4], [new[] {1, 2}, new[] {3, 4}], comparer);
     }
@@ -50,7 +52,9 @@ public sealed class ExpectParameterTests
             .Run();
         
         // Assert
+#pragma warning disable CS8604 // Possible null reference argument.
         Func<int[]?, int[]?, bool> comparer = (x, y) => x.SequenceEqual(y);
+#pragma warning restore CS8604 // Possible null reference argument.
         reporter.AssertTestCaseExists(1).AssertNotPassed([4, 6], [new[] {1, 2}, new[] {3, 4}], comparer);
     }
     

@@ -12,7 +12,7 @@ internal sealed class ParameterExpectationBuilder(
     List<DefinedTestClause> testClauses
     ) : IParameterExpectationBuilder
 {
-    public ITestCaseBuilder ToBe<T>(T expected)
+    public ITestCaseBuilder ToBe<T>(T? expected)
     {
         var comparedObj = ComparedObjectFactory.WrapParameter(expected, operationParameter);
         

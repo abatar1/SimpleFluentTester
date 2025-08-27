@@ -8,7 +8,7 @@ internal static class TestHelpers
         try
         {
             action.Invoke();
-            Assert.Fail();
+            Assert.Fail($"Exception {typeof(TException)} was not thrown.");
         }
         catch (TException e)
         {

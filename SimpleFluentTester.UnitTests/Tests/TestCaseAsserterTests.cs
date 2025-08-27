@@ -206,7 +206,7 @@ public sealed class TestCaseAsserterTests
         var assertedTestCase = executedTestCase.Assert();
 
         // Assert
-        assertedTestCase.AssertPassed(expected, input, (NotEquatableTestObject? x, NotEquatableTestObject? y) => x?.Value == y?.Value);
+        assertedTestCase.AssertPassed(expected, input, (x, y) => x?.Value == y?.Value);
     }
     
     [Fact]
@@ -230,6 +230,8 @@ public sealed class TestCaseAsserterTests
 
         // Assert
         assertedTestCase.AssertPassed(expected, input, 
+#pragma warning disable CS8604 // Possible null reference argument.
             (x, y) => x.Select(s1 => s1.Value).SequenceEqual(y.Select(s2 => s2.Value)));;
+#pragma warning restore CS8604 // Possible null reference argument.
     }
 }
