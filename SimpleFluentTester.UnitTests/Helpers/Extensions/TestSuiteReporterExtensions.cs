@@ -4,7 +4,7 @@ using SimpleFluentTester.Validators.Models;
 
 namespace SimpleFluentTester.UnitTests.Helpers.Extensions;
 
-public static class TestSuiteReporterExtensions
+internal static class TestSuiteReporterExtensions
 {
     public static AssertedTestCase AssertTestCaseExists(this ITestSuiteReporter testSuiteReporter, int testNumber)
     {

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using SimpleFluentTester.Reporter;
 using SimpleFluentTester.TestCase;
 using SimpleFluentTester.TestSuite.Context;
@@ -20,6 +21,14 @@ public interface ITestSuiteBuilder
     /// <param name="expected">The value expected as the result of executing the test case.</param>
     /// <returns>An instance of <see cref="ITestCaseBuilder"/> for further configuration of the test case.</returns>
     ITestCaseBuilder ExpectReturn(object? expected);
+
+    /// <summary>
+    /// Specifies the expected return value of the test case after execution.
+    /// </summary>
+    /// <param name="expected">The expected value or collection of values to be returned from the test case.</param>
+    /// <typeparam name="T">The type of the expected return value.</typeparam>
+    /// <returns>An instance of <see cref="ITestCaseBuilder"/> for configuring the test case further.</returns>
+    ITestCaseBuilder ExpectReturn<T>(IEnumerable<T?> expected);
 
     /// <summary>
     /// Specifies the expected exception type and optional message that should be thrown during the execution of the test case.

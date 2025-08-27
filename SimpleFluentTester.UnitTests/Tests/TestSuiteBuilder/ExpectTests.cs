@@ -2,6 +2,7 @@ using System.Reflection;
 using Moq;
 using SimpleFluentTester.Helpers;
 using SimpleFluentTester.TestCase.Clause;
+using SimpleFluentTester.TestSuite.Context;
 using SimpleFluentTester.UnitTests.Helpers;
 using SimpleFluentTester.UnitTests.Helpers.Extensions;
 using SimpleFluentTester.UnitTests.Helpers.TestObjects;
@@ -78,7 +79,7 @@ public sealed class ExpectTests
         // Assert
         reporter.AssertTestCaseExists(1).AssertPassed(2, [1, 1]);
         reporter.AssertTestCaseExists(2).AssertNotPassed(2, [2, 1]);
-        reporter.AssertTestCaseExists(3).AssertSkippedTestResult(3, [2, 1]);
+        reporter.AssertTestCaseExists(3).AssertIgnored();
     }
 
     [Fact]
@@ -106,7 +107,8 @@ public sealed class ExpectTests
         entryAssemblyProviderMock
             .Setup(x => x.Get())
             .Returns(Assembly.GetAssembly(typeof(ExpectTests)));
-        var container = TestSuiteFactory.CreateEmptyContextContainer(entryAssemblyProviderMock.Object);
+        var container = TestSuiteContextContainer.Default();
+        container.WithEntryAssemblyProvider(entryAssemblyProviderMock.Object);
         var builder = new TestSuite.SequentialTestSuiteBuilder(container, new List<DefinedTestClause>());
         
         // Act
@@ -154,7 +156,7 @@ public sealed class ExpectTests
         // Assert
         reporter
             .AssertTestCaseExists(1)
-            .AssertFailed<CustomWithMessageException>("Comparer execution failed with an exception.", innerMessage);
+            .AssertFailedValidation<CustomWithMessageException>(ValidationSubject.Comparer, "Comparer execution failed with an exception.", innerMessage);
     }
     
     [Fact]

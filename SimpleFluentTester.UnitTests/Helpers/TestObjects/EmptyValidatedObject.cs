@@ -1,7 +1,6 @@
-using System;
-using System.Collections.Generic;
+using SimpleFluentTester.Validators.Models;
 
-namespace SimpleFluentTester.Validators.Models;
+namespace SimpleFluentTester.UnitTests.Helpers.TestObjects;
 
 /// <summary>
 /// Represents an empty implementation of the <see cref="IValidatedObject"/> interface.

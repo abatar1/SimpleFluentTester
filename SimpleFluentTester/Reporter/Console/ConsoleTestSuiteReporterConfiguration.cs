@@ -3,9 +3,9 @@ using Microsoft.Extensions.Logging;
 using SimpleFluentTester.TestCase;
 using SimpleFluentTester.TestCase.Clause;
 
-namespace SimpleFluentTester.Reporter;
+namespace SimpleFluentTester.Reporter.Console;
 
-internal sealed class TestSuiteReporterConfiguration : ITestSuiteReporterConfiguration
+internal sealed class ConsoleTestSuiteReporterConfiguration : ITestSuiteReporterConfiguration
 {
     public ITestSuiteReportBuilder? ReportBuilder { get; set; }
     

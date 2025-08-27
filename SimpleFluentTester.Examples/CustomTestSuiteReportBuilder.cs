@@ -1,6 +1,7 @@
 using System.Text;
 using Microsoft.Extensions.Logging;
 using SimpleFluentTester.Reporter;
+using SimpleFluentTester.Reporter.Console;
 using SimpleFluentTester.TestCase;
 using SimpleFluentTester.TestCase.Clause;
 using SimpleFluentTester.TestSuite;
@@ -9,7 +10,7 @@ namespace SimpleFluentTester.Examples;
 
 internal sealed class CustomTestSuiteReportBuilder : ITestSuiteReportBuilder
 {
-    public PrintableTestSuiteResult? TestSuiteResultToString(TestSuiteRunResult testSuiteRunResult, Func<AssertedTestClause, AssertedTestCase, bool>? shouldPrintPredicate)
+    public ConsoleTestSuiteResult? TestSuiteResultToString(ITestSuiteRunResult testSuiteRunResult, Func<AssertedTestClause, AssertedTestCase, bool>? shouldPrintPredicate)
     {
         if (!testSuiteRunResult.ShouldBeExecuted)
             return null;
@@ -19,7 +20,7 @@ internal sealed class CustomTestSuiteReportBuilder : ITestSuiteReportBuilder
         stringBuilder.AppendLine($"Executing tests for target method [{testSuiteRunResult.Operation?.Method}]");
         stringBuilder.AppendLine($"Total tests: {testSuiteRunResult.TestCases.Count}");
         stringBuilder.AppendLine($"Passed tests: {CountPassedTests(testSuiteRunResult.TestCases)}");
-        return new PrintableTestSuiteResult(LogLevel.Information, testSuiteRunResult.Number, stringBuilder.ToString());
+        return new ConsoleTestSuiteResult(LogLevel.Information, testSuiteRunResult.Number, stringBuilder.ToString());
     }
 
     private int CountPassedTests(IList<AssertedTestCase> testCases)

@@ -82,7 +82,7 @@ public sealed class UseOperationTests
     public void UseOperation_InvalidDelegateReturnType_ShouldBeInvalid()
     {
         // Assign
-        var container = TestSuiteFactory.CreateEmptyContextContainer();
+        var container = TestSuiteContextContainer.Default();
         var builder = new TestSuite.SequentialTestSuiteBuilder(container, new List<DefinedTestClause>());
         
         // Act
@@ -94,5 +94,22 @@ public sealed class UseOperationTests
         // Assert
         var message = "Operation return type is not the same as used generic type.";
         reporter.AssertTestCaseExists(1).AssertNonValid(ValidationSubject.Operation, message);
+    }
+    
+    [Fact]
+    public void UseOperation_ThrowsException_ShouldBeFailed()
+    {
+        // Assign
+        var setup = TestSuite.TestSuite.Sequential;
+        Func<int, int, int> operation = (_, _) => throw new CustomException();
+        
+        // Act
+        var reporter = setup
+            .ExpectReturn(2).WithInput(1, 1)
+            .UseOperation(operation)
+            .Run();
+
+        // Assert
+        reporter.AssertTestCaseExists(1).AssertNotPassedWithException(2, [1, 1], typeof(CustomException));
     }
 }

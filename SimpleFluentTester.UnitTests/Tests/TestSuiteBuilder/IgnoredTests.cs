@@ -19,7 +19,7 @@ public sealed class IgnoredTests
         
         // Assert
         Assert.False(reporter.TestSuiteRunResult.ShouldBeExecuted);
-        reporter.AssertTestCaseExists(1).AssertSkippedTestResult(2, [1, 1, 1]);
-        reporter.AssertTestCaseExists(2).AssertSkippedTestResult(3, [1, 1, 1]);
+        reporter.AssertTestCaseExists(1).AssertIgnored();
+        reporter.AssertTestCaseExists(2).AssertIgnored();
     }
 }

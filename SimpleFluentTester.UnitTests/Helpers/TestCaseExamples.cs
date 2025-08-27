@@ -1,10 +1,13 @@
 using SimpleFluentTester.TestCase;
 using SimpleFluentTester.TestSuite;
 using SimpleFluentTester.TestSuite.ComparedObject;
+using SimpleFluentTester.Validators;
+using SimpleFluentTester.Validators.Helpers;
+using SimpleFluentTester.Validators.Models;
 
 namespace SimpleFluentTester.UnitTests.Helpers;
 
-public static class TestCaseExamples
+internal static class TestCaseExamples
 {
     public static ITestSuiteBuilder UseAdderOperation(this ITestSuiteBuilder builder)
     {
@@ -47,14 +50,18 @@ public static class TestCaseExamples
         }
     }
         
-    public static DefinedTestCase Invalid
+    public static DefinedTestCase NonValidOperation
     {
         get
         {
             var expected = TestClauseFactory.DefineFromValue(3);
-            return new DefinedTestCase(new Lazy<Delegate?>(() => Operation), new Lazy<Delegate?>(() => Comparer),ComparedObjectFactory.WrapMany(["test", 2]), expected, 1);
+            var testCase = new DefinedTestCase(new Lazy<Delegate?>(() => Operation), new Lazy<Delegate?>(() => Comparer), ComparedObjectFactory.WrapMany([1, 2]), expected, 1);
+            testCase.AddReadyValidation(ValidationResult.NonValid(ValidationSubject.Operation, NonValidOperationMessage));
+            return testCase;
         }
     }
+    
+    public static string NonValidOperationMessage => "Test";
     
     [TestSuiteDelegate]
     // ReSharper disable once UnusedMember.Local

@@ -9,19 +9,19 @@ using SimpleFluentTester.TestSuite;
 using SimpleFluentTester.Validators;
 using SimpleFluentTester.Validators.Helpers;
 
-namespace SimpleFluentTester.Reporter;
+namespace SimpleFluentTester.Reporter.Console;
 
 /// <summary>
 /// Provides default utility methods for generating reports and determining log levels for test suite run results.
 /// </summary>
-public static class TestSuiteReportDefaults
+public static class ConsoleTestSuiteReportDefaults
 {
     /// <summary>
     /// Determines the appropriate logging level based on the provided test suite run result.
     /// </summary>
     /// <param name="testSuiteResult">The result of the test suite run, containing details about the test cases and their statuses.</param>
     /// <returns>The log level indicating the outcome of the test suite run. Returns <see cref="LogLevel.Error"/> if any test case is invalid, not passed, or the test suite itself is invalid. Otherwise, returns <see cref="LogLevel.Information"/>.</returns>
-    public static LogLevel DetermineLogLevel(this TestSuiteRunResult testSuiteResult)
+    public static LogLevel DetermineLogLevel(this ITestSuiteRunResult testSuiteResult)
     {
         var someTestCasesNotPassed = testSuiteResult.TestCases
             .SelectMany(x => x.Clauses)
@@ -40,7 +40,7 @@ public static class TestSuiteReportDefaults
     /// </summary>
     /// <param name="testSuiteResult">The result of the test suite run, containing information about the executed test cases, target operation, and validation status.</param>
     /// <returns>A formatted string representing the header section of the test suite report, including the target method, total number of tests, the number of tests marked for execution, and validation status details.</returns>
-    public static string ToHeaderString(this TestSuiteRunResult testSuiteResult)
+    public static string ToHeaderString(this ITestSuiteRunResult testSuiteResult)
     {
         var stringBuilder = new StringBuilder();
         stringBuilder.AppendLine($"Executing tests for target method [{testSuiteResult.Operation?.Method}]");
@@ -68,7 +68,7 @@ public static class TestSuiteReportDefaults
     /// </summary>
     /// <param name="testSuiteResult">The result of the test suite run, containing details about test case executions, their validation statuses, and overall outcomes.</param>
     /// <returns>A string that summarizes the results of the test suite, including passed and failed test case counts and additional statistics.</returns>
-    public static string ToFooterString(this TestSuiteRunResult testSuiteResult)
+    public static string ToFooterString(this ITestSuiteRunResult testSuiteResult)
     {
         var stringBuilder = new StringBuilder();
         
@@ -156,9 +156,7 @@ public static class TestSuiteReportDefaults
             .Where(clause => clause.Assert.Status != AssertStatus.Passed && clause.Assert.Status != AssertStatus.Ignored)
             .ToList();
         if (notSuccessClauses.Count == 0)
-        {
             return stringBuilder.ToString();
-        }
         
         stringBuilder.AppendLine($"Test case [{testCase.Number}] was not successful");
 

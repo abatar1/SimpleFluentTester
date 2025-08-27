@@ -9,7 +9,7 @@ internal sealed class TestSuiteContextContainer : ITestSuiteContextContainer
 {
     public ITestSuiteContext Context { get; private set; }
 
-    internal TestSuiteContextContainer(ITestSuiteContext context)
+    private TestSuiteContextContainer(ITestSuiteContext context)
     {
         Context = context;
     }
@@ -65,8 +65,34 @@ internal sealed class TestSuiteContextContainer : ITestSuiteContextContainer
             Context.Comparer,
             false);
     }
+    
+    public void WithEntryAssemblyProvider(IEntryAssemblyProvider entryAssemblyProvider)
+    {
+        Context = new TestSuiteContext(
+            Context.Number,
+            Context.Name,
+            entryAssemblyProvider,
+            Context.Activator,
+            Context.TestCases,
+            Context.Operation,
+            Context.Comparer,
+            Context.ShouldBeExecuted);
+    }
+    
+    public void WithActivator(IActivator activator)
+    {
+        Context = new TestSuiteContext(
+            Context.Number,
+            Context.Name,
+            Context.EntryAssemblyProvider,
+            activator,
+            Context.TestCases,
+            Context.Operation,
+            Context.Comparer,
+            Context.ShouldBeExecuted);
+    }
         
-    public static TestSuiteContextContainer Default(int testSuiteNumber)
+    public static TestSuiteContextContainer Default(int testSuiteNumber = 1)
     {
         var context = new TestSuiteContext(
             testSuiteNumber,

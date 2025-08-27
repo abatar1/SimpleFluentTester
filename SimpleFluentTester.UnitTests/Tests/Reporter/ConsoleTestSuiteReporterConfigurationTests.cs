@@ -1,29 +1,29 @@
-using Microsoft.Extensions.Logging;
-using Moq;
 using SimpleFluentTester.Reporter;
+using SimpleFluentTester.Reporter.Console;
 using SimpleFluentTester.TestCase;
 using SimpleFluentTester.TestCase.Clause;
+using SimpleFluentTester.TestSuite.Context;
 using SimpleFluentTester.UnitTests.Helpers;
 using SimpleFluentTester.UnitTests.Helpers.Extensions;
 
 namespace SimpleFluentTester.UnitTests.Tests.Reporter;
 
-public sealed class TestSuiteReporterConfigurationBuilderTests
+public sealed class ConsoleTestSuiteReporterConfigurationTests
 {
     [Fact]
     public void Build_Default_AllShouldBeNotNull()
     {
         // Assign
-        var builder = new TestSuiteReporterConfigurationBuilder();
-        var container = TestSuiteFactory.CreateEmptyContextContainer();
+        var builder = new ConsoleTestSuiteReporterConfigurationBuilder();
+        var container = TestSuiteContextContainer.Default();
         var completedTestCase1 = TestCaseExamples.NotPassed.CompleteTestCase(container);
-        var completedTestCase2 = TestCaseExamples.Invalid.CompleteTestCase(container);
+        var completedTestCase2 = TestCaseExamples.NonValidOperation.CompleteTestCase(container);
         var completedTestCase3 = TestCaseExamples.NotPassedWithOperationException.CompleteTestCase(container);
         var completedTestCase4 = TestCaseExamples.NotPassedWithComparerException.CompleteTestCase(container);
         var completedTestCase5 = TestCaseExamples.Passed.CompleteTestCase(container);
 
         // Act
-        var configuration = builder.Build();
+        var configuration = (ConsoleTestSuiteReporterConfiguration) builder.Build();
 
         // Assert
         Assert.NotNull(configuration);
@@ -42,39 +42,17 @@ public sealed class TestSuiteReporterConfigurationBuilderTests
     public void Build_WithReportBuilder_AllShouldBeNotNull()
     {
         // Assign
-        var builder = new TestSuiteReporterConfigurationBuilder();
+        var builder = new ConsoleTestSuiteReporterConfigurationBuilder();
 
         // Act
-        var reportBuilder = new DefaultTestSuiteReportBuilder();
-        builder.WithReportBuilder(() => reportBuilder);
-        var configuration = builder.Build();
+        builder.WithReportBuilder<ConsoleTestSuiteReportBuilder>();
+        var configuration = (ConsoleTestSuiteReporterConfiguration) builder.Build();
 
         // Assert
         Assert.NotNull(configuration);
         Assert.NotNull(configuration.ReportBuilder);
-        Assert.Equal(reportBuilder, configuration.ReportBuilder);
+        Assert.IsType<ConsoleTestSuiteReportBuilder>(configuration.ReportBuilder);
         Assert.NotNull(configuration.LoggingBuilder);
-        Assert.NotNull(configuration.PrintablePredicate);
-    }
-
-    [Fact]
-    public void Build_WithLoggingBuilder_AllShouldBeNotNull()
-    {
-        // Assign
-        var builder = new TestSuiteReporterConfigurationBuilder();
-
-        // Act
-        var loggingBuilderMock = new Mock<ILoggingBuilder>();
-        builder.WithLoggingBuilder(loggingBuilder => { _ = loggingBuilder.Services; });
-
-        var configuration = builder.Build();
-
-        // Assert
-        Assert.NotNull(configuration);
-        Assert.NotNull(configuration.ReportBuilder);
-        Assert.NotNull(configuration.LoggingBuilder);
-        configuration.LoggingBuilder.Invoke(loggingBuilderMock.Object);
-        loggingBuilderMock.VerifyGet(x => x.Services, Times.Once);
         Assert.NotNull(configuration.PrintablePredicate);
     }
     
@@ -82,13 +60,13 @@ public sealed class TestSuiteReporterConfigurationBuilderTests
     public void Build_WithPrintablePredicate_AllShouldBeNotNull()
     {
         // Assign
-        var builder = new TestSuiteReporterConfigurationBuilder();
-        var container = TestSuiteFactory.CreateEmptyContextContainer();
+        var builder = new ConsoleTestSuiteReporterConfigurationBuilder();
+        var container = TestSuiteContextContainer.Default();
         var completedTestCase = TestCaseExamples.Passed.CompleteTestCase(container);
 
         // Act
         builder.WithPrintablePredicate((_, testCase) => testCase == completedTestCase);
-        var configuration = builder.Build();
+        var configuration = (ConsoleTestSuiteReporterConfiguration) builder.Build();
 
         // Assert
         Assert.NotNull(configuration);

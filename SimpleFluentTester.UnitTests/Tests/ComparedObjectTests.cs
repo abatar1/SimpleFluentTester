@@ -1,9 +1,10 @@
+using System.Reflection;
 using SimpleFluentTester.TestSuite.ComparedObject;
+using SimpleFluentTester.TestSuite.Parameter;
 using SimpleFluentTester.UnitTests.Helpers.Extensions;
 
 namespace SimpleFluentTester.UnitTests.Tests;
 
-// todo add parameters
 public sealed class ComparedObjectFactoryTests
 {
     [Fact]
@@ -43,9 +44,36 @@ public sealed class ComparedObjectFactoryTests
 
         // Assert
         comparedObject.AssertSingleException(obj);
-        Assert.NotNull(comparedObject);
-        Assert.Equal(obj, comparedObject.Value);
-        Assert.Equal(obj.GetType(), comparedObject.Type);
-        Assert.Equal(ComparedObjectVariety.Exception, comparedObject.Variety);
+    }
+     
+    [Fact]
+    public void Wrap_Parameter_ShouldBeValid()
+    {
+        // Assign
+        var obj = 1;
+        var parameter = new DeferredOperationParameter(new Lazy<ParameterInfo>());
+            
+        // Act
+        var comparedObject = ComparedObjectFactory.WrapParameter(1, parameter);
+
+        // Assert
+        comparedObject.AssertSingleParameter(obj, parameter);
+    }
+    
+    [Fact]
+    public void Wrap_Many_ShouldBeValid()
+    {
+        // Assign
+        var obj1 = 1;
+        string? obj2 = null;
+        var obj3 = new Exception();
+            
+        // Act
+        var comparedObjects = ComparedObjectFactory.WrapMany([obj1, obj2, obj3]);
+
+        // Assert
+        comparedObjects[0].AssertSingleValue(obj1);
+        comparedObjects[1].AssertNull();
+        comparedObjects[2].AssertSingleException(obj3);
     }
 }

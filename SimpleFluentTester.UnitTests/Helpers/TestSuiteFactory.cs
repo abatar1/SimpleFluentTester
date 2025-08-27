@@ -1,7 +1,6 @@
-using SimpleFluentTester.Helpers;
 using SimpleFluentTester.TestCase;
+using SimpleFluentTester.TestCase.Clause;
 using SimpleFluentTester.TestSuite;
-using SimpleFluentTester.TestSuite.ComparedObject;
 using SimpleFluentTester.TestSuite.Context;
 using SimpleFluentTester.UnitTests.Helpers.Extensions;
 
@@ -9,37 +8,16 @@ namespace SimpleFluentTester.UnitTests.Helpers;
 
 internal static class TestSuiteFactory
 {
-    public static DefinedTestCase CreateDeferredTestCase(ITestSuiteContextContainer container, object?[] inputs, object? expected)
+    public static DefinedTestCase DefineTestCaseWithExpectedValue(this ITestSuiteContextContainer container, object?[] inputs, object? expected)
     {
-        var testCase = new DefinedTestCase(
-            new Lazy<Delegate?>(() => container.Context.Operation),
-            new Lazy<Delegate?>(() => container.Context.Comparer),
-            ComparedObjectFactory.WrapMany(inputs), 
-            TestClauseFactory.DefineFromValue(expected), 
-            1);
-        container.Context.TestCases.Add(testCase);
-        return testCase;
+        return container.DefineTestCase(inputs, TestClauseFactory.DefineFromValue(expected));
     }
-
-    public static ITestSuiteContextContainer CreateEmptyContextContainer(
-        IEntryAssemblyProvider? assemblyProvider = null,
-        IActivator? activator = null,
-        Delegate? operation = null,
-        int testSuiteNumber = 1,
-        bool? shouldBeExecuted = true)
+    
+    public static DefinedTestCase DefineTestCase(this ITestSuiteContextContainer container, object?[] inputs, List<DefinedTestClause> clauses)
     {
-        var defaultContainer = TestSuiteContextContainer.Default(testSuiteNumber);
-        var defaultContext = defaultContainer.Context;
-        var context = new TestSuiteContext(
-            defaultContext.Number,
-            defaultContext.Name,
-            assemblyProvider ?? defaultContext.EntryAssemblyProvider,
-            activator ?? defaultContext.Activator,
-            defaultContext.TestCases,
-            operation,
-            null,
-            shouldBeExecuted ?? defaultContext.ShouldBeExecuted);
-        return new TestSuiteContextContainer(context);
+        var builder = new TestCaseBuilder(container, clauses);
+        builder.WithInput(inputs);
+        return container.Context.TestCases.Last();
     }
 
     public static TestSuiteRunResult CreateTestSuiteRunResult(
@@ -49,8 +27,7 @@ internal static class TestSuiteFactory
         bool shouldBeExecuted = true,
         int testCaseNumber = 1)
     {
-        var contextContainer =
-            CreateEmptyContextContainer(testSuiteNumber: testCaseNumber, shouldBeExecuted: shouldBeExecuted);
+        var contextContainer = TestSuiteContextContainer.Default(testCaseNumber);
 
         var completedTestCases = new List<AssertedTestCase>();
         if (testCase != null)

@@ -15,6 +15,8 @@ public interface ITestCaseBuilder
     /// <param name="inputs">The input parameters to be assigned to the test case.</param>
     /// <returns>An instance of <see cref="ITestSuiteBuilder"/> for chaining further test suite configurations.</returns>
     ITestSuiteBuilder WithInput(params object?[] inputs);
+    
+    ITestSuiteBuilder WithInput(params object?[][] inputs);
 
     /// <summary>
     /// Facilitates chaining additional expectation or configuration steps for constructing the current test case.

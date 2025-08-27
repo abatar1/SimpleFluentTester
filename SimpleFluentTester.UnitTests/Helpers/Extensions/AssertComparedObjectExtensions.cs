@@ -1,9 +1,10 @@
 using SimpleFluentTester.TestCase.Clause;
 using SimpleFluentTester.TestSuite.ComparedObject;
+using SimpleFluentTester.TestSuite.Parameter;
 
 namespace SimpleFluentTester.UnitTests.Helpers.Extensions;
 
-public static class ComparedObjectExtensions
+internal static class AssertComparedObjectExtensions
 {
     public static void AssertSingleValue(this IList<ITestClause> testClauses, object expectedValue)
     {
@@ -14,13 +15,37 @@ public static class ComparedObjectExtensions
     
     public static void AssertSingleValue(this IComparedObject comparedObject, object expectedValue)
     {
+        if (comparedObject is not ValueObject)
+        {
+            Assert.Fail($"Expected exception result, actual result was {comparedObject.Value}");
+            return;
+        }
+        
         Assert.NotNull(comparedObject);
         Assert.NotNull(comparedObject.Value);
         Assert.NotNull(comparedObject.Type);
         Assert.Equal(ComparedObjectVariety.Value, comparedObject.Variety);
         Assert.Equal(expectedValue, comparedObject.Value);
         Assert.Equal(expectedValue.GetType(), comparedObject.Type);
-        Assert.Equal(comparedObject.Value.ToString(), comparedObject.ToString());
+
+        var wrappedExpectedValue = ComparedObjectFactory.Wrap(expectedValue);
+        Assert.Equal(wrappedExpectedValue.ToString(), comparedObject.ToString());
+    }
+    
+    public static void AssertSingleParameter(this IComparedObject comparedObject, object expectedValue, DeferredOperationParameter parameter)
+    {
+        if (comparedObject is not ParameterObject parameterObject)
+        {
+            Assert.Fail($"Expected parameter result, actual result was {comparedObject.Value}");
+            return;
+        }
+        
+        Assert.NotNull(parameterObject);
+        Assert.NotNull(parameterObject.Value);
+        Assert.Null(parameterObject.Type);
+        Assert.Equal(ComparedObjectVariety.Parameter, parameterObject.Variety);
+        Assert.Equal(parameter, parameterObject.Parameter);
+        AssertSingleValue((IComparedObject)parameterObject.Value, expectedValue);
     }
     
     public static void AssertSingleException<TException>(this IList<ITestClause> testClauses, TException expectedException)

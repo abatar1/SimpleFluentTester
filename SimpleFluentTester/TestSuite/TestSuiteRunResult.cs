@@ -14,7 +14,7 @@ public sealed class TestSuiteRunResult(
     string? displayName,
     int number,
     Exception? exception = null,
-    bool shouldBeExecuted = true)
+    bool shouldBeExecuted = true) : ITestSuiteRunResult
 {
     public bool ShouldBeExecuted { get; } = shouldBeExecuted;
 

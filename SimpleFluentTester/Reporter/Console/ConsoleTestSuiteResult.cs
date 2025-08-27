@@ -1,8 +1,8 @@
 using Microsoft.Extensions.Logging;
 
-namespace SimpleFluentTester.Reporter;
+namespace SimpleFluentTester.Reporter.Console;
 
-public sealed record PrintableTestSuiteResult(LogLevel LogLevel, EventId EventId, string Message)
+public sealed record ConsoleTestSuiteResult(LogLevel LogLevel, EventId EventId, string Message)
 {
     public LogLevel LogLevel { get; } = LogLevel;
     

@@ -1,6 +1,6 @@
 namespace SimpleFluentTester.UnitTests.Helpers.TestObjects;
 
-public class EquatableTestObject(int value) : IEquatable<EquatableTestObject>
+internal class EquatableTestObject(int value) : IEquatable<EquatableTestObject>
 {
     public int Value { get; } = value;
 

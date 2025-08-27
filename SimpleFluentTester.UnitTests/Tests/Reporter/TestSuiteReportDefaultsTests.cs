@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
-using SimpleFluentTester.Reporter;
+using SimpleFluentTester.Reporter.Console;
+using SimpleFluentTester.TestSuite.Context;
 using SimpleFluentTester.UnitTests.Helpers;
 using SimpleFluentTester.UnitTests.Helpers.Extensions;
 
@@ -11,7 +12,7 @@ public sealed class TestSuiteReportDefaultsTests
     public void DetermineLogLevel_InvalidTestCase_ShouldBeError()
     {
         // Assign
-        var testSuiteResult = TestSuiteFactory.CreateTestSuiteRunResult(testCase: TestCaseExamples.Invalid);
+        var testSuiteResult = TestSuiteFactory.CreateTestSuiteRunResult(testCase: TestCaseExamples.NonValidOperation);
         
         // Act
         var logLevel = testSuiteResult.DetermineLogLevel();
@@ -65,7 +66,7 @@ public sealed class TestSuiteReportDefaultsTests
     public void ToFooterString_InvalidTestCase_WithValidationStrings()
     {
         // Assign
-        var testSuiteResult = TestSuiteFactory.CreateTestSuiteRunResult(testCase: TestCaseExamples.Invalid);
+        var testSuiteResult = TestSuiteFactory.CreateTestSuiteRunResult(testCase: TestCaseExamples.NonValidOperation);
         
         // Act
         var footerString = testSuiteResult.ToFooterString();
@@ -113,7 +114,7 @@ public sealed class TestSuiteReportDefaultsTests
     public void ToFormattedString_PassedTestCase_ShouldReturnPassedString()
     {
         // Assign
-        var container = TestSuiteFactory.CreateEmptyContextContainer();
+        var container = TestSuiteContextContainer.Default();
         var completedTestCase = TestCaseExamples.Passed.CompleteTestCase(container);
         
         // Act
@@ -127,7 +128,7 @@ public sealed class TestSuiteReportDefaultsTests
     public void ToFormattedString_NotPassedTestCase_ShouldReturnNotPassedString()
     {
         // Assign
-        var container = TestSuiteFactory.CreateEmptyContextContainer();
+        var container = TestSuiteContextContainer.Default();
         var completedTestCase = TestCaseExamples.NotPassed.CompleteTestCase(container);
         
         // Act
@@ -148,7 +149,7 @@ public sealed class TestSuiteReportDefaultsTests
     public void ToFormattedString_NotPassedWithExceptionTestCase_ShouldReturnNotPassedStringWithException()
     {
         // Assign
-        var container = TestSuiteFactory.CreateEmptyContextContainer();
+        var container = TestSuiteContextContainer.Default();
         var completedTestCase = TestCaseExamples.NotPassedWithOperationException.CompleteTestCase(container);
         
         // Act
@@ -169,8 +170,8 @@ public sealed class TestSuiteReportDefaultsTests
     public void ToFormattedString_NotValidTestCase_ShouldReturnValidationStrings()
     {
         // Assign
-        var container = TestSuiteFactory.CreateEmptyContextContainer();
-        var completedTestCase = TestCaseExamples.Invalid.CompleteTestCase(container);
+        var container = TestSuiteContextContainer.Default();
+        var completedTestCase = TestCaseExamples.NonValidOperation.CompleteTestCase(container);
         
         // Act
         var formattedString = completedTestCase.ToFormattedString();
@@ -178,11 +179,11 @@ public sealed class TestSuiteReportDefaultsTests
         // Assert
         var lines = SeparateToLines(formattedString);
         Assert.Equal("Test case [1] not passed with a validation error:", lines[0]);
-        Assert.Contains("Validation subject: Inputs", lines[1]);
-        Assert.Contains("Error message: Passed parameters and expected operation parameters are not equal.", lines[2]);
+        Assert.Contains("Validation subject: Operation", lines[1]);
+        Assert.Contains($"Error message: {TestCaseExamples.NonValidOperationMessage}", lines[2]);
         Assert.Equal("Test case [1] was not successful", lines[3]);
         Assert.Contains("Reason: Test case assertion has failed with an exception", lines[4]);
-        Assert.Contains("Inputs: 'test', '2'", lines[5]);
+        Assert.Contains("Inputs: '1', '2'", lines[5]);
         Assert.Contains("Expected: '3'", lines[6]);
         Assert.Contains("Result: 'null'", lines[7]);
         Assert.Contains("Elapsed", lines[8]);

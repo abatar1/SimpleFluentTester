@@ -14,7 +14,8 @@ public sealed class OperationEnricherTests
     {
         // Assign
         var entryAssemblyProviderMock = new Mock<IEntryAssemblyProvider>();
-        var container = TestSuiteFactory.CreateEmptyContextContainer(entryAssemblyProviderMock.Object);
+        var container = TestSuiteContextContainer.Default();
+        container.WithEntryAssemblyProvider(entryAssemblyProviderMock.Object);
         var enricher = new OperationEnricher(container);
         
         // Act 
@@ -36,7 +37,8 @@ public sealed class OperationEnricherTests
         var entryAssemblyProviderMock = new Mock<IEntryAssemblyProvider>();
         entryAssemblyProviderMock.Setup(x => x.Get()).Returns(assemblyMock.Object);
         
-        var container = TestSuiteFactory.CreateEmptyContextContainer(entryAssemblyProviderMock.Object);
+        var container = TestSuiteContextContainer.Default();
+        container.WithEntryAssemblyProvider(entryAssemblyProviderMock.Object);
         var enricher = new OperationEnricher(container);
         
         // Act 
@@ -44,7 +46,7 @@ public sealed class OperationEnricherTests
 
         // Assert
         const string message =
-            $"You should specify an operation first with an {nameof(TestSuiteDelegateAttribute)} attribute or using {nameof(SimpleFluentTester.TestSuite.SequentialTestSuiteBuilder.UseOperation)} method.";
+            $"You should specify an operation first with an {nameof(TestSuiteDelegateAttribute)} attribute or using {nameof(SequentialTestSuiteBuilder.UseOperation)} method.";
         TestHelpers.AssertWithMessage<InvalidContextException>(func, message);
         Assert.Null(container.Context.Operation);
     }
@@ -65,7 +67,8 @@ public sealed class OperationEnricherTests
         var entryAssemblyProviderMock = new Mock<IEntryAssemblyProvider>();
         entryAssemblyProviderMock.Setup(x => x.Get()).Returns(assemblyMock.Object);
         
-        var container = TestSuiteFactory.CreateEmptyContextContainer(entryAssemblyProviderMock.Object);
+        var container = TestSuiteContextContainer.Default();
+        container.WithEntryAssemblyProvider(entryAssemblyProviderMock.Object);
         var enricher = new OperationEnricher(container);
         
         // Act 
@@ -103,7 +106,8 @@ public sealed class OperationEnricherTests
         var entryAssemblyProviderMock = new Mock<IEntryAssemblyProvider>();
         entryAssemblyProviderMock.Setup(x => x.Get()).Returns(assemblyMock.Object);
         
-        var container = TestSuiteFactory.CreateEmptyContextContainer(entryAssemblyProviderMock.Object);
+        var container = TestSuiteContextContainer.Default();
+        container.WithEntryAssemblyProvider(entryAssemblyProviderMock.Object);
         var enricher = new OperationEnricher(container);
         
         // Act 
@@ -143,7 +147,8 @@ public sealed class OperationEnricherTests
         var entryAssemblyProviderMock = new Mock<IEntryAssemblyProvider>();
         entryAssemblyProviderMock.Setup(x => x.Get()).Returns(assemblyMock.Object);
         
-        var container = TestSuiteFactory.CreateEmptyContextContainer(entryAssemblyProviderMock.Object);
+        var container = TestSuiteContextContainer.Default();
+        container.WithEntryAssemblyProvider(entryAssemblyProviderMock.Object);
         var enricher = new OperationEnricher(container);
         
         // Act 
@@ -197,7 +202,9 @@ public sealed class OperationEnricherTests
             .Setup(x => x.CreateDelegate(It.IsAny<Type>(), It.Is<object>(y => y == declaringTypeObjectMock.Object)))
             .Returns(expectedDelegate);
         
-        var container = TestSuiteFactory.CreateEmptyContextContainer(entryAssemblyProviderMock.Object, activator: activatorMock.Object);
+        var container = TestSuiteContextContainer.Default();
+        container.WithEntryAssemblyProvider(entryAssemblyProviderMock.Object);
+        container.WithActivator(activatorMock.Object);
         var enricher = new OperationEnricher(container);
         
         // Act 

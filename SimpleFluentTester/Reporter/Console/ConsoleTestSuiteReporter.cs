@@ -2,15 +2,15 @@
 using Microsoft.Extensions.Logging;
 using SimpleFluentTester.TestSuite;
 
-namespace SimpleFluentTester.Reporter;
+namespace SimpleFluentTester.Reporter.Console;
 
-internal sealed class TestSuiteReporter(TestSuiteRunResult testSuiteRunResult) : ITestSuiteReporter
+internal sealed class ConsoleTestSuiteReporter(ITestSuiteRunResult testSuiteRunResult) : ITestSuiteReporter
 {
-    public void Report(Action<ITestSuiteReporterConfigurationBuilder, TestSuiteRunResult>? configurationBuilderInvoker = null)
+    public void Report(Action<ITestSuiteReporterConfigurationBuilder, ITestSuiteRunResult>? configurationBuilderInvoker = null)
     {
-        var configurationBuilder = new TestSuiteReporterConfigurationBuilder();
+        var configurationBuilder = new ConsoleTestSuiteReporterConfigurationBuilder();
         configurationBuilderInvoker?.Invoke(configurationBuilder, TestSuiteRunResult);
-        var configuration = configurationBuilder.Build();
+        var configuration = (ConsoleTestSuiteReporterConfiguration) configurationBuilder.Build();
         
         if (configuration.LoggingBuilder == null)
             throw new InvalidOperationException("Even default logging builder was not specified, should be a bug.");
@@ -36,5 +36,5 @@ internal sealed class TestSuiteReporter(TestSuiteRunResult testSuiteRunResult) :
         }
     }
 
-    public TestSuiteRunResult TestSuiteRunResult { get; } = testSuiteRunResult;
+    public ITestSuiteRunResult TestSuiteRunResult { get; } = testSuiteRunResult;
 }

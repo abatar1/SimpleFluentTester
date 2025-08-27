@@ -85,7 +85,7 @@ internal static class TestCaseAsserter
         switch (clause.Expected.Variety)
         {
             case ComparedObjectVariety.Null:
-                passed = clause.Expected.Variety == ComparedObjectVariety.Null;
+                passed = clause.Result.Variety == ComparedObjectVariety.Null;
                 break;
             case ComparedObjectVariety.Exception:
             {
@@ -112,6 +112,9 @@ internal static class TestCaseAsserter
             }
             case ComparedObjectVariety.Parameter:
             {
+                if (clause.Result.Variety == ComparedObjectVariety.Exception)
+                    return AssertStatus.NotPassedWithException;
+                
                 var expectedType = ObjectParameterExtractor.ExtractExpectedParameterType(clause);
                 var hasSameType = clause.Result.Type == expectedType;
                 var isEqual = (bool)clause.Comparer.Method.Invoke(clause.Comparer.Target, [ObjectParameterExtractor.ExtractExpectedParameterValue(clause), clause.Result.Value]);

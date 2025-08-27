@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using SimpleFluentTester.Reporter;
+using SimpleFluentTester.Reporter.Console;
 using SimpleFluentTester.TestCase;
 using SimpleFluentTester.TestCase.Clause;
 using SimpleFluentTester.TestCase.Pipeline;
@@ -30,14 +31,14 @@ internal sealed class SequentialTestSuiteBuilder : ITestSuiteBuilder
     
     public ITestCaseBuilder ExpectReturn(object? expected)
     {
-        var comparedObj = ComparedObjectFactory.Wrap(expected);
-        
-        var testClause = new DefinedTestClause(comparedObj);
-        _testClauses.Add(testClause);
-        
-        return new TestCaseBuilder(_contextContainer, _testClauses);
+        return ExpectReturnCore(expected);
     }
-    
+
+    public ITestCaseBuilder ExpectReturn<T>(IEnumerable<T?> expected)
+    {
+        return ExpectReturnCore(expected);
+    }
+
     public ITestCaseBuilder ExpectException<TException>(string? message = null)
         where TException : Exception
     {
@@ -95,7 +96,17 @@ internal sealed class SequentialTestSuiteBuilder : ITestSuiteBuilder
             return ReturnNotExecutedTestReporter();
 
         var testSuiteResult = ProcessContextToResult(testNumbers);
-        return new TestSuiteReporter(testSuiteResult);
+        return new ConsoleTestSuiteReporter(testSuiteResult);
+    }
+    
+    private ITestCaseBuilder ExpectReturnCore<T>(T expected)
+    {
+        var comparedObj = ComparedObjectFactory.Wrap(expected);
+        
+        var testClause = new DefinedTestClause(comparedObj);
+        _testClauses.Add(testClause);
+        
+        return new TestCaseBuilder(_contextContainer, _testClauses);
     }
 
     /// <summary>
@@ -104,7 +115,7 @@ internal sealed class SequentialTestSuiteBuilder : ITestSuiteBuilder
     /// <returns>True if the test suite should be executed; otherwise, false.</returns>
     private bool CheckIfShouldBeExecuted()
     {
-        return _contextContainer.Context.ShouldBeExecuted && TestSuiteGlobalState.IsAllowed(_contextContainer.Context);
+        return _contextContainer.Context.ShouldBeExecuted && TestSuite.IsAllowed(_contextContainer.Context);
     }
 
     /// <summary>
@@ -137,7 +148,7 @@ internal sealed class SequentialTestSuiteBuilder : ITestSuiteBuilder
         
         var testSuiteRunResult = GetTestSuiteRunResult(_contextContainer.Context, testCases, false, exception);
         
-        return new TestSuiteReporter(testSuiteRunResult);
+        return new ConsoleTestSuiteReporter(testSuiteRunResult);
     }
 
     /// <summary>

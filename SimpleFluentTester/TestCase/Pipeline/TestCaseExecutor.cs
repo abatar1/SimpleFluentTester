@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using SimpleFluentTester.Helpers;
 using SimpleFluentTester.TestCase.Clause;
 using SimpleFluentTester.TestSuite.ComparedObject;
 using SimpleFluentTester.TestSuite.Context;
@@ -75,7 +76,11 @@ internal static class TestCaseExecutor
             .Select(testClause =>
             {
                 IComparedObject result;
-                if (testClause.Expected.Variety == ComparedObjectVariety.Parameter)
+                if (operationResult is Exception)
+                {
+                    result = ComparedObjectFactory.Wrap(operationResult);
+                }
+                else if (testClause.Expected.Variety == ComparedObjectVariety.Parameter)
                 {
                     var parameterInfo = ObjectParameterExtractor.ExtractExpectedParameter(testClause);
                     // We get actual value from parameters of the function after execution.
@@ -98,12 +103,46 @@ internal static class TestCaseExecutor
         if (testCase.ComparerFactory.Value != null)
         {
             var expectedParameterType = testCase.ComparerFactory.Value.Method.GetParameters()[0].ParameterType;
-            if (expectedParameterType != clauseExpectedType)
-                throw new InvalidContextException("Could not find comparer for expected type " + clauseExpectedType + " and actual type " + expectedParameterType + ".");
-            return testCase.ComparerFactory.Value;
+            
+            if (clauseExpectedType == expectedParameterType)
+                return testCase.ComparerFactory.Value;
+            
+            if (CollectionHelper.IsCollection(clauseExpectedType))
+            {
+                clauseExpectedType = CollectionHelper.GetCollectionElementType(clauseExpectedType);
+                if (expectedParameterType != clauseExpectedType)
+                    throw new InvalidContextException("Could not find comparer for expected type " + clauseExpectedType + " and actual type " + expectedParameterType + ".");
+                return CreateCollectionComparer(testCase.ComparerFactory.Value);
+            }
+                
+            throw new InvalidContextException("Could not find comparer for expected type " + clauseExpectedType + " and actual type " + expectedParameterType + ".");
         }
 
         return GetComparerDelegate(clauseExpectedType);
+    }
+    
+    private static Func<object, object, bool> CreateCollectionComparer(Delegate elementComparer)
+    {
+        return (x, y) =>
+        {
+            if (ReferenceEquals(x, y)) 
+                return true;
+            if (x == null || y == null) 
+                return false;
+
+            var arr1 = (Array)x;
+            var arr2 = (Array)y;
+
+            if (arr1.Length != arr2.Length) 
+                return false;
+
+            for (int i = 0; i < arr1.Length; i++)
+            {
+                if (!(bool)elementComparer.DynamicInvoke(arr1.GetValue(i), arr2.GetValue(i)))
+                    return false;
+            }
+            return true;
+        };
     }
 
     private static Delegate GetOperation(DefinedTestCase testCase)
@@ -122,7 +161,7 @@ internal static class TestCaseExecutor
 
     private static Delegate GetComparerDelegate(Type? type)
     {
-        if (typeof(IEnumerable).IsAssignableFrom(type) && type != typeof(string))
+        if (CollectionHelper.IsCollection(type))
         {
             return new Func<object?, object?, bool>((x, y) =>
             {

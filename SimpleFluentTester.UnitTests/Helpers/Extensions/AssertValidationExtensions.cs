@@ -4,7 +4,7 @@ using SimpleFluentTester.Validators.Models;
 
 namespace SimpleFluentTester.UnitTests.Helpers.Extensions;
 
-public static class TestValidationExtensions
+internal static class AssertValidationExtensions
 {
     public static void AssertValid(this IValidatedObject validated)
     {
@@ -38,7 +38,7 @@ public static class TestValidationExtensions
         AssertNonValid(subjectValidation.Validations, subject, messages);
     }
     
-    public static void AssertFailed<TException>(this IValidatedObject validated, ValidationSubject validationSubject, string validationMessage, string? innerMessage = null)
+    public static void AssertFailedValidation<TException>(this IValidatedObject validated, ValidationSubject validationSubject, string validationMessage, string? innerMessage = null)
         where TException: Exception
     {
         Assert.NotNull(validated);
@@ -46,23 +46,6 @@ public static class TestValidationExtensions
         Assert.False(validated.IsValid());
 
         var validations = validated.GetNonValidValidations();
-        Assert.NotEmpty(validations);
-        
-        var validation = validations
-            .FirstOrDefault(x => x.Subject == validationSubject);
-        Assert.NotNull(validation);
-        
-        validation.AssertFailed<TException>(validationSubject, validationMessage, innerMessage);
-    }
-    
-    public static void AssertFailed<TException>(this SubjectValidation subjectValidation, ValidationSubject validationSubject, string validationMessage, string? innerMessage = null)
-        where TException: Exception
-    {
-        Assert.NotNull(subjectValidation);
-        
-        Assert.False(subjectValidation.IsValid());
-
-        var validations = subjectValidation.GetNonValidValidations();
         Assert.NotEmpty(validations);
         
         var validation = validations

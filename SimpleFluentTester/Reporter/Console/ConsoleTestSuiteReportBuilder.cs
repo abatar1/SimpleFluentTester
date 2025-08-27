@@ -6,19 +6,19 @@ using SimpleFluentTester.TestCase;
 using SimpleFluentTester.TestCase.Clause;
 using SimpleFluentTester.TestSuite;
 
-namespace SimpleFluentTester.Reporter;
+namespace SimpleFluentTester.Reporter.Console;
 
-internal sealed class DefaultTestSuiteReportBuilder : ITestSuiteReportBuilder
+internal sealed class ConsoleTestSuiteReportBuilder : ITestSuiteReportBuilder
 {
-    public PrintableTestSuiteResult? TestSuiteResultToString(
-        TestSuiteRunResult testSuiteRunResult,
+    public ConsoleTestSuiteResult? TestSuiteResultToString(
+        ITestSuiteRunResult testSuiteRunResult,
         Func<AssertedTestClause, AssertedTestCase, bool>? shouldPrintPredicate)
     {
         if (!testSuiteRunResult.ShouldBeExecuted)
             return null;
 
         if (!testSuiteRunResult.TestCases.Any())
-            return new PrintableTestSuiteResult(LogLevel.Error, testSuiteRunResult.Number, "No test cases were added");
+            return new ConsoleTestSuiteResult(LogLevel.Error, testSuiteRunResult.Number, "No test cases were added");
         
         var stringBuilder = new StringBuilder();
 
@@ -43,6 +43,6 @@ internal sealed class DefaultTestSuiteReportBuilder : ITestSuiteReportBuilder
         stringBuilder.AppendLine(testSuiteRunResult.ToFooterString());
 
         var logLevel = testSuiteRunResult.DetermineLogLevel();
-        return new PrintableTestSuiteResult(logLevel, testSuiteRunResult.Number, stringBuilder.ToString());
+        return new ConsoleTestSuiteResult(logLevel, testSuiteRunResult.Number, stringBuilder.ToString());
     }
 }

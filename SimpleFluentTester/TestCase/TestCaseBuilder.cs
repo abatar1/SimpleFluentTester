@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using SimpleFluentTester.TestCase.Clause;
 using SimpleFluentTester.TestSuite;
 using SimpleFluentTester.TestSuite.ComparedObject;
@@ -19,6 +20,16 @@ internal sealed class TestCaseBuilder(
     IList<ValidationResult>? validationResults = null) : ITestCaseBuilder
 {
     public ITestSuiteBuilder WithInput(params object?[] inputs)
+    {
+        return WithInputCore(inputs);
+    }
+
+    public ITestSuiteBuilder WithInput(params object?[][] inputs)
+    {
+        return WithInputCore(inputs.Cast<object?>().ToArray());
+    }
+
+    private ITestSuiteBuilder WithInputCore(params object?[] inputs)
     {
         var testCase = new DefinedTestCase(
             new Lazy<Delegate?>(() => contextContainer.Context.Operation),

@@ -3,7 +3,7 @@ using SimpleFluentTester.Validators.Models;
 
 namespace SimpleFluentTester.UnitTests.Helpers.TestObjects;
 
-internal sealed class CustomValidator(ValidationSubject validationSubject) 
+internal sealed class EmptyValidator(ValidationSubject validationSubject) 
     : BaseValidator<EmptyValidationContext, EmptyValidatedObject>
 {
     public override ValidationSubject Subject => validationSubject;

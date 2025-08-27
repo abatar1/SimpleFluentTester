@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using SimpleFluentTester.Validators.Models;
 
 namespace SimpleFluentTester.Validators.Helpers;
@@ -61,22 +62,25 @@ internal static class BuilderContextValidatorExtensions
     }
 
     /// <summary>
-    /// Registers a future validation using the specified validator type and optional validation context factory.
+    /// Registers a future validation on the given validated object using the specified validator type.
+    /// The future validation is created using an instance of <typeparamref name="TValidator"/> and added to the validated object.
     /// </summary>
-    /// <typeparam name="TValidator">The type of the validator that implements <see cref="IValidator"/>.</typeparam>
-    /// <param name="validated">The object to be validated, which implements <see cref="IValidatedObject"/>.</param>
-    /// <param name="validationContextFactory">An optional function to create the validation context.</param>
-    /// <returns>The same instance of <see cref="IValidatedObject"/> to support a fluent interface.</returns>
-    /// <exception cref="InvalidOperationException">Thrown if the validator could not be instantiated.</exception>
+    /// <typeparam name="TValidator">The type of the validator to be used for the future validation, which must implement <see cref="IValidator"/>.</typeparam>
+    /// <param name="validated">The validated object to which the future validation is added.</param>
+    /// <param name="args">Optional arguments for creating the validator instance, if required.</param>
+    /// <param name="validationContextFactory">Optional factory function that creates validation context objects for the validation process.</param>
+    /// <returns>The same validated object passed as input with the future validation registered.</returns>
+    /// <exception cref="InvalidOperationException">Thrown if the validator instance could not be created due to an error.</exception>
     public static IValidatedObject RegisterFutureValidation<TValidator>(
         this IValidatedObject validated,
+        object[]? args = null,
         Func<IValidationContext>? validationContextFactory = null)
         where TValidator : IValidator
     {
         IValidator validator;
         try
         {
-            validator = (IValidator)Activator.CreateInstance(typeof(TValidator));
+            validator = (IValidator)Activator.CreateInstance(typeof(TValidator), args);
         }
         catch (Exception e)
         {

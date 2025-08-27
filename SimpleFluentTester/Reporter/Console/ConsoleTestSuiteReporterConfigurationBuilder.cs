@@ -6,21 +6,16 @@ using SimpleFluentTester.TestCase.Clause;
 using SimpleFluentTester.TestSuite;
 using SimpleFluentTester.Validators.Helpers;
 
-namespace SimpleFluentTester.Reporter;
+namespace SimpleFluentTester.Reporter.Console;
 
-internal sealed class TestSuiteReporterConfigurationBuilder : ITestSuiteReporterConfigurationBuilder
+internal sealed class ConsoleTestSuiteReporterConfigurationBuilder : ITestSuiteReporterConfigurationBuilder
 {
-    private readonly ITestSuiteReporterConfiguration _configuration = new TestSuiteReporterConfiguration();
+    private readonly ConsoleTestSuiteReporterConfiguration _configuration = new();
 
-    public ITestSuiteReporterConfigurationBuilder WithReportBuilder(Func<ITestSuiteReportBuilder> builderFactory)
+    public ITestSuiteReporterConfigurationBuilder WithReportBuilder<TTestSuiteReportBuilder>() 
+        where TTestSuiteReportBuilder : class, ITestSuiteReportBuilder
     {
-        _configuration.ReportBuilder = builderFactory.Invoke();
-        return this;
-    }
-
-    public  ITestSuiteReporterConfigurationBuilder WithLoggingBuilder(Action<ILoggingBuilder> loggingBuilder)
-    {
-        _configuration.LoggingBuilder = loggingBuilder;
+        _configuration.ReportBuilder = Activator.CreateInstance<TTestSuiteReportBuilder>();
         return this;
     }
 
@@ -32,7 +27,7 @@ internal sealed class TestSuiteReporterConfigurationBuilder : ITestSuiteReporter
 
     public ITestSuiteReporterConfiguration Build()
     {
-        _configuration.ReportBuilder ??= new DefaultTestSuiteReportBuilder();
+        _configuration.ReportBuilder ??= new ConsoleTestSuiteReportBuilder();
         _configuration.LoggingBuilder ??= DefaultLoggingBuilder;
         _configuration.PrintablePredicate ??= DefaultPrintablePredicate;
         

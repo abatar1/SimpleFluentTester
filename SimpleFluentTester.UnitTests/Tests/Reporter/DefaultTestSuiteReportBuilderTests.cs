@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Logging;
 using Moq;
-using SimpleFluentTester.Reporter;
+using SimpleFluentTester.Reporter.Console;
 using SimpleFluentTester.TestCase;
 using SimpleFluentTester.TestCase.Clause;
 using SimpleFluentTester.UnitTests.Helpers;
@@ -14,7 +14,7 @@ public sealed class DefaultTestSuiteReportBuilderTests
     {
         // Assign
         var testSuiteResult = TestSuiteFactory.CreateTestSuiteRunResult(shouldBeExecuted: false);
-        var reporter = new DefaultTestSuiteReportBuilder();
+        var reporter = new ConsoleTestSuiteReportBuilder();
         var shouldPrintPredicateMock = new Mock<Func<AssertedTestClause, AssertedTestCase, bool>>();
 
         // Act
@@ -31,7 +31,7 @@ public sealed class DefaultTestSuiteReportBuilderTests
     {
         // Assign
         var testSuiteResult = TestSuiteFactory.CreateTestSuiteRunResult();
-        var reporter = new DefaultTestSuiteReportBuilder();
+        var reporter = new ConsoleTestSuiteReportBuilder();
         var shouldPrintPredicateMock = new Mock<Func<AssertedTestClause, AssertedTestCase, bool>>();
 
         // Act
@@ -51,8 +51,8 @@ public sealed class DefaultTestSuiteReportBuilderTests
     public void TestSuiteResultToString_NonValidContext_ReturnError()
     {
         // Assign
-        var testSuiteResult = TestSuiteFactory.CreateTestSuiteRunResult(testCase: TestCaseExamples.Invalid);
-        var reporter = new DefaultTestSuiteReportBuilder();
+        var testSuiteResult = TestSuiteFactory.CreateTestSuiteRunResult(testCase: TestCaseExamples.NonValidOperation);
+        var reporter = new ConsoleTestSuiteReportBuilder();
         var shouldPrintPredicateMock = new Mock<Func<AssertedTestClause, AssertedTestCase, bool>>();
 
         // Act
@@ -72,7 +72,7 @@ public sealed class DefaultTestSuiteReportBuilderTests
     {
         // Assign
         var testSuiteResult = TestSuiteFactory.CreateTestSuiteRunResult(testCase: TestCaseExamples.Passed);
-        var reporter = new DefaultTestSuiteReportBuilder();
+        var reporter = new ConsoleTestSuiteReportBuilder();
         var shouldPrintPredicateMock = new Mock<Func<AssertedTestClause, AssertedTestCase, bool>>();
 
         // Act
@@ -91,8 +91,8 @@ public sealed class DefaultTestSuiteReportBuilderTests
     public void TestSuiteResultToString_TestCaseNotPassedWithException_ReturnError()
     {
         // Assign
-        var testSuiteResult = TestSuiteFactory.CreateTestSuiteRunResult(testCase: TestCaseExamples.Invalid);
-        var reporter = new DefaultTestSuiteReportBuilder();
+        var testSuiteResult = TestSuiteFactory.CreateTestSuiteRunResult(testCase: TestCaseExamples.NonValidOperation);
+        var reporter = new ConsoleTestSuiteReportBuilder();
         var shouldPrintPredicateMock = new Mock<Func<AssertedTestClause, AssertedTestCase, bool>>();
 
         // Act
@@ -112,7 +112,7 @@ public sealed class DefaultTestSuiteReportBuilderTests
     {
         // Assign
         var testSuiteResult = TestSuiteFactory.CreateTestSuiteRunResult(testCase: TestCaseExamples.NotPassed);
-        var reporter = new DefaultTestSuiteReportBuilder();
+        var reporter = new ConsoleTestSuiteReportBuilder();
         var shouldPrintPredicateMock = new Mock<Func<AssertedTestClause, AssertedTestCase, bool>>();
 
         // Act
@@ -132,7 +132,7 @@ public sealed class DefaultTestSuiteReportBuilderTests
     {
         // Assign
         var testSuiteResult = TestSuiteFactory.CreateTestSuiteRunResult(testCase: TestCaseExamples.Passed);
-        var reporter = new DefaultTestSuiteReportBuilder();
+        var reporter = new ConsoleTestSuiteReportBuilder();
         var shouldPrintPredicateMock = new Mock<Func<AssertedTestClause, AssertedTestCase, bool>>();
 
         // Act
@@ -152,7 +152,7 @@ public sealed class DefaultTestSuiteReportBuilderTests
     {
         // Assign
         var testSuiteResult = TestSuiteFactory.CreateTestSuiteRunResult(testCase: TestCaseExamples.Passed, testCaseToRun: 2);
-        var reporter = new DefaultTestSuiteReportBuilder();
+        var reporter = new ConsoleTestSuiteReportBuilder();
         var shouldPrintPredicateMock = new Mock<Func<AssertedTestClause, AssertedTestCase, bool>>();
 
         // Act

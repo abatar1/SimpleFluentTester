@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
-using SimpleFluentTester.Examples;
+﻿using SimpleFluentTester.Examples;
 using SimpleFluentTester.TestSuite;
 
 // Uncomment the following line to allow only specific test cases or ignore specific tests.
@@ -31,9 +30,8 @@ TestSuite.Sequential
     .Report((builder, _) =>
     {
         builder
-            .WithReportBuilder(() => new CustomTestSuiteReportBuilder())
-            .WithPrintablePredicate((testClause, _) => testClause.Assert.Status == AssertStatus.Passed)
-            .WithLoggingBuilder(x => x.AddSimpleConsole());
+            .WithReportBuilder<CustomTestSuiteReportBuilder>()
+            .WithPrintablePredicate((testClause, _) => testClause.Assert.Status == AssertStatus.Passed);
     });
     
 // Example 3.
@@ -67,6 +65,7 @@ TestSuite.Sequential
     .UseOperation(CustomMethods.Adder) 
     .WithComparer<int>((x, y) => x == y)
     .ExpectReturn(null).WithInput(1, 1)
+    .ExpectReturn([1, 2]).WithInput(1, 1)
     .ExpectReturn("test").WithInput(1, 1)
     .ExpectReturn(-3).WithInput(-1, -1, -1)
     .ExpectReturn("-3").WithInput("test", -1)
@@ -90,9 +89,9 @@ TestSuite.Sequential
 TestSuite.Sequential
     .WithDisplayName("Example 7, 3 not passed")
     .UseOperation(CustomMethods.VoidPositionalSeqAdder)
-    .ExpectParameter(0).ToBe(new[] {2, 4}).WithInput(new[] {0, 1}, new [] {2, 3})
-    .ExpectParameter("seq1").ToBe(new[] {2, 4}).WithInput(new[] {0, 1}, new [] {2, 3})
-    .ExpectParameter(0).ToBe(new[] {2, 3}).WithInput(new[] {0, 1}, new [] {2, 3})
+    .ExpectParameter(0).ToBe([2, 4]).WithInput([0, 1], [2, 3])
+    .ExpectParameter("seq1").ToBe([2, 4]).WithInput([0, 1], [2, 3])
+    .ExpectParameter(0).ToBe([2, 3]).WithInput([0, 1], [2, 3])
     .Run()
     .Report();
 
@@ -102,8 +101,8 @@ TestSuite.Sequential
 TestSuite.Sequential
     .WithDisplayName("Example 8, Test 2 Clause 2 not passed")
     .UseOperation(CustomMethods.PositionalSeqAdder)
-    .ExpectParameter(0).ToBe(new[] {4, 3, 5}).And.ExpectReturn(7).WithInput(new[] {1, 2, 3}, new [] {3, 1, 2})
-    .ExpectParameter("seq1").ToBe(new[] {1, 3, 5}).And.ExpectReturn(2).WithInput(new[] {1, 2, 3}, new [] {0, 1, 2})
+    .ExpectParameter(0).ToBe([4, 3, 5]).And.ExpectReturn(7).WithInput([1, 2, 3], [3, 1, 2])
+    .ExpectParameter("seq1").ToBe([1, 3, 5]).And.ExpectReturn(2).WithInput([1, 2, 3], [0, 1, 2])
     .Run()
     .Report();
 

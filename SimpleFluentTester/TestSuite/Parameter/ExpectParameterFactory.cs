@@ -37,7 +37,10 @@ internal static class ExpectParameterFactory
         var methodInfo = operation.Method;
         var parameters = methodInfo.GetParameters();
         
-        var parametersByName = parameters.ToDictionary(x => x.Name, x => x);
+        Dictionary<string, ParameterInfo> parametersByName = new Dictionary<string, ParameterInfo>();
+        if (parameters.Select(x => x.Name).Distinct().Count() == parameters.Length)
+            parametersByName = parameters.ToDictionary(x => x.Name, x => x);
+
         var parametersByPosition = parameters.ToDictionary(x => x.Position, x => x);
         
         return new OperationParametersInfo(parametersByName, parametersByPosition);

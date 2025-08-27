@@ -20,7 +20,7 @@ internal sealed class TestSuiteContext(
     public string Name { get; } = name;
     
     public bool ShouldBeExecuted { get; } = shouldBeExecuted;
-    
+
     public IEntryAssemblyProvider EntryAssemblyProvider { get; } = entryAssemblyProvider;
 
     public IActivator Activator { get; } = activator;
