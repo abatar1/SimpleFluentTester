@@ -1,11 +1,13 @@
-using SimpleFluentTester.UnitTests.Extensions;
+using SimpleFluentTester.TestCase.Clause;
+using SimpleFluentTester.TestSuite.Context;
 using SimpleFluentTester.UnitTests.Helpers;
-using SimpleFluentTester.UnitTests.TestObjects;
-using SimpleFluentTester.Validators.Core;
+using SimpleFluentTester.UnitTests.Helpers.Extensions;
+using SimpleFluentTester.UnitTests.Helpers.TestObjects;
+using SimpleFluentTester.Validators.Models;
 
 namespace SimpleFluentTester.UnitTests.Tests.TestSuiteBuilder;
 
-public class UseOperationTests
+public sealed class UseOperationTests
 {
     [Fact]
     public void UseOperation_ValidReturnType_ShouldBeValid()
@@ -27,20 +29,19 @@ public class UseOperationTests
     public void UseOperation_WithCustomObjectAndComparer_ValidReturn()
     {
         // Assign
-        var comparer = (NotEquatableTestObject? a, NotEquatableTestObject? b) => a?.Value == b?.Value;
         var setup = TestSuite.TestSuite.Sequential
-            .WithComparer(comparer);
+            .WithComparer<NotEquatableTestObject?>((a, b) => a?.Value == b?.Value);
         
         // Act
         var reporter = setup
             .UseOperation((NotEquatableTestObject a, NotEquatableTestObject b) => new NotEquatableTestObject(a.Value + b.Value))
-            .Expect(new NotEquatableTestObject(2)).WithInput([new NotEquatableTestObject(1), new NotEquatableTestObject(1)])
+            .ExpectReturn(new NotEquatableTestObject(2)).WithInput([new NotEquatableTestObject(1), new NotEquatableTestObject(1)])
             .Run();
 
         // Assert
         reporter
             .AssertTestCaseExists(1)
-            .AssertPassed(new NotEquatableTestObject(2), [new NotEquatableTestObject(1), new NotEquatableTestObject(1)], comparer);
+            .AssertPassed(new NotEquatableTestObject(2), [new NotEquatableTestObject(1), new NotEquatableTestObject(1)], (a, b) => a?.Value == b?.Value);
     }
     
     [Fact]
@@ -52,13 +53,13 @@ public class UseOperationTests
         
         // Act
         var reporter = setup
-            .Expect(2).WithInput(1, 1)
+            .ExpectReturn(2).WithInput(1, 1)
             .UseOperation((int _, int _) => { })
             .Run();
 
         // Assert
         var message = "Operation must have return type to be testable";
-        reporter.AssertTestCaseExists(1).Validation.AssertInvalid(ValidationSubject.Operation, message);
+        reporter.AssertTestCaseExists(1).AssertNonValid(ValidationSubject.Operation, message);
     }
     
     [Fact]
@@ -69,29 +70,46 @@ public class UseOperationTests
             .WithComparer<int>((x, y) => x == y);
         
         // Act
-        var reporter = setup
+        Action func = () => setup
             .Run();
 
         // Assert
         var message = "You should specify an operation first with an TestSuiteDelegateAttribute attribute or using UseOperation method.";
-        reporter.AssertInvalid(ValidationSubject.Operation, message);
+        TestHelpers.AssertWithMessage<InvalidContextException>(func, message);
     }
     
     [Fact]
     public void UseOperation_InvalidDelegateReturnType_ShouldBeInvalid()
     {
         // Assign
-        var container = TestSuiteFactory.CreateEmptyContextContainer();
-        var builder = new TestSuite.TestSuiteBuilder(container);
+        var container = TestSuiteContextContainer.Default();
+        var builder = new TestSuite.SequentialTestSuiteBuilder(container, new List<DefinedTestClause>());
         
         // Act
         var reporter = builder
-            .Expect(2).WithInput(1, 1)
+            .ExpectReturn(2).WithInput(1, 1)
             .UseOperation((int _, int _) => "test")
             .Run();
         
         // Assert
         var message = "Operation return type is not the same as used generic type.";
-        reporter.AssertTestCaseExists(1).Validation.AssertInvalid(ValidationSubject.Operation, message);
+        reporter.AssertTestCaseExists(1).AssertNonValid(ValidationSubject.Operation, message);
+    }
+    
+    [Fact]
+    public void UseOperation_ThrowsException_ShouldBeFailed()
+    {
+        // Assign
+        var setup = TestSuite.TestSuite.Sequential;
+        Func<int, int, int> operation = (_, _) => throw new CustomException();
+        
+        // Act
+        var reporter = setup
+            .ExpectReturn(2).WithInput(1, 1)
+            .UseOperation(operation)
+            .Run();
+
+        // Assert
+        reporter.AssertTestCaseExists(1).AssertNotPassedWithException(2, [1, 1], typeof(CustomException));
     }
 }

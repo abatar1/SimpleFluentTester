@@ -1,13 +1,12 @@
-using SimpleFluentTester.UnitTests.Extensions;
+using SimpleFluentTester.TestSuite.Context;
 using SimpleFluentTester.UnitTests.Helpers;
-using SimpleFluentTester.Validators.Core;
 
 namespace SimpleFluentTester.UnitTests.Tests.TestSuiteBuilder;
 
-public class RunTests
+public sealed class TestNumbersTests
 {
     [Fact]
-    public void Run_InvalidIterationNumber_ShouldBeInvalid()
+    public void Run_InvalidIterationNumber_ShouldThrow()
     {
         // Assign
         var builder1 = TestSuite.TestSuite.Sequential
@@ -16,16 +15,32 @@ public class RunTests
             .UseAdderOperation();
         
         // Act
-        var reporter1 = builder1
-            .Expect(2).WithInput(1, 1)
+        Action fun1 = () => builder1
+            .ExpectReturn(2).WithInput(1, 1)
             .Run(2);
-        var reporter2 = builder2
-            .Expect(2).WithInput(1, 1)
+        Action fun2 = () => builder2
+            .ExpectReturn(2).WithInput(1, 1)
             .Run(1, 2);
         
         // Assert
-        var message = "Invalid test case numbers were given as input";
-        reporter1.AssertInvalid(ValidationSubject.TestNumbers, message);
-        reporter2.AssertInvalid(ValidationSubject.TestNumbers, message);
+        const string message = "Invalid test case numbers were given as input";
+        TestHelpers.AssertWithMessage<InvalidContextException>(fun1, message);
+        TestHelpers.AssertWithMessage<InvalidContextException>(fun2, message);
+    }
+    
+    [Fact]
+    public void Run_ValidIterationNumber_ShouldBeValid()
+    {
+        // Assign
+        var builder = TestSuite.TestSuite.Sequential
+            .UseAdderOperation();
+        
+        // Act
+        var result = builder
+            .ExpectReturn(2).WithInput(1, 1)
+            .Run(1);
+        
+        // Assert
+        Assert.NotNull(result);
     }
 }

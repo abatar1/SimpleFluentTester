@@ -1,7 +1,10 @@
-using SimpleFluentTester.UnitTests.Extensions;
+using SimpleFluentTester.TestSuite.Context;
+using SimpleFluentTester.TestSuite.Parameter;
 using SimpleFluentTester.UnitTests.Helpers;
+using SimpleFluentTester.UnitTests.Helpers.Extensions;
+using SimpleFluentTester.UnitTests.Helpers.TestObjects;
 using SimpleFluentTester.Validators;
-using SimpleFluentTester.Validators.Core;
+using SimpleFluentTester.Validators.Models;
 
 namespace SimpleFluentTester.UnitTests.Tests.Validators;
 
@@ -12,7 +15,7 @@ public sealed class OperationValidatorTests
     {
         // Assign
         var validator = new OperationValidator();
-        var validated = new CustomValidatedObject(new Dictionary<ValidationSubject, IList<Func<ValidationResult>>>());
+        var validated = new CustomValidatedObject(new Dictionary<ValidationSubject, IList<Lazy<SubjectValidation>>>());
 
         // Act
         var func = () => validator.Validate(validated, new EmptyValidationContext());
@@ -26,15 +29,14 @@ public sealed class OperationValidatorTests
     {
         // Assign
         var validator = new OperationValidator();
-        var container = TestSuiteFactory.CreateEmptyContextContainer();
-        var testCase = TestSuiteFactory.CreateAndAddTestCase(container, [1], 1);
-        var validationContext = new OperationValidationContext(null);
+        var container = TestSuiteContextContainer.Default();
+        var testCase = container.DefineTestCaseWithExpectedValue([], 1);
 
         // Act
-        var validatedResult = validator.Validate(testCase, validationContext);
+        var validationResult = validator.Validate(testCase, new EmptyValidationContext());
 
         // Assert
-        validatedResult.AssertInvalid(ValidationSubject.Operation, "Operation not specified");
+        validationResult.AssertNonValid(ValidationSubject.Operation, "Operation not specified");
     }
     
     [Fact]
@@ -42,15 +44,15 @@ public sealed class OperationValidatorTests
     {
         // Assign
         var validator = new OperationValidator();
-        var container = TestSuiteFactory.CreateEmptyContextContainer();
-        var testCase = TestSuiteFactory.CreateAndAddTestCase(container, [1], 1);
-        var validationContext = new OperationValidationContext(() => { });
+        var container = TestSuiteContextContainer.Default();
+        container.WithOperation(() => { });
+        var testCase = container.DefineTestCaseWithExpectedValue([], 1);
 
         // Act
-        var validatedResult = validator.Validate(testCase, validationContext);
+        var validationResult = validator.Validate(testCase, new EmptyValidationContext());
 
         // Assert
-        validatedResult.AssertInvalid(ValidationSubject.Operation, "Operation must have return type to be testable");
+        validationResult.AssertNonValid(ValidationSubject.Operation, "Operation must have return type to be testable");
     }
     
     [Fact]
@@ -58,15 +60,15 @@ public sealed class OperationValidatorTests
     {
         // Assign
         var validator = new OperationValidator();
-        var container = TestSuiteFactory.CreateEmptyContextContainer();
-        var testCase = TestSuiteFactory.CreateAndAddTestCase(container, [1], new Exception());
-        var validationContext = new OperationValidationContext(() => true);
+        var container = TestSuiteContextContainer.Default();
+        container.WithOperation((int x) => x);
+        var testCase = container.DefineTestCaseWithExpectedValue([], new Exception());
 
         // Act
-        var validatedResult = validator.Validate(testCase, validationContext);
+        var validationResult = validator.Validate(testCase, new EmptyValidationContext());
 
         // Assert
-        validatedResult.AssertValid();
+        validationResult.AssertValid();
     }
     
     [Fact]
@@ -74,15 +76,15 @@ public sealed class OperationValidatorTests
     {
         // Assign
         var validator = new OperationValidator();
-        var container = TestSuiteFactory.CreateEmptyContextContainer();
-        var testCase = TestSuiteFactory.CreateAndAddTestCase(container, [1], null);
-        var validationContext = new OperationValidationContext((int? x) => x);
+        var container = TestSuiteContextContainer.Default();
+        container.WithOperation((int? _) => (int?)null);
+        var testCase = container.DefineTestCaseWithExpectedValue([], null);
 
         // Act
-        var validatedResult = validator.Validate(testCase, validationContext);
+        var validationResult = validator.Validate(testCase, new EmptyValidationContext());
 
         // Assert
-        validatedResult.AssertValid();
+        validationResult.AssertValid();
     }
     
     [Fact]
@@ -90,15 +92,15 @@ public sealed class OperationValidatorTests
     {
         // Assign
         var validator = new OperationValidator();
-        var container = TestSuiteFactory.CreateEmptyContextContainer();
-        var testCase = TestSuiteFactory.CreateAndAddTestCase(container, [1], 1);
-        var validationContext = new OperationValidationContext((int? x) => x);
+        var container = TestSuiteContextContainer.Default();
+        container.WithOperation((int? _) => 1);
+        var testCase = container.DefineTestCaseWithExpectedValue([], 1);
 
         // Act
-        var validatedResult = validator.Validate(testCase, validationContext);
+        var validationResult = validator.Validate(testCase, new EmptyValidationContext());
 
         // Assert
-        validatedResult.AssertValid();
+        validationResult.AssertValid();
     }
     
     [Fact]
@@ -106,15 +108,15 @@ public sealed class OperationValidatorTests
     {
         // Assign
         var validator = new OperationValidator();
-        var container = TestSuiteFactory.CreateEmptyContextContainer();
-        var testCase = TestSuiteFactory.CreateAndAddTestCase(container, [1], "test");
-        var validationContext = new OperationValidationContext((int? x) => x);
+        var container = TestSuiteContextContainer.Default();
+        container.WithOperation((int? _) => (int?) null);
+        var testCase = container.DefineTestCaseWithExpectedValue([], "test");
 
         // Act
-        var validatedResult = validator.Validate(testCase, validationContext);
+        var validationResult = validator.Validate(testCase, new EmptyValidationContext());
 
         // Assert
-        validatedResult.AssertInvalid(ValidationSubject.Operation, "Operation return type is not the same as used generic type.");
+        validationResult.AssertNonValid(ValidationSubject.Operation, "Operation return type is not the same as used generic type.");
     }
     
     [Fact]
@@ -122,15 +124,15 @@ public sealed class OperationValidatorTests
     {
         // Assign
         var validator = new OperationValidator();
-        var container = TestSuiteFactory.CreateEmptyContextContainer();
-        var testCase = TestSuiteFactory.CreateAndAddTestCase(container, [1], "test");
-        var validationContext = new OperationValidationContext((int x) => x);
+        var container = TestSuiteContextContainer.Default();
+        container.WithOperation((int? _) => (int?) null);
+        var testCase = container.DefineTestCaseWithExpectedValue([], "test");
 
         // Act
-        var validatedResult = validator.Validate(testCase, validationContext);
+        var validationResult = validator.Validate(testCase, new EmptyValidationContext());
 
         // Assert
-        validatedResult.AssertInvalid(ValidationSubject.Operation, "Operation return type is not the same as used generic type.");
+        validationResult.AssertNonValid(ValidationSubject.Operation, "Operation return type is not the same as used generic type.");
     }
     
     [Fact]
@@ -138,15 +140,15 @@ public sealed class OperationValidatorTests
     {
         // Assign
         var validator = new OperationValidator();
-        var container = TestSuiteFactory.CreateEmptyContextContainer();
-        var testCase = TestSuiteFactory.CreateAndAddTestCase(container, [1], 1);
-        var validationContext = new OperationValidationContext((int x) => x);
+        var container = TestSuiteContextContainer.Default();
+        container.WithOperation((int x) => x);
+        var testCase = container.DefineTestCaseWithExpectedValue([], 1);
 
         // Act
-        var validatedResult = validator.Validate(testCase, validationContext);
+        var validationResult = validator.Validate(testCase, new EmptyValidationContext());
 
         // Assert
-        validatedResult.AssertValid();
+        validationResult.AssertValid();
     }
     
     [Fact]
@@ -154,13 +156,31 @@ public sealed class OperationValidatorTests
     {
         // Assign
         var validator = new OperationValidator();
-        var customValidated = new CustomValidatedObject(new Dictionary<ValidationSubject, IList<Func<ValidationResult>>>());
-        var validationContext = new OperationValidationContext(() => true);
+        var customValidated = new CustomValidatedObject(new Dictionary<ValidationSubject, IList<Lazy<SubjectValidation>>>());
 
         // Act
-        var func = () => validator.Validate(customValidated, validationContext);
+        var func = () => validator.Validate(customValidated, new EmptyValidationContext());
 
         // Assert
         Assert.Throws<ValidationUnexpectedException>(func);
+    }
+    
+    [Fact]
+    public void OperationValidator_OperationThrowsExceptionButExpectParameter_ShouldBeAlwaysValid()
+    {
+        // Assign
+        var validator = new InputsValidator();
+        var container = TestSuiteContextContainer.Default();
+        container.WithOperation((Func<int?, int?, int>)((_, _) => throw new Exception()));
+        
+        var parameter = ExpectParameterFactory.Create(container, 0);
+        var clauses = TestClauseFactory.DefineFromParameter(1, parameter);
+        var testCase = container.DefineTestCase([1, 1], clauses);
+        
+        // Act
+        var validationResult = validator.Validate(testCase, new EmptyValidationContext());
+
+        // Assert
+        validationResult.AssertValid();
     }
 }

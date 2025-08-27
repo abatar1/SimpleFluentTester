@@ -1,10 +1,10 @@
-using SimpleFluentTester.UnitTests.Extensions;
 using SimpleFluentTester.UnitTests.Helpers;
-using SimpleFluentTester.Validators.Core;
+using SimpleFluentTester.UnitTests.Helpers.Extensions;
+using SimpleFluentTester.Validators.Models;
 
 namespace SimpleFluentTester.UnitTests.Tests.TestSuiteBuilder;
 
-public class WithInputTests
+public sealed class WithInputTests
 {
     [Fact]
     public void WithInput_ParametersNumberMoreThanExpected_ShouldBeInvalid()
@@ -15,12 +15,12 @@ public class WithInputTests
             
         // Act    
         var reporter = builder
-            .Expect(2).WithInput(1, 1, 1)
+            .ExpectReturn(2).WithInput(1, 1, 1)
             .Run();
         
         // Assert
-        var message = "Invalid inputs number, should be 2, but was 3.";
-        reporter.AssertTestCaseExists(1).Validation.AssertInvalid(ValidationSubject.Inputs, message);
+        var message = "Invalid inputs number, should have 2 parameters, but had 3: [1, 1, 1]";
+        reporter.AssertTestCaseExists(1).AssertNonValid(ValidationSubject.Inputs, message);
     }
     
     [Fact]
@@ -32,12 +32,12 @@ public class WithInputTests
             
         // Act    
         var reporter = builder
-            .Expect(2).WithInput(1)
+            .ExpectReturn(2).WithInput(1)
             .Run();
         
         // Assert
-        var message = "Invalid inputs number, should be 2, but was 1.";
-        reporter.AssertTestCaseExists(1).Validation.AssertInvalid(ValidationSubject.Inputs, message);
+        var message = "Invalid inputs number, should have 2 parameters, but had 1: [1]";
+        reporter.AssertTestCaseExists(1).AssertNonValid(ValidationSubject.Inputs, message);
     }
     
     [Fact]
@@ -49,12 +49,12 @@ public class WithInputTests
             
         // Act    
         var reporter = builder
-            .Expect(2).WithInput(1, "test")
+            .ExpectReturn(2).WithInput(1, "test")
             .Run();
         
         // Assert
         var message = "Passed parameters and expected operation parameters are not equal.";
-        reporter.AssertTestCaseExists(1).Validation.AssertInvalid(ValidationSubject.Inputs, message);
+        reporter.AssertTestCaseExists(1).AssertNonValid(ValidationSubject.Inputs, message);
     }
     
     [Fact]
@@ -66,7 +66,7 @@ public class WithInputTests
             
         // Act    
         var reporter = builder
-            .Expect(2).WithInput(1, 1)
+            .ExpectReturn(2).WithInput(1, 1)
             .Run();
         
         // Assert

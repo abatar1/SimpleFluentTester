@@ -1,16 +1,15 @@
 using System;
-using Microsoft.Extensions.Logging;
-using SimpleFluentTester.TestSuite.Case;
+using SimpleFluentTester.TestCase;
+using SimpleFluentTester.TestCase.Clause;
 
 namespace SimpleFluentTester.Reporter;
 
 public interface ITestSuiteReporterConfigurationBuilder
 {
-    ITestSuiteReporterConfigurationBuilder WithReportBuilder(Func<ITestSuiteReportBuilder> builderFactory);
+    ITestSuiteReporterConfigurationBuilder WithReportBuilder<TTestSuiteReportBuilder>()
+        where TTestSuiteReportBuilder : class, ITestSuiteReportBuilder;
 
-    ITestSuiteReporterConfigurationBuilder WithLoggingBuilder(Action<ILoggingBuilder> loggingBuilder);
-
-    ITestSuiteReporterConfigurationBuilder WithPrintablePredicate(Func<CompletedTestCase, bool> printablePredicate);
+    ITestSuiteReporterConfigurationBuilder WithPrintablePredicate(Func<AssertedTestClause, AssertedTestCase, bool> printablePredicate);
 
     ITestSuiteReporterConfiguration Build();
 }

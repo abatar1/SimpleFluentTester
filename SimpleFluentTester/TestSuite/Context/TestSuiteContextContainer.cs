@@ -1,8 +1,7 @@
 using System;
 using System.Collections.Generic;
 using SimpleFluentTester.Helpers;
-using SimpleFluentTester.TestSuite.Case;
-using SimpleFluentTester.Validators.Core;
+using SimpleFluentTester.TestCase;
 
 namespace SimpleFluentTester.TestSuite.Context;
 
@@ -10,7 +9,7 @@ internal sealed class TestSuiteContextContainer : ITestSuiteContextContainer
 {
     public ITestSuiteContext Context { get; private set; }
 
-    internal TestSuiteContextContainer(ITestSuiteContext context)
+    private TestSuiteContextContainer(ITestSuiteContext context)
     {
         Context = context;
     }
@@ -25,7 +24,6 @@ internal sealed class TestSuiteContextContainer : ITestSuiteContextContainer
             Context.TestCases,
             operation,
             Context.Comparer,
-            Context.Validations,
             Context.ShouldBeExecuted);
     }
     
@@ -39,11 +37,10 @@ internal sealed class TestSuiteContextContainer : ITestSuiteContextContainer
             Context.TestCases,
             Context.Operation,
             Context.Comparer,
-            Context.Validations,
             Context.ShouldBeExecuted);
     }
     
-    public void WithComparer(Delegate comparer)
+    public void WithComparer<TExpected>(ComparerDelegate<TExpected> comparer)
     {
         Context = new TestSuiteContext(
             Context.Number,
@@ -53,7 +50,6 @@ internal sealed class TestSuiteContextContainer : ITestSuiteContextContainer
             Context.TestCases,
             Context.Operation,
             comparer,
-            Context.Validations,
             Context.ShouldBeExecuted);
     }
     
@@ -67,21 +63,45 @@ internal sealed class TestSuiteContextContainer : ITestSuiteContextContainer
             Context.TestCases,
             Context.Operation,
             Context.Comparer,
-            Context.Validations,
             false);
     }
+    
+    public void WithEntryAssemblyProvider(IEntryAssemblyProvider entryAssemblyProvider)
+    {
+        Context = new TestSuiteContext(
+            Context.Number,
+            Context.Name,
+            entryAssemblyProvider,
+            Context.Activator,
+            Context.TestCases,
+            Context.Operation,
+            Context.Comparer,
+            Context.ShouldBeExecuted);
+    }
+    
+    public void WithActivator(IActivator activator)
+    {
+        Context = new TestSuiteContext(
+            Context.Number,
+            Context.Name,
+            Context.EntryAssemblyProvider,
+            activator,
+            Context.TestCases,
+            Context.Operation,
+            Context.Comparer,
+            Context.ShouldBeExecuted);
+    }
         
-    public static TestSuiteContextContainer Default(int testSuiteNumber)
+    public static TestSuiteContextContainer Default(int testSuiteNumber = 1)
     {
         var context = new TestSuiteContext(
             testSuiteNumber,
             nameof(TestSuite),
             new EntryAssemblyProvider(), 
             new DefaultActivator(),
-            new List<TestCase>(), 
+            new List<DefinedTestCase>(), 
             null, 
             null,
-            new Dictionary<ValidationSubject, IList<Func<ValidationResult>>>(),
             true);
         return new TestSuiteContextContainer(context);
     }

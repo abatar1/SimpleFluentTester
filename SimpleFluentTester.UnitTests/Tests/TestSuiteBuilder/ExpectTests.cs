@@ -1,14 +1,16 @@
 using System.Reflection;
 using Moq;
 using SimpleFluentTester.Helpers;
-using SimpleFluentTester.UnitTests.Extensions;
+using SimpleFluentTester.TestCase.Clause;
+using SimpleFluentTester.TestSuite.Context;
 using SimpleFluentTester.UnitTests.Helpers;
-using SimpleFluentTester.UnitTests.TestObjects;
-using SimpleFluentTester.Validators.Core;
+using SimpleFluentTester.UnitTests.Helpers.Extensions;
+using SimpleFluentTester.UnitTests.Helpers.TestObjects;
+using SimpleFluentTester.Validators.Models;
 
 namespace SimpleFluentTester.UnitTests.Tests.TestSuiteBuilder;
 
-public class ExpectTests
+public sealed class ExpectTests
 {
     [Fact]
     public void Expect_SetValidOperationWithValidExpectedValue_ShouldBePassed()
@@ -19,7 +21,7 @@ public class ExpectTests
             
         // Act    
         var reporter = builder
-            .Expect(2).WithInput(1, 1)
+            .ExpectReturn(2).WithInput(1, 1)
             .Run();
         
         // Assert
@@ -35,7 +37,7 @@ public class ExpectTests
             
         // Act    
         var reporter = builder
-            .Expect(null).WithInput(null, 1)
+            .ExpectReturn(null).WithInput(null, 1)
             .Run();
         
         // Assert
@@ -51,8 +53,8 @@ public class ExpectTests
             
         // Act    
         var reporter = builder
-            .Expect(2).WithInput(1, 1)
-            .Expect(3).WithInput(1, 1)
+            .ExpectReturn(2).WithInput(1, 1)
+            .ExpectReturn(3).WithInput(1, 1)
             .Run();
         
         // Assert
@@ -69,28 +71,28 @@ public class ExpectTests
             
         // Act    
         var reporter = builder
-            .Expect(2).WithInput(1, 1)
-            .Expect(2).WithInput(2, 1)
-            .Expect(3).WithInput(2, 1)
+            .ExpectReturn(2).WithInput(1, 1)
+            .ExpectReturn(2).WithInput(2, 1)
+            .ExpectReturn(3).WithInput(2, 1)
             .Run(1, 2);
 
         // Assert
         reporter.AssertTestCaseExists(1).AssertPassed(2, [1, 1]);
         reporter.AssertTestCaseExists(2).AssertNotPassed(2, [2, 1]);
-        reporter.AssertTestCaseExists(3).AssertSkippedTestResult(3, [2, 1]);
+        reporter.AssertTestCaseExists(3).AssertIgnored();
     }
 
     [Fact]
     public void Expect_TestingOperationThrowsExceptionAndExpectNumber_TestCaseHasException()
     {
         // Assign
-        Func<int, int, int> comparer = (_, _) => throw new CustomException();
+        Func<int, int, int> operation = (_, _) => throw new CustomException();
         var builder = TestSuite.TestSuite.Sequential
-            .UseOperation(comparer);
+            .UseOperation(operation);
         
         // Act
         var reporter = builder
-            .Expect(2).WithInput(1, 1)
+            .ExpectReturn(2).WithInput(1, 1)
             .Run();
         
         // Assert
@@ -105,40 +107,17 @@ public class ExpectTests
         entryAssemblyProviderMock
             .Setup(x => x.Get())
             .Returns(Assembly.GetAssembly(typeof(ExpectTests)));
-        var container = TestSuiteFactory.CreateEmptyContextContainer(entryAssemblyProviderMock.Object);
-        var builder = new TestSuite.TestSuiteBuilder(container);
+        var container = TestSuiteContextContainer.Default();
+        container.WithEntryAssemblyProvider(entryAssemblyProviderMock.Object);
+        var builder = new TestSuite.SequentialTestSuiteBuilder(container, new List<DefinedTestClause>());
         
         // Act
         var reporter = builder
-            .Expect(2).WithInput(1, 1)
+            .ExpectReturn(2).WithInput(1, 1)
             .Run();
         
         // Assert
         reporter.AssertTestCaseExists(1).AssertPassed(2, [1, 1]);
-    }
-    
-    [Fact]
-    public void Expect_OperationNotSetWithNotCorrectAssembly_AdderWithAttributeShouldNotBeSelected()
-    {
-        // Assign
-        var assemblyMock = new Mock<Assembly>();
-        assemblyMock
-            .Setup(x => x.GetTypes())
-            .Returns([]);
-        var entryAssemblyProviderMock = new Mock<IEntryAssemblyProvider>();
-        entryAssemblyProviderMock
-            .Setup(x => x.Get())
-            .Returns(assemblyMock.Object);
-        var container = TestSuiteFactory.CreateEmptyContextContainer(entryAssemblyProviderMock.Object);
-        var builder = new TestSuite.TestSuiteBuilder(container);
-        
-        // Act
-        var reporter = builder
-            .Expect(2).WithInput(1, 1)
-            .Run();
-        
-        // Assert
-        reporter.AssertTestCaseExists(1).Validation.AssertInvalid(ValidationSubject.Operation, "Operation not specified");
     }
     
     [Fact]
@@ -151,7 +130,7 @@ public class ExpectTests
         
         // Act
         var reporter = builder
-            .Expect(new EquatableTestObject(2)).WithInput(new EquatableTestObject(1), new EquatableTestObject(1))
+            .ExpectReturn(new EquatableTestObject(2)).WithInput(new EquatableTestObject(1), new EquatableTestObject(1))
             .Run();
         
         // Assert
@@ -164,21 +143,20 @@ public class ExpectTests
     public void Expect_WithCustomEquatableObjectAndInvalidComparer_FailedReturn()
     {
         // Assign
-        var exceptionMessage = "Exception";
-        var exception = new CustomWithMessageException(exceptionMessage);
+        var innerMessage = "text";
         var builder = TestSuite.TestSuite.Sequential
-            .WithComparer<EquatableTestObject>((x, y) => throw exception)
+            .WithComparer<EquatableTestObject>((_, _) => throw new CustomWithMessageException("text"))
             .UseOperation((EquatableTestObject a, EquatableTestObject b) => new EquatableTestObject(a.Value + b.Value));
         
         // Act
         var reporter = builder
-            .Expect(new EquatableTestObject(2)).WithInput(new EquatableTestObject(1), new EquatableTestObject(1))
+            .ExpectReturn(new EquatableTestObject(2)).WithInput(new EquatableTestObject(1), new EquatableTestObject(1))
             .Run();
         
         // Assert
         reporter
             .AssertTestCaseExists(1)
-            .AssertFailed(exception, exceptionMessage);
+            .AssertFailedValidation<CustomWithMessageException>(ValidationSubject.Comparer, "Comparer execution failed with an exception.", innerMessage);
     }
     
     [Fact]
@@ -190,12 +168,12 @@ public class ExpectTests
             
         // Act    
         var reporter = builder
-            .Expect("123").WithInput(1, 1)
+            .ExpectReturn("123").WithInput(1, 1)
             .Run();
         
         // Assert
         var message = "Operation return type is not the same as used generic type.";
-        reporter.AssertTestCaseExists(1).Validation.AssertInvalid(ValidationSubject.Operation, message);
+        reporter.AssertTestCaseExists(1).AssertNonValid(ValidationSubject.Operation, message);
     }
     
     [Fact]
@@ -207,12 +185,12 @@ public class ExpectTests
             
         // Act    
         var reporter = builder
-            .Expect(null).WithInput(1, 1)
+            .ExpectReturn(null).WithInput(1, 1)
             .Run();
         
         // Assert
         var message = "Operation return type is not the same as used generic type.";
-        reporter.AssertTestCaseExists(1).Validation.AssertInvalid(ValidationSubject.Operation, message);
+        reporter.AssertTestCaseExists(1).AssertNonValid(ValidationSubject.Operation, message);
     }
     
     [Fact]
@@ -224,10 +202,10 @@ public class ExpectTests
             
         // Act    
         var reporter = builder
-            .Expect(2).WithInput(1, 1)
+            .ExpectReturn(2).WithInput(1, 1)
             .Run();
         
         // Assert
-        reporter.AssertTestCaseExists(1).Validation.AssertValid();
+        reporter.AssertTestCaseExists(1).AssertValid();
     }
 }

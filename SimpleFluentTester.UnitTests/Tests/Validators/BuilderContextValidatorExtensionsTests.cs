@@ -1,11 +1,13 @@
-using SimpleFluentTester.UnitTests.Extensions;
+using SimpleFluentTester.TestSuite.Context;
 using SimpleFluentTester.UnitTests.Helpers;
-using SimpleFluentTester.Validators;
-using SimpleFluentTester.Validators.Core;
+using SimpleFluentTester.UnitTests.Helpers.Extensions;
+using SimpleFluentTester.UnitTests.Helpers.TestObjects;
+using SimpleFluentTester.Validators.Helpers;
+using SimpleFluentTester.Validators.Models;
 
 namespace SimpleFluentTester.UnitTests.Tests.Validators;
 
-public class BuilderContextValidatorExtensionsTests
+public sealed class BuilderContextValidatorExtensionsTests
 {
     [Fact]
     public void BaseValidator_Initialize_ShouldBeValid()
@@ -14,24 +16,69 @@ public class BuilderContextValidatorExtensionsTests
         var subject = ValidationSubject.Operation;
         
         // Act
-        var validator = new CustomValidator(subject);
+        var validator = new EmptyValidator(subject);
 
         // Assert
-        Assert.Equal(nameof(CustomValidator), validator.Key);
+        Assert.Equal(nameof(EmptyValidator), validator.Key);
         Assert.Equal(subject, validator.Subject);
-        Assert.NotNull(validator.AllowedType);
     }
     
     [Fact]
-    public void AddValidation_AddSingleValidation_ShouldBeSingle()
+    public void AddValidation_AddInvalidAndValidValidations_ShouldInvalid()
     {
         // Assign
-        var validated = new CustomValidatedObject(new Dictionary<ValidationSubject, IList<Func<ValidationResult>>>());
+        var validated = new CustomValidatedObject(new Dictionary<ValidationSubject, IList<Lazy<SubjectValidation>>>());
         
         // Act
-        validated.AddValidation(ValidationTestResults.Valid);
+        validated.AddReadyValidation(ValidationTestResults.NonValid);
+        validated.AddReadyValidation(ValidationTestResults.Valid);
 
         // Assert
+        Assert.False(validated.IsValid());
+        Assert.Single(validated.Validations);
+    }
+    
+    [Fact]
+    public void AddValidation_AddFailedValidation_ShouldInvalid()
+    {
+        // Assign
+        var validated = new CustomValidatedObject(new Dictionary<ValidationSubject, IList<Lazy<SubjectValidation>>>());
+        
+        // Act
+        validated.AddReadyValidation(ValidationTestResults.Failed);
+        validated.AddReadyValidation(ValidationTestResults.Valid);
+
+        // Assert
+        Assert.False(validated.IsValid());
+        Assert.Single(validated.Validations);
+    }
+    
+    [Fact]
+    public void AddValidation_AddSingleInvalidValidation_ShouldBeSingleAndInvalid()
+    {
+        // Assign
+        var validated = new CustomValidatedObject(new Dictionary<ValidationSubject, IList<Lazy<SubjectValidation>>>());
+        
+        // Act
+        validated.AddReadyValidation(ValidationTestResults.NonValid);
+
+        // Assert
+        Assert.False(validated.IsValid());
+        Assert.Single(validated.Validations);
+        Assert.Single(validated.Validations.Values.First());
+    }
+    
+    [Fact]
+    public void AddValidation_AddValidValidation_ShouldBeSingleAndValid()
+    {
+        // Assign
+        var validated = new CustomValidatedObject(new Dictionary<ValidationSubject, IList<Lazy<SubjectValidation>>>());
+        
+        // Act
+        validated.AddReadyValidation(ValidationTestResults.Valid);
+
+        // Assert
+        Assert.True(validated.IsValid());
         Assert.Single(validated.Validations);
         Assert.Single(validated.Validations.Values.First());
     }
@@ -40,13 +87,14 @@ public class BuilderContextValidatorExtensionsTests
     public void AddValidation_AddTwoValidations_ShouldBeValid()
     {
         // Assign
-        var validated = new CustomValidatedObject(new Dictionary<ValidationSubject, IList<Func<ValidationResult>>>());
+        var validated = new CustomValidatedObject(new Dictionary<ValidationSubject, IList<Lazy<SubjectValidation>>>());
         
         // Act
-        validated.AddValidation(ValidationTestResults.Valid);
-        validated.AddValidation(ValidationTestResults.Valid);
+        validated.AddReadyValidation(ValidationTestResults.Valid);
+        validated.AddReadyValidation(ValidationTestResults.Valid);
 
         // Assert
+        Assert.True(validated.IsValid());
         Assert.Single(validated.Validations);
         Assert.Equal(2, validated.Validations.Values.First().Count);
     }
@@ -55,55 +103,31 @@ public class BuilderContextValidatorExtensionsTests
     public void RegisterValidation_InvalidValidator_ShouldThrowException()
     {
         // Assign
-        var validated = new CustomValidatedObject(new Dictionary<ValidationSubject, IList<Func<ValidationResult>>>());
+        var validated = new CustomValidatedObject(new Dictionary<ValidationSubject, IList<Lazy<SubjectValidation>>>());
         
         // Act
-        var func = () => validated.RegisterValidation<CustomValidator>();
+        var func = () => validated.RegisterFutureValidation<EmptyValidator>();
 
         // Assert
         Assert.Throws<InvalidOperationException>(func);
-    }
-    
-    [Fact]
-    public void RegisterValidation_InvalidValidatedType_ShouldThrowException()
-    {
-        // Assign
-        var validated = new CustomValidatedObject(new Dictionary<ValidationSubject, IList<Func<ValidationResult>>>());
-        
-        // Act
-        var func = () => validated.RegisterValidation<OperationValidator>();
-
-        // Assert
-        Assert.Throws<InvalidOperationException>(func);
-    }
-    
-    [Fact]
-    public void RegisterValidation_ValidRegistrationFailedValidator_ShouldBeInvalid()
-    {
-        // Assign
-        var container = TestSuiteFactory.CreateEmptyContextContainer();
-        var validated = TestSuiteFactory.CreateAndAddTestCase(container, [1], 1);
-        
-        // Act
-        validated.RegisterValidation<OperationValidator>();
-
-        // Assert
-        var validation = ValidationPipe.ValidatePacked(validated);
-        validation.AssertFailed<ValidationUnexpectedException>(ValidationSubject.Operation, "Failed to validate SimpleFluentTester.TestSuite.Case.TestCase with SimpleFluentTester.Validators.OperationValidator validator.");
     }
     
     [Fact]
     public void RegisterValidation_ValidRegistration_ShouldBeValid()
     {
         // Assign
-        var container = TestSuiteFactory.CreateEmptyContextContainer();
-        var validated = TestSuiteFactory.CreateAndAddTestCase(container, [1], 1);
+        var container = TestSuiteContextContainer.Default();
+        container.WithOperation((int x, int y) => x + y);
+        var testCase = container.DefineTestCaseWithExpectedValue([1], 1);
+        testCase.RegisterFutureValidation<OkTestValidator>(args: [ValidationSubject.Expect]);
         
         // Act
-        validated.RegisterValidation<OperationValidator>(() => new OperationValidationContext(() => 1));
+        _ = testCase.Validate();
 
         // Assert
-        var validation = ValidationPipe.ValidatePacked(validated);
-        validation.AssertValid();
+        var validations = testCase.Validations
+            .FirstOrDefault(x => x.Key == ValidationSubject.Expect).Value;
+        Assert.Single(validations);
+        validations.First().Value.AssertValid();
     }
 }

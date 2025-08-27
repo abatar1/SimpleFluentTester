@@ -2,7 +2,7 @@ using System;
 
 namespace SimpleFluentTester.TestSuite.ComparedObject;
 
-public sealed class ExceptionObject(Exception exception, Type type) : IComparedObject
+internal sealed class ExceptionObject(Exception exception, Type type) : IComparedObject
 {
     public ComparedObjectVariety Variety => ComparedObjectVariety.Exception;
 

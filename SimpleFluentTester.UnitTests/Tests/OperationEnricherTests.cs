@@ -3,9 +3,7 @@ using Moq;
 using SimpleFluentTester.Helpers;
 using SimpleFluentTester.TestSuite;
 using SimpleFluentTester.TestSuite.Context;
-using SimpleFluentTester.UnitTests.Extensions;
 using SimpleFluentTester.UnitTests.Helpers;
-using SimpleFluentTester.Validators.Core;
 
 namespace SimpleFluentTester.UnitTests.Tests;
 
@@ -16,14 +14,16 @@ public sealed class OperationEnricherTests
     {
         // Assign
         var entryAssemblyProviderMock = new Mock<IEntryAssemblyProvider>();
-        var container = TestSuiteFactory.CreateEmptyContextContainer(entryAssemblyProviderMock.Object);
+        var container = TestSuiteContextContainer.Default();
+        container.WithEntryAssemblyProvider(entryAssemblyProviderMock.Object);
+        var enricher = new OperationEnricher(container);
         
         // Act 
-        container.TryToEnrichAttributeOperation();
+        var func = () => enricher.TryToEnrichAttributeOperation(null);
 
         // Assert
         const string message = $"No entry Assembly have been found when trying to find {nameof(TestSuiteDelegateAttribute)} definitions.";
-        container.Context.AssertNotValidValidation(ValidationSubject.Operation, message);
+        TestHelpers.AssertWithMessage<InvalidContextException>(func, message);
         Assert.Null(container.Context.Operation);
     }
     
@@ -32,20 +32,22 @@ public sealed class OperationEnricherTests
     {
         // Assign
         var assemblyMock = new Mock<Assembly>();
-        assemblyMock.Setup(x => x.GetTypes()).Returns(Array.Empty<Type>());
+        assemblyMock.Setup(x => x.GetTypes()).Returns([]);
         
         var entryAssemblyProviderMock = new Mock<IEntryAssemblyProvider>();
         entryAssemblyProviderMock.Setup(x => x.Get()).Returns(assemblyMock.Object);
         
-        var container = TestSuiteFactory.CreateEmptyContextContainer(entryAssemblyProviderMock.Object);
+        var container = TestSuiteContextContainer.Default();
+        container.WithEntryAssemblyProvider(entryAssemblyProviderMock.Object);
+        var enricher = new OperationEnricher(container);
         
         // Act 
-        container.TryToEnrichAttributeOperation();
+        var func = () => enricher.TryToEnrichAttributeOperation(null);
 
         // Assert
         const string message =
-            $"You should specify an operation first with an {nameof(TestSuiteDelegateAttribute)} attribute or using {nameof(SimpleFluentTester.TestSuite.TestSuiteBuilder.UseOperation)} method.";
-        container.Context.AssertNotValidValidation(ValidationSubject.Operation, message);
+            $"You should specify an operation first with an {nameof(TestSuiteDelegateAttribute)} attribute or using {nameof(SequentialTestSuiteBuilder.UseOperation)} method.";
+        TestHelpers.AssertWithMessage<InvalidContextException>(func, message);
         Assert.Null(container.Context.Operation);
     }
     
@@ -65,14 +67,16 @@ public sealed class OperationEnricherTests
         var entryAssemblyProviderMock = new Mock<IEntryAssemblyProvider>();
         entryAssemblyProviderMock.Setup(x => x.Get()).Returns(assemblyMock.Object);
         
-        var container = TestSuiteFactory.CreateEmptyContextContainer(entryAssemblyProviderMock.Object);
+        var container = TestSuiteContextContainer.Default();
+        container.WithEntryAssemblyProvider(entryAssemblyProviderMock.Object);
+        var enricher = new OperationEnricher(container);
         
         // Act 
-        container.TryToEnrichAttributeOperation();
+        var func = () => enricher.TryToEnrichAttributeOperation(null);
 
         // Assert
         const string message = $"You defined more than one method with {nameof(TestSuiteDelegateAttribute)}.";
-        container.Context.AssertNotValidValidation(ValidationSubject.Operation, message);
+        TestHelpers.AssertWithMessage<InvalidContextException>(func, message);
         Assert.Null(container.Context.Operation);
     }
     
@@ -102,13 +106,14 @@ public sealed class OperationEnricherTests
         var entryAssemblyProviderMock = new Mock<IEntryAssemblyProvider>();
         entryAssemblyProviderMock.Setup(x => x.Get()).Returns(assemblyMock.Object);
         
-        var container = TestSuiteFactory.CreateEmptyContextContainer(entryAssemblyProviderMock.Object);
+        var container = TestSuiteContextContainer.Default();
+        container.WithEntryAssemblyProvider(entryAssemblyProviderMock.Object);
+        var enricher = new OperationEnricher(container);
         
         // Act 
-        container.TryToEnrichAttributeOperation();
+        enricher.TryToEnrichAttributeOperation(null);
 
         // Assert
-        container.Context.AssertValidValidation();
         Assert.NotNull(container.Context.Operation);
     }
     
@@ -142,15 +147,17 @@ public sealed class OperationEnricherTests
         var entryAssemblyProviderMock = new Mock<IEntryAssemblyProvider>();
         entryAssemblyProviderMock.Setup(x => x.Get()).Returns(assemblyMock.Object);
         
-        var container = TestSuiteFactory.CreateEmptyContextContainer(entryAssemblyProviderMock.Object);
+        var container = TestSuiteContextContainer.Default();
+        container.WithEntryAssemblyProvider(entryAssemblyProviderMock.Object);
+        var enricher = new OperationEnricher(container);
         
         // Act 
-        container.TryToEnrichAttributeOperation();
+        var func = () => enricher.TryToEnrichAttributeOperation(null);
 
         // Assert
         const string message =
             $"{nameof(TestSuiteDelegateAttribute)} has been defined for non-static method where declaring type do not have empty constructors. Please add empty constructor or consider using static method.";
-        container.Context.AssertNotValidValidation(ValidationSubject.Operation, message);
+        TestHelpers.AssertWithMessage<InvalidContextException>(func, message);
         Assert.Null(container.Context.Operation);
     }
     
@@ -172,7 +179,7 @@ public sealed class OperationEnricherTests
         var constructorMock = new Mock<ConstructorInfo>();
         constructorMock
             .Setup(x => x.GetParameters())
-            .Returns(Array.Empty<ParameterInfo>());
+            .Returns([]);
         declaringTypeMock
             .Setup(x => x.GetConstructors(It.Is<BindingFlags>(y => y == (BindingFlags.Public | BindingFlags.Instance))))
             .Returns([constructorMock.Object]);
@@ -195,13 +202,15 @@ public sealed class OperationEnricherTests
             .Setup(x => x.CreateDelegate(It.IsAny<Type>(), It.Is<object>(y => y == declaringTypeObjectMock.Object)))
             .Returns(expectedDelegate);
         
-        var container = TestSuiteFactory.CreateEmptyContextContainer(entryAssemblyProviderMock.Object, activator: activatorMock.Object);
+        var container = TestSuiteContextContainer.Default();
+        container.WithEntryAssemblyProvider(entryAssemblyProviderMock.Object);
+        container.WithActivator(activatorMock.Object);
+        var enricher = new OperationEnricher(container);
         
         // Act 
-        container.TryToEnrichAttributeOperation();
+        enricher.TryToEnrichAttributeOperation(null);
 
         // Assert
-        container.Context.AssertValidValidation();
         Assert.NotNull(container.Context.Operation);
     }
 

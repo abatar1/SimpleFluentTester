@@ -1,61 +1,102 @@
 using System;
-using System.Linq;
+using System.Collections.Generic;
+using SimpleFluentTester.Helpers;
+using SimpleFluentTester.TestCase;
+using SimpleFluentTester.TestCase.Clause;
 using SimpleFluentTester.TestSuite.ComparedObject;
-using SimpleFluentTester.TestSuite.Context;
-using SimpleFluentTester.Validators.Core;
+using SimpleFluentTester.TestSuite.Parameter;
+using SimpleFluentTester.Validators.Models;
 
 namespace SimpleFluentTester.Validators;
 
-internal sealed class ComparerValidator : BaseValidator<EmptyValidationContext, ITestSuiteContext>
+internal sealed class ComparerValidator : BaseValidator<EmptyValidationContext, DefinedTestCase>
 {
-    public override Type AllowedType => ValidatedTypes.Context;
-    
     public override ValidationSubject Subject => ValidationSubject.Comparer;
 
-    protected override ValidationResult ValidateCore(
-        ITestSuiteContext testSuiteContext, 
-        EmptyValidationContext validationContext)
+    protected override SubjectValidation ValidateCore(
+        DefinedTestCase testCase, 
+        EmptyValidationContext _)
     {
-        var testCaseExpectedObjects = testSuiteContext.TestCases
-            .Where(x => x.Expected.Type != null)
-            .Select(x => x.Expected)
-            .Where(x => x.Variety == ComparedObjectVariety.Value)
-            .ToLookup(x => x.Type);
+        var validationResults = new List<SubjectValidation>();
+        foreach (var clause in testCase.Clauses)
+        {
+            validationResults.Add(ValidateInternalSingle(testCase, clause));
+        }
+        return new SubjectValidation(validationResults);
+    }
+    
+    private SubjectValidation ValidateInternalSingle(DefinedTestCase testCase, ITestClause testClause)
+    {
+        var testCaseExpectedObjectType = GetExpectedObjectType(testClause);
 
-        if (testCaseExpectedObjects.Count == 0)
+        if (testCaseExpectedObjectType == null)
             return Ok();
         
-        if (testCaseExpectedObjects.Count > 1)
-            return NonValid("TestCase expected object types are more than one in TestSuite collection");
-            
-        var testCaseExpectedObject = (ValueObject) testCaseExpectedObjects.First().First();
+        var comparer = testCase.ComparerFactory.Value;
 
-        if (testSuiteContext.Comparer != null)
+        if (comparer == null)
+            return ValidateWithoutComparer(testCaseExpectedObjectType);
+        
+        if (comparer.Method.ReturnParameter?.ParameterType != typeof(bool))
+            return NonValid($"Return type of the custom comparer is not bool but {comparer.Method.ReturnParameter?.ParameterType}, something went wrong during initialization");
+
+        var parameters = comparer.Method.GetParameters();
+        if (parameters.Length != 2)
+            return NonValid($"Custom comparer has {parameters.Length} parameters, but should has 2, something went wrong during initialization");
+
+        var expectParamType = parameters[0].ParameterType;
+        var resultParamType = parameters[1].ParameterType;
+
+        if (expectParamType != resultParamType)
+            return NonValid("Comparer has not the same input parameter type, something went wrong during initialization");
+
+        Type? elementType = testCaseExpectedObjectType;
+        if (CollectionHelper.IsCollection(elementType))
+            elementType = CollectionHelper.GetCollectionElementType(elementType);
+        
+        Type? expectedType = expectParamType;
+        if (CollectionHelper.IsCollection(expectedType))
+            expectedType = CollectionHelper.GetCollectionElementType(expectedType);
+        
+        if (expectedType != elementType)
+            return NonValid($"Test case type was {testCaseExpectedObjectType}, but comparer type is {expectParamType}");
+           
+        return Ok();
+    }
+
+    private SubjectValidation ValidateWithoutComparer(Type testCaseExpectedObjectType)
+    {
+        if (CollectionHelper.IsCollection(testCaseExpectedObjectType))
         {
-            if (testSuiteContext.Comparer?.Method.ReturnParameter?.ParameterType != typeof(bool))
-                return NonValid(
-                    $"Return type of the custom comparer is not bool but {testSuiteContext.Comparer?.Method.ReturnParameter?.ParameterType}, something went wrong during initialization");
+            Type? elementType = CollectionHelper.GetCollectionElementType(testCaseExpectedObjectType);
+            if (elementType == null)
+                return NonValid($"Cannot determine the element type of {testCaseExpectedObjectType}");
 
-            var parameters = testSuiteContext.Comparer.Method.GetParameters();
-            if (parameters.Length != 2)
-                return NonValid(
-                    $"Custom comparer has {parameters.Length} parameters, but should has 2, something went wrong during initialization");
-
-            var paramType = parameters[0].ParameterType;
-
-            if (paramType != parameters[1].ParameterType)
-                return NonValid("Comparer has not the same input parameter type, something went wrong during initialization");
-            
-            if (testCaseExpectedObject != null && paramType != testCaseExpectedObject.Type)
-                return NonValid($"Test case type was {testCaseExpectedObject.Type}, but comparer type is {paramType}");
+            var equatableElementType = typeof(IEquatable<>).MakeGenericType(elementType);
+            if (!equatableElementType.IsAssignableFrom(elementType))
+            {
+                return NonValid($"{elementType} elements should implement {typeof(IEquatable<>).Name} or a comparer should be defined");
+            }
         }
         else
         {
-            var interfaceType = typeof(IEquatable<>).MakeGenericType(testCaseExpectedObject.Type);
-            if (!interfaceType.IsAssignableFrom(testCaseExpectedObject.Type))
-                return NonValid($"{testCaseExpectedObject.Type} type should be assignable from {typeof(IEquatable<>).Name} or comparer should be defined");
+            var interfaceType = typeof(IEquatable<>).MakeGenericType(testCaseExpectedObjectType);
+            if (!interfaceType.IsAssignableFrom(testCaseExpectedObjectType))
+                return NonValid($"{testCaseExpectedObjectType} type should be assignable from {typeof(IEquatable<>).Name} or comparer should be defined");
         }
-           
+
         return Ok();
+    }
+
+    private Type? GetExpectedObjectType(ITestClause testClause)
+    {
+        return testClause.Expected.Variety switch
+        {
+            ComparedObjectVariety.Null => null,
+            ComparedObjectVariety.Exception => null,
+            ComparedObjectVariety.Value => testClause.Expected.Type,
+            ComparedObjectVariety.Parameter => ObjectParameterExtractor.ExtractExpectedParameterType(testClause),
+            _ => throw new ArgumentOutOfRangeException()
+        };
     }
 }

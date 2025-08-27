@@ -1,31 +1,93 @@
 using System;
+using System.Collections.Generic;
 using SimpleFluentTester.Reporter;
-using SimpleFluentTester.TestSuite.Case;
+using SimpleFluentTester.TestCase;
+using SimpleFluentTester.TestSuite.Context;
+using SimpleFluentTester.TestSuite.Parameter;
 
 namespace SimpleFluentTester.TestSuite;
 
-/// <inheritdoc cref="TestSuiteBuilder"/>
+/// <summary>
+/// Represents a builder interface for configuring and executing test suites.
+/// Provides methods to define test cases, set expectations, configure operations,
+/// specify test case display names, and execute the tests with specified configurations.
+/// </summary>
 public interface ITestSuiteBuilder
 {
-    /// <inheritdoc cref="TestSuiteBuilder.Expect"/>
-    ITestCaseBuilder Expect(object? expected);
+    /// <inheritdoc cref="SequentialTestSuiteBuilder.ExpectReturn"/>
+    /// <summary>
+    /// Specifies the expected value resulting from the execution of this test case.
+    /// </summary>
+    /// <param name="expected">The value expected as the result of executing the test case.</param>
+    /// <returns>An instance of <see cref="ITestCaseBuilder"/> for further configuration of the test case.</returns>
+    ITestCaseBuilder ExpectReturn(object? expected);
 
-    /// <inheritdoc cref="TestSuiteBuilder.ExpectException{TException}"/>
+    /// <summary>
+    /// Specifies the expected return value of the test case after execution.
+    /// </summary>
+    /// <param name="expected">The expected value or collection of values to be returned from the test case.</param>
+    /// <typeparam name="T">The type of the expected return value.</typeparam>
+    /// <returns>An instance of <see cref="ITestCaseBuilder"/> for configuring the test case further.</returns>
+    ITestCaseBuilder ExpectReturn<T>(IEnumerable<T?> expected);
+
+    /// <summary>
+    /// Specifies the expected exception type and optional message that should be thrown during the execution of the test case.
+    /// </summary>
+    /// <typeparam name="TException">The type of exception expected to be thrown.</typeparam>
+    /// <param name="message">An optional message to validate against the exception being thrown.</param>
+    /// <returns>An instance of <see cref="ITestCaseBuilder"/> for further configuration of the test case.</returns>
     ITestCaseBuilder ExpectException<TException>(string? message = null)
         where TException : Exception;
+    
+    /// <summary>
+    /// Initiates expectation configuration for a parameter identified by name or position.
+    /// </summary>
+    /// <param name="parameterName">The name of the parameter to verify</param>
+    /// <returns>An instance of <see cref="IParameterExpectationBuilder"/> for specifying the expected value.</returns>
+    IParameterExpectationBuilder ExpectParameter(string parameterName);
 
-    /// <inheritdoc cref="TestSuiteBuilder.UseOperation"/>
+    /// <summary>
+    /// Initiates expectation configuration for a parameter at the specified position.
+    /// </summary>
+    /// <param name="parameterPosition">Zero-based position of the parameter</param>
+    /// <returns>An instance of <see cref="IParameterExpectationBuilder"/> for specifying the expected value.</returns>
+    IParameterExpectationBuilder ExpectParameter(int parameterPosition);
+
+    /// <summary>
+    /// Specifies the operation to be executed as part of the test suite.
+    /// </summary>
+    /// <param name="operation">The delegate representing the operation to be executed.</param>
+    /// <returns>An instance of <see cref="ITestSuiteBuilder"/> for further configuration of the test suite.</returns>
     ITestSuiteBuilder UseOperation(Delegate operation);
 
-    /// <inheritdoc cref="TestSuiteBuilder.WithDisplayName"/>
+    /// <summary>
+    /// Specifies the display name of the test suite to be used in the output.
+    /// </summary>
+    /// <param name="displayName">The custom display name to be assigned to the test suite.</param>
+    /// <returns>An instance of <see cref="ITestSuiteBuilder"/> for further configuration of the test suite.</returns>
     ITestSuiteBuilder WithDisplayName(string displayName);
 
-    /// <inheritdoc cref="TestSuiteBuilder.WithComparer{TExpected}"/>
-    ITestSuiteBuilder WithComparer<TExpected>(Func<TExpected?, TExpected?, bool> comparer);
+    /// <summary>
+    /// Defines a custom comparison logic to evaluate the equality of expected and actual values during test execution.
+    /// </summary>
+    /// <param name="comparer">A delegate that provides the comparison logic between two values of the specified type.</param>
+    /// <typeparam name="TExpected">The type of the values being compared.</typeparam>
+    /// <returns>An instance of <see cref="ITestSuiteBuilder"/> for further configuration of the test suite.</returns>
+    ITestSuiteBuilder WithComparer<TExpected>(ComparerDelegate<TExpected> comparer);
 
-    /// <inheritdoc cref="TestSuiteBuilder.Ignore"/>
+    /// <summary>
+    /// Gets a builder instance configured to ignore the test suite execution.
+    /// By calling this property, the builder will mark the entire test suite as ignored.
+    /// This allows test cases to be defined and configured but prevents them from being executed during the test run.
+    /// </summary>
+    /// <returns>An instance of <see cref="ITestSuiteBuilder"/> for further configuration of the test suite.</returns>
     ITestSuiteBuilder Ignore { get; }
 
-    /// <inheritdoc cref="TestSuiteBuilder.Run"/>
+    /// <summary>
+    /// Executes the defined test suite using the specified test case numbers or all test cases if no numbers are provided.
+    /// </summary>
+    /// <param name="testNumbers">The specific test case numbers to run. If no numbers are passed, all test cases in the suite will be executed.</param>
+    /// <exception cref="InvalidContextException">Throws if testNumber are not correct or operation hasn't been set</exception>
+    /// <returns>An instance of <see cref="ITestSuiteReporter"/> that contains the results of the test suite execution.</returns>
     ITestSuiteReporter Run(params int[] testNumbers);
 }

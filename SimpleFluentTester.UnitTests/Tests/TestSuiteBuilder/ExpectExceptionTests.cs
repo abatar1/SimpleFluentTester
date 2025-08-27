@@ -1,10 +1,10 @@
-using SimpleFluentTester.UnitTests.Extensions;
-using SimpleFluentTester.UnitTests.TestObjects;
-using SimpleFluentTester.Validators.Core;
+using SimpleFluentTester.UnitTests.Helpers.Extensions;
+using SimpleFluentTester.UnitTests.Helpers.TestObjects;
+using SimpleFluentTester.Validators.Models;
 
 namespace SimpleFluentTester.UnitTests.Tests.TestSuiteBuilder;
 
-public class ExpectExceptionTests
+public sealed class ExpectExceptionTests
 {
     [Fact]
     public void ExpectException_CustomExceptionWithoutMessage_ShouldBeValid()
@@ -22,7 +22,7 @@ public class ExpectExceptionTests
         // Act    
         var reporter = builder
             .ExpectException<CustomException>().WithInput(1, 1)
-            .Expect(3).WithInput(1, 2)
+            .ExpectReturn(3).WithInput(1, 2)
             .Run();
         
         // Assert
@@ -45,12 +45,12 @@ public class ExpectExceptionTests
         // Act    
         var reporter = builder
             .ExpectException<CustomException>("Test").WithInput(1, 1)
-            .Expect(3).WithInput(1, 2)
+            .ExpectReturn(3).WithInput(1, 2)
             .Run();
         
         // Assert
         var message = $"{typeof(CustomException).FullName} do not have public .ctor() with string parameter";
-        reporter.AssertTestCaseExists(1).Validation.AssertInvalid(ValidationSubject.Expect, message);
+        reporter.AssertTestCaseExists(1).AssertNonValid(ValidationSubject.Expect, message);
     }
     
     [Fact]
@@ -70,7 +70,7 @@ public class ExpectExceptionTests
         // Act    
         var reporter = builder
             .ExpectException<CustomWithMessageException>(exceptionMessage).WithInput(1, 1)
-            .Expect(3).WithInput(1, 2)
+            .ExpectReturn(3).WithInput(1, 2)
             .Run();
         
         // Assert

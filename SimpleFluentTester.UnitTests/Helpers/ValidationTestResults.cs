@@ -1,8 +1,9 @@
-using SimpleFluentTester.Validators.Core;
+using SimpleFluentTester.Validators;
+using SimpleFluentTester.Validators.Models;
 
 namespace SimpleFluentTester.UnitTests.Helpers;
 
-public static class ValidationTestResults
+internal static class ValidationTestResults
 {
     public static ValidationResult Valid => ValidationResult.Valid(ValidationSubject.Operation);
         

@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using SimpleFluentTester.Validators.Core;
+using SimpleFluentTester.Validators;
 
 namespace SimpleFluentTester.TestSuite.ComparedObject;
 

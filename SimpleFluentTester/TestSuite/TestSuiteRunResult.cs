@@ -1,23 +1,28 @@
 using System;
 using System.Collections.Generic;
-using SimpleFluentTester.TestSuite.Case;
-using SimpleFluentTester.Validators.Core;
+using SimpleFluentTester.TestCase;
 
 namespace SimpleFluentTester.TestSuite;
 
+/// <summary>
+/// Represents the result of a test suite execution, including details of the executed test cases,
+/// validations performed, and additional metadata about the test suite.
+/// </summary>
 public sealed class TestSuiteRunResult(
-    IList<CompletedTestCase> validatedTestCases,
-    PackedValidation validation,
+    IList<AssertedTestCase> assertedTestCases,
     Delegate? operation,
     string? displayName,
     int number,
-    bool shouldBeExecuted = true)
+    Exception? exception = null,
+    bool shouldBeExecuted = true) : ITestSuiteRunResult
 {
     public bool ShouldBeExecuted { get; } = shouldBeExecuted;
-    
-    public IList<CompletedTestCase> TestCases { get; } = validatedTestCases;
 
-    public PackedValidation Validation { get; } = validation;
+    public bool IsValid { get; } = exception == null;
+
+    public Exception? Exception { get; } = exception;
+    
+    public IList<AssertedTestCase> TestCases { get; } = assertedTestCases;
 
     public Delegate? Operation { get; } = operation;
 

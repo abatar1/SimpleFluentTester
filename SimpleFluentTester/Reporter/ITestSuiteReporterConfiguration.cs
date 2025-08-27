@@ -1,6 +1,6 @@
 using System;
-using Microsoft.Extensions.Logging;
-using SimpleFluentTester.TestSuite.Case;
+using SimpleFluentTester.TestCase;
+using SimpleFluentTester.TestCase.Clause;
 
 namespace SimpleFluentTester.Reporter;
 
@@ -10,17 +10,12 @@ namespace SimpleFluentTester.Reporter;
 public interface ITestSuiteReporterConfiguration
 {
     /// <summary>
-    /// Allows to set custom string report builder; otherwise default builder will be used.
+    /// Allows setting a custom string report builder; otherwise the default builder will be used.
     /// </summary>
     ITestSuiteReportBuilder? ReportBuilder { get; set; }
     
     /// <summary>
-    /// Allows to set up custom logging builder for reporter; otherwise default console logger will be used.
+    /// Allows specifying predicate that defines should a test case be printed or not; by default, only failed test cases will be printed.
     /// </summary>
-    Action<ILoggingBuilder>? LoggingBuilder { get; set; }
-    
-    /// <summary>
-    /// Allows to specify predicate that defines should test case be printed or not; by default only failed test cases will be printed.
-    /// </summary>
-    Func<CompletedTestCase, bool>? PrintablePredicate { get; set; }
+    Func<AssertedTestClause, AssertedTestCase, bool>? PrintablePredicate { get; set; }
 }
